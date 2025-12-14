@@ -54,3 +54,6 @@ config.local.yaml
 *.log
 geckodriver.log
 chromedriver.log
+
+# Project docs (local only)
+SESSION_NOTES.md

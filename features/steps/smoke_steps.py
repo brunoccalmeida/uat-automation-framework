@@ -81,11 +81,3 @@ def step_verify_error_message(context):
     error_message = context.login_page.get_error_message()
     assert error_message is not None, "Error message should be displayed"
     assert len(error_message) > 0, "Error message should not be empty"
-
-
-@then('I should remain on the login page')
-def step_verify_remain_on_login(context):
-    """Verify user remains on login page."""
-    base_url = get_base_url(context.config_data)
-    assert base_url in context.driver.current_url, \
-        "Should remain on login page after failed login"

@@ -1,6 +1,6 @@
-"""Login Page Object for Parabank.
+"""Login Page Object for Sauce Demo.
 
-Represents the login functionality on Parabank homepage.
+Represents the login functionality on Sauce Demo e-commerce application.
 """
 
 from selenium.webdriver.common.by import By
@@ -9,13 +9,13 @@ from pages.base_page import BasePage
 
 
 class LoginPage(BasePage):
-    """Page Object for Parabank login form."""
+    """Page Object for Sauce Demo login form."""
     
     # Locators
-    USERNAME_INPUT = (By.NAME, "username")
-    PASSWORD_INPUT = (By.NAME, "password")
-    LOGIN_BUTTON = (By.XPATH, "//input[@value='Log In']")
-    ERROR_MESSAGE = (By.CSS_SELECTOR, ".error")
+    USERNAME_INPUT = (By.ID, "user-name")
+    PASSWORD_INPUT = (By.ID, "password")
+    LOGIN_BUTTON = (By.ID, "login-button")
+    ERROR_MESSAGE = (By.CSS_SELECTOR, "[data-test='error']")
     
     def enter_username(self, username: str) -> None:
         """Enter username into login form.
@@ -59,8 +59,3 @@ class LoginPage(BasePage):
         if self.is_element_present(self.ERROR_MESSAGE):
             return self.get_text(self.ERROR_MESSAGE)
         return None
-    
-    def click_register_link(self) -> None:
-        """Click the 'Register' link to navigate to registration page."""
-        register_link = (By.LINK_TEXT, "Register")
-        self.click(register_link)

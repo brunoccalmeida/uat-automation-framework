@@ -1,27 +1,29 @@
 # UAT Automation Framework
 
-Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium for testing the Parabank demo banking application.
+Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium for testing the **Sauce Demo** e-commerce application.
+
+> **Note**: Originally developed for Parabank (banking demo), migrated to Sauce Demo due to instability issues with Parabank public instance. Framework architecture remains fully intact and demonstrates professional testing practices.
 
 ## 🎯 Purpose
 
-This framework demonstrates professional UAT automation practices for banking applications, featuring:
+This framework demonstrates professional UAT automation practices for web applications, featuring:
+- **Target Application**: [Sauce Demo](https://www.saucedemo.com) - stable e-commerce demo by Sauce Labs
 - Behavior-Driven Development (BDD) with Behave
 - Page Object Model design pattern
 - Comprehensive reporting with Allure
-- Support for both remote and local (Docker) environments
+- Pre-configured test users (no credential management needed)
+Test Users
 
-## 🔐 Security Approach: Ephemeral Credentials
+Sauce Demo provides pre-configured test users (password: `secret_sauce` for all):
 
-**Why we use dynamically generated credentials:**
+- `standard_user` - Normal user, no issues
+- `locked_out_user` - User has been locked out
+- `problem_user` - User experiences visual glitches
+- `performance_glitch_user` - User has performance issues
+- `error_user` - User encounters errors
+- `visual_user` - User has visual testing variations
 
-This framework implements **ephemeral credential management** rather than storing secrets for the following reasons:
-
-1. **Security by Design**: No sensitive credentials are stored in configuration files, environment variables, or code
-2. **Test Isolation**: Each test run can create fresh users, ensuring complete independence between test executions
-3. **Zero Configuration**: No manual credential management required - tests work out of the box
-4. **Production-Ready Pattern**: Demonstrates real-world security practices suitable for banking/regulated environments
-5. **CI/CD Friendly**: No secrets to inject or manage in pipelines
-
+**Security**: No credential storage needed - users are provided by the demo application
 Parabank's `/register` endpoint allows dynamic user creation, making this approach both secure and practical.
 
 ## 🏗️ Architecture
@@ -94,16 +96,23 @@ allure serve reports/allure-results
 - **pytest**: Unit testing framework
 - **PyYAML**: Configuration management
 
+## ✅ Features Status
+Implemented
+
+- ✅ **Smoke Tests**: Basic application availability checks
+- ✅ **User Login**: Login with valid/invalid credentials, locked users, logout
+- 🚧 **Shopping Cart**: Add/remove items, checkout flow (planned)
+- 🚧 **Product Catalog**: Sorting, filtering, details (planned)
 ## 📝 Development Guidelines
 
-See [.copilot-instructions.md](.copilot-instructions.md) for detailed development practices.
+See [.github/copilot-instructions.md](.github/copilot-instructions.md) for project rules applied automatically in VS Code Copilot Chat.
 
 Key principles:
-- Zen of Python philosophy
-- TDD for production code
-- Page Object pattern for maintainability
-- Ephemeral credentials for security
-- Comprehensive documentation
+- Zen of Python
+- Outside-in TDD/BDD (Red-Green-Refactor)
+- Page Object Model
+- Ephemeral test users (no stored credentials)
+- Explicit waits with Selenium (no `time.sleep()`)
 
 ## 🐳 Docker Support
 
@@ -116,6 +125,23 @@ Reports are generated in the `reports/` directory and are automatically excluded
 ## 🤝 Contributing
 
 This is a portfolio project demonstrating professional UAT automation practices.
+
+## ✅ Current Feature Status
+
+- Registration: Successful registration creates account and auto-login
+- Login: Successful login (with dynamic pre-registration) and failed login
+- Driver setup: Maximize window, disable autofill prompts, reduce automation detection
+- Instructions: Workspace-wide rules in .github/copilot-instructions.md
+
+### Quick Run
+
+```bash
+# Run registration feature
+poetry run behave features/register.feature
+
+# Run login feature
+poetry run behave features/login.feature
+```
 
 ## 📄 License
 

@@ -1,12 +1,21 @@
 # Configuration for UAT Automation Framework
 
-# Remote environment (Parabank public instance)
+# Target application: Sauce Demo (stable e-commerce demo by Sauce Labs)
+# Migrated from Parabank due to instability issues
 environment:
   remote:
-    base_url: "https://parabank.parasoft.com/parabank"
+    base_url: "https://www.saucedemo.com"
     timeout: 10
     implicit_wait: 5
-    auto_register_users: true
+    # Pre-configured test users (password: secret_sauce for all)
+    test_users:
+      standard: "standard_user"
+      locked: "locked_out_user"
+      problem: "problem_user"
+      glitch: "performance_glitch_user"
+      error: "error_user"
+      visual: "visual_user"
+    default_password: "secret_sauce"
 
 # Browser configuration
 browser:

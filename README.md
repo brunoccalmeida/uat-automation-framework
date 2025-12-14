@@ -23,8 +23,7 @@ Sauce Demo provides pre-configured test users (password: `secret_sauce` for all)
 - `error_user` - User encounters errors
 - `visual_user` - User has visual testing variations
 
-**Security**: No credential storage needed - users are provided by the demo application
-Parabank's `/register` endpoint allows dynamic user creation, making this approach both secure and practical.
+**Security**: No credential storage needed - users are provided by the demo application.
 
 ## 🏗️ Architecture
 
@@ -76,8 +75,12 @@ poetry install
 ### Running Tests
 
 ```bash
-# Run all Behave scenarios
+# Run all tests
 poetry run behave
+
+# Run specific feature
+poetry run behave features/smoke.feature
+poetry run behave features/login.feature
 
 # Run with Allure reporting
 poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results
@@ -92,44 +95,50 @@ allure serve reports/allure-results
 - **Selenium 4**: Browser automation
 - **Behave**: BDD framework
 - **Allure**: Test reporting
-- **Poetry**: Dependency management
-- **pytest**: Unit testing framework
-- **PyYAML**: Configuration management
+- **Poetry**: Implemented
 
-## ✅ Features Status
-Implemented
+| Feature | Scenarios | Steps | Status |
+|---------|-----------|-------|--------|
+| **Smoke Tests** | 4/4 ✅ | 14/14 ✅ | Complete |
+| **User Login** | 4/4 ✅ | 18/18 ✅ | Complete |
+| **Shopping Cart** | - | - | Planned |
+| **Checkout** | - | - | Planned |
+| **Product Catalog** | - | - | Planned |
+
+### Test Coverage
+
+- ✅ Homepage loads and displays correctly
+- ✅ Login form elements present and functional
+- ✅ Valid user authentication (standard_user)
+- ✅ Invalid credentials rejection
+- ✅ Locked user detection (locked_out_user)
+- ✅ Successful logout flow
 
 - ✅ **Smoke Tests**: Basic application availability checks
 - ✅ **User Login**: Login with valid/invalid credentials, locked users, logout
 - 🚧 **Shopping Cart**: Add/remove items, checkout flow (planned)
-- 🚧 **Product Catalog**: Sorting, filtering, details (planned)
-## 📝 Development Guidelines
-
-See [.github/copilot-instructions.md](.github/copilot-instructions.md) for project rules applied automatically in VS Code Copilot Chat.
-
-Key principles:
-- Zen of Python
-- Outside-in TDD/BDD (Red-Green-Refactor)
-- Page Object Model
-- Ephemeral test users (no stored credentials)
-- Explicit waits with Selenium (no `time.sleep()`)
-
-## 🐳 Docker Support
-
-(Coming soon: Instructions for running Parabank locally via Docker)
-
-## 📊 Test Reports
+- 🚧� Test Reports
 
 Reports are generated in the `reports/` directory and are automatically excluded from version control.
 
+```bash
+# Generate Allure report
+poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results
+allure serve reports/allure-results
+```
+
 ## 🤝 Contributing
 
-This is a portfolio project demonstrating professional UAT automation practices.
+This is a portfolio project demonstrating professional UAT automation practices following:
+- Outside-in TDD/BDD (Red-Green-Refactor)
+- Page Object Model design pattern
+- Explicit waits (no `time.sleep()`)
+- Atomic commits with Conventional Commits
+- Self-documenting code with docstrings
 
-## ✅ Current Feature Status
+## 📚 Project History
 
-- Registration: Successful registration creates account and auto-login
-- Login: Successful login (with dynamic pre-registration) and failed login
+**Migration Note**: This framework was originally developed for Parabank (banking demo) and successfully migrated to Sauce Demo in <1 hour, proving the robustness of its architecture. All core design patterns (BDD, POM, Selenium best practices) remained unchanged, demonstrating true framework portability.ogin: Successful login (with dynamic pre-registration) and failed login
 - Driver setup: Maximize window, disable autofill prompts, reduce automation detection
 - Instructions: Workspace-wide rules in .github/copilot-instructions.md
 

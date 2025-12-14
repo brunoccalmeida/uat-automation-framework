@@ -77,8 +77,23 @@ class DriverManager:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         
+        # Evitar detecção de automação
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("useAutomationExtension", False)
+        
+        # Disable autofill to prevent browser prompts
+        options.add_experimental_option("prefs", {
+            "autofill.profile_enabled": False,
+            "credentials_enable_service": False,
+            "profile.password_manager_enabled": False
+        })
+        
         # Create driver (Selenium Manager will handle driver binary)
         driver = webdriver.Chrome(options=options)
+        
+        # Maximize window for better visibility
+        driver.maximize_window()
         
         return driver
     

@@ -59,3 +59,8 @@ class LoginPage(BasePage):
         if self.is_element_present(self.ERROR_MESSAGE):
             return self.get_text(self.ERROR_MESSAGE)
         return None
+    
+    def click_register_link(self) -> None:
+        """Click the 'Register' link to navigate to registration page."""
+        register_link = (By.LINK_TEXT, "Register")
+        self.click(register_link)

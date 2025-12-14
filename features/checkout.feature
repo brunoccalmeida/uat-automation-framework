@@ -12,8 +12,8 @@ Feature: Checkout
     When I click the checkout button
     And I fill in the checkout information:
       | field      | value    |
-      | First Name | John     |
-      | Last Name  | Doe      |
+      | First Name | Marcus   |
+      | Last Name  | Chen     |
       | Zip Code   | 12345    |
     And I click continue
     Then I should be on the checkout overview page
@@ -33,7 +33,7 @@ Feature: Checkout
     When I click the checkout button
     And I fill in the checkout information:
       | field      | value |
-      | First Name | John  |
+      | First Name | Sofia |
     And I click continue
     Then the checkout error should mention "Last Name is required"
 
@@ -41,8 +41,8 @@ Feature: Checkout
     When I click the checkout button
     And I fill in the checkout information:
       | field      | value    |
-      | First Name | Jane     |
-      | Last Name  | Smith    |
+      | First Name | Elena    |
+      | Last Name  | Rodriguez|
       | Zip Code   | 54321    |
     And I click continue
     Then I should be on the checkout overview page
@@ -59,8 +59,8 @@ Feature: Checkout
     When I click the checkout button
     And I fill in the checkout information:
       | field      | value    |
-      | First Name | Test     |
-      | Last Name  | User     |
+      | First Name | Akira    |
+      | Last Name  | Tanaka   |
       | Zip Code   | 99999    |
     And I click continue
     And I click finish

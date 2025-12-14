@@ -101,22 +101,31 @@ allure serve reports/allure-results
 |---------|-----------|-------|--------|
 | **Smoke Tests** | 4/4 ✅ | 14/14 ✅ | Complete |
 | **User Login** | 4/4 ✅ | 18/18 ✅ | Complete |
-| **Shopping Cart** | - | - | Planned |
+| **Shopping Cart** | 6/6 ✅ | 35/35 ✅ | Complete |
 | **Checkout** | - | - | Planned |
 | **Product Catalog** | - | - | Planned |
 
 ### Test Coverage
 
+**Smoke Tests**
 - ✅ Homepage loads and displays correctly
 - ✅ Login form elements present and functional
+- ✅ Valid user authentication
+- ✅ Invalid credentials rejection
+
+**User Login**
 - ✅ Valid user authentication (standard_user)
 - ✅ Invalid credentials rejection
 - ✅ Locked user detection (locked_out_user)
 - ✅ Successful logout flow
 
-- ✅ **Smoke Tests**: Basic application availability checks
-- ✅ **User Login**: Login with valid/invalid credentials, locked users, logout
-- 🚧 **Shopping Cart**: Add/remove items, checkout flow (planned)
+**Shopping Cart**
+- ✅ Add single product to cart
+- ✅ Add multiple products to cart
+- ✅ View cart contents
+- ✅ Remove product from cart
+- ✅ Continue shopping from cart
+- ✅ Cart persistence across navigation
 - 🚧� Test Reports
 
 Reports are generated in the `reports/` directory and are automatically excluded from version control.

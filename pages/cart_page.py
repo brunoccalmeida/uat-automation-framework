@@ -68,5 +68,5 @@ class CartPage(BasePage):
         self.click(self.CONTINUE_SHOPPING_BUTTON)
     
     def click_checkout(self) -> None:
-        """Click Checkout button."""
+        """Click Checkout button to proceed to checkout."""
         self.click(self.CHECKOUT_BUTTON)

@@ -82,12 +82,21 @@ class DriverManager:
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option("useAutomationExtension", False)
         
-        # Disable autofill to prevent browser prompts
+        # Disable autofill and password management completely
         options.add_experimental_option("prefs", {
             "autofill.profile_enabled": False,
             "credentials_enable_service": False,
-            "profile.password_manager_enabled": False
+            "profile.password_manager_enabled": False,
+            "profile.default_content_setting_values.notifications": 2,
+            "profile.password_manager_leak_detection": False,
+            "profile.default_content_settings.popups": 0
         })
+        
+        # Suppress all password-related prompts and warnings
+        options.add_argument("--disable-save-password-bubble")
+        options.add_argument("--disable-features=PasswordManager,PasswordLeak")
+        options.add_argument("--disable-infobars")
+        options.add_argument("--disable-notifications")
         
         # Create driver (Selenium Manager will handle driver binary)
         driver = webdriver.Chrome(options=options)

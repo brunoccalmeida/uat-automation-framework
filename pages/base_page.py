@@ -6,7 +6,7 @@ All page objects should inherit from this base class.
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
 
 
 class BasePage:
@@ -64,13 +64,22 @@ class BasePage:
         element.click()
     
     def type(self, locator: tuple[str, str], text: str) -> None:
-        """Type text into element.
+        """Type text into element using explicit waits.
         
         Args:
             locator: Tuple of (By strategy, locator value).
             text: Text to type.
         """
-        element = self.find_element(locator)
+        # First wait for element to be clickable
+        element = self.find_clickable_element(locator)
+        
+        # Verify element is not obscured using JavaScript
+        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+        
+        # Double-check element is still interactable after scroll
+        self.wait.until(EC.element_to_be_clickable(locator))
+        
+        # Now safe to interact
         element.clear()
         element.send_keys(text)
     

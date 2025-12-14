@@ -36,7 +36,7 @@ def test_can_get_base_url(config):
     """Verify base URL can be extracted from config."""
     base_url = get_base_url(config)
     assert base_url is not None
-    assert "parabank" in base_url.lower()
+    assert "saucedemo" in base_url.lower()
 
 
 def test_driver_manager_creates_driver(driver_manager):
@@ -45,8 +45,8 @@ def test_driver_manager_creates_driver(driver_manager):
     assert driver is not None
 
 
-def test_can_access_parabank(driver_manager, config):
-    """Smoke test: Verify we can access Parabank homepage.
+def test_can_access_sauce_demo(driver_manager, config):
+    """Smoke test: Verify we can access Sauce Demo homepage.
     
     This is the most basic end-to-end test that validates:
     - Configuration loading works
@@ -57,11 +57,11 @@ def test_can_access_parabank(driver_manager, config):
     driver = driver_manager.get_driver()
     base_url = get_base_url(config)
     
-    # Navigate to Parabank
+    # Navigate to Sauce Demo
     driver.get(base_url)
     
     # Verify page loaded by checking title
-    assert "ParaBank" in driver.title
+    assert "Swag Labs" in driver.title
     
     # Verify we're on the right page
-    assert "parabank" in driver.current_url.lower()
+    assert "saucedemo" in driver.current_url.lower()

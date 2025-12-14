@@ -75,12 +75,22 @@ poetry install
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all tests (uses config.yaml default)
 poetry run behave
 
 # Run specific feature
 poetry run behave features/smoke.feature
 poetry run behave features/login.feature
+
+# Run in headless mode (CLI override)
+poetry run behave -Dheadless=true
+
+# Run with visible browser (useful for debugging)
+poetry run behave -Dheadless=false
+
+# Run in headless mode via environment variable (useful for CI/CD)
+$env:HEADLESS="true"; poetry run behave  # PowerShell
+export HEADLESS=true && poetry run behave  # Bash
 
 # Run with Allure reporting
 poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results
@@ -88,6 +98,15 @@ poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-r
 # Generate and view Allure report
 allure serve reports/allure-results
 ```
+
+**Headless Mode Configuration:**
+
+The framework supports flexible headless mode configuration with the following priority:
+1. **CLI Parameter** (highest): `-Dheadless=true/false`
+2. **Environment Variable**: `HEADLESS=true/false`
+3. **Config File** (lowest): `config.yaml` default value
+
+See [CONFIGURATION.md](CONFIGURATION.md) for detailed configuration options.
 
 ## 🛠️ Technology Stack
 

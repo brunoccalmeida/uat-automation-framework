@@ -102,7 +102,7 @@ allure serve reports/allure-results
 | **Smoke Tests** | 4/4 ✅ | 14/14 ✅ | Complete |
 | **User Login** | 4/4 ✅ | 18/18 ✅ | Complete |
 | **Shopping Cart** | 6/6 ✅ | 35/35 ✅ | Complete |
-| **Checkout** | - | - | Planned |
+| **Checkout** | 6/6 ✅ | 52/52 ✅ | Complete |
 | **Product Catalog** | - | - | Planned |
 
 ### Test Coverage
@@ -126,6 +126,14 @@ allure serve reports/allure-results
 - ✅ Remove product from cart
 - ✅ Continue shopping from cart
 - ✅ Cart persistence across navigation
+
+**Checkout**
+- ✅ Complete checkout with valid information
+- ✅ Validation for required fields
+- ✅ Order summary with pricing details
+- ✅ Cancel checkout and return to cart
+- ✅ Order confirmation message
+- ✅ Post-purchase cart clearing
 - 🚧� Test Reports
 
 Reports are generated in the `reports/` directory and are automatically excluded from version control.

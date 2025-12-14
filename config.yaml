@@ -1,0 +1,20 @@
+# Configuration for UAT Automation Framework
+
+# Remote environment (Parabank public instance)
+environment:
+  remote:
+    base_url: "https://parabank.parasoft.com/parabank"
+    timeout: 10
+    implicit_wait: 5
+    auto_register_users: true
+
+# Browser configuration
+browser:
+  name: "chrome"  # chrome, firefox, edge
+  headless: false
+  window_size: "1920,1080"
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

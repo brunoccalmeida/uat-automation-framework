@@ -7,12 +7,11 @@ Feature: User Login
     Given the user is on the Parabank homepage
 
   Scenario: Successful login with valid credentials
-    Given the user has a registered account with username "testuser" and password "testpass123"
-    When the user enters username "testuser"
-    And the user enters password "testpass123"
-    And the user clicks the login button
+    Given the user registers a new account
+    And the user logs out
+    When the user logs in with the registered credentials
     Then the user should be logged in successfully
-    And the user should see the account overview page
+    And the user should see the account services menu
 
   Scenario: Failed login with invalid credentials
     When the user enters username "invaliduser"

@@ -61,6 +61,12 @@ jobs:
         env:
           HEADLESS: true
       
+      - name: Run integration tests
+        run: |
+          poetry run pytest tests/integration/ -v --tb=short
+        env:
+          HEADLESS: true
+      
       - name: Run BDD tests (Smoke)
         run: |
           poetry run behave features/smoke.feature --no-capture

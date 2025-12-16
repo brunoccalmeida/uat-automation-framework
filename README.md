@@ -1,7 +1,7 @@
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
-[![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.14-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium for testing the **Sauce Demo** e-commerce application.
@@ -117,7 +117,7 @@ See [CONFIGURATION.md](CONFIGURATION.md) for detailed configuration options.
 The project uses **GitHub Actions** for continuous integration:
 
 - ✅ **Automated testing** on every push and pull request
-- ✅ **Matrix testing** with Python 3.11 and 3.12
+- ✅ **Python 3.14** latest stable version
 - ✅ **Headless browser** execution in CI environment
 - ✅ **Code quality** checks (Black, Flake8, Pylint)
 - ✅ **Test artifacts** uploaded for review
@@ -127,7 +127,7 @@ See [.github/workflows/tests.yml](.github/workflows/tests.yml) for pipeline conf
 
 ## 🛠️ Technology Stack
 
-- **Python 3.11+**: Core language
+- **Python 3.14**: Core language
 - **Selenium 4**: Browser automation
 - **Behave**: BDD framework
 - **Allure**: Test reporting

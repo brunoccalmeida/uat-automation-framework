@@ -69,7 +69,7 @@ This framework uses a **hybrid OOP/Functional programming approach**, choosing t
 
 - Python 3.14+
 - Poetry (dependency management)
-- Chrome/Firefox browser
+- Chrome browser
 
 ### Installation
 
@@ -80,8 +80,9 @@ poetry install
 
 ### Running Tests
 
+**BDD/E2E Tests (Behave):**
 ```bash
-# Run all tests (uses config.yaml default)
+# Run all E2E tests (uses config.yaml default)
 poetry run behave
 
 # Run specific feature
@@ -103,6 +104,21 @@ poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-r
 
 # Generate and view Allure report
 allure serve reports/allure-results
+```
+
+**Unit Tests (Pytest):**
+```bash
+# Run all unit tests
+poetry run pytest tests/ -v
+
+# Run with coverage report
+poetry run pytest tests/ --cov=core --cov=pages --cov-report=term-missing
+
+# Run specific test module
+poetry run pytest tests/test_login_page.py -v
+
+# Run all tests (unit + E2E)
+poetry run pytest tests/ && poetry run behave
 ```
 
 **Headless Mode Configuration:**
@@ -139,11 +155,12 @@ See [.github/workflows/tests.yml](.github/workflows/tests.yml) for pipeline conf
 
 - **Python 3.14**: Core language
 - **Selenium 4**: Browser automation
-- **Behave**: BDD framework
-- **Allure**: Test reporting
+- **Behave**: BDD/E2E testing framework
+- **Pytest**: Unit testing framework
+- **Allure**: Test reporting with history and trends
 - **Poetry**: Dependency management
 - **GitHub Actions**: CI/CD pipeline
-- **Poetry**: Implemented
+- **GitHub Pages**: Live test report hosting
 
 | Feature | Scenarios | Steps | Status |
 |---------|-----------|-------|--------|
@@ -151,9 +168,29 @@ See [.github/workflows/tests.yml](.github/workflows/tests.yml) for pipeline conf
 | **User Login** | 4/4 ✅ | 18/18 ✅ | Complete |
 | **Shopping Cart** | 6/6 ✅ | 35/35 ✅ | Complete |
 | **Checkout** | 6/6 ✅ | 52/52 ✅ | Complete |
-| **Product Catalog** | - | - | Planned |
+| **TOTAL** | **20** | **120** | **100%** |
 
-### Test Coverage
+### Unit Tests (Pytest)
+
+| Module | Tests | Coverage | Status |
+|--------|-------|----------|--------|
+| **BasePage** | 19 | 100% | ✅ Complete |
+| **LoginPage** | 14 | 100% | ✅ Complete |
+| **CartPage** | 13 | 100% | ✅ Complete |
+| **InventoryPage** | 12 | 100% | ✅ Complete |
+| **CheckoutStepOnePage** | 13 | 100% | ✅ Complete |
+| **CheckoutStepTwoPage** | 15 | 100% | ✅ Complete |
+| **CheckoutCompletePage** | 12 | 100% | ✅ Complete |
+| **ConfigResolver** | 30 | 100% | ✅ Complete |
+| **Smoke Tests** | 4 | N/A | ✅ Complete |
+| **TOTAL** | **132** | **98%** | **Complete** |
+
+**Code Coverage:**
+- **Pages Module**: 100% (194/194 statements)
+- **Core Module**: 95% (62/65 statements)
+- **Overall Framework**: 98%+
+
+### Test Scenarios
 
 **Smoke Tests**
 - ✅ Homepage loads and displays correctly
@@ -192,14 +229,39 @@ poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-r
 allure serve reports/allure-results
 ```
 
+## 🎯 Next Steps (Best Practices Roadmap)
+
+Following industry best practices, the recommended next steps are:
+
+### High Priority
+1. **Integration Tests** - Test Page Objects with real browser (faster than E2E, more realistic than unit tests)
+2. **Coverage Badges** - Add coverage badges to README using Codecov or Coveralls
+3. **Pre-commit Hooks** - Automated code quality checks before commits (Black, Flake8, Pylint)
+4. **Performance Testing** - Measure and track test execution times, identify bottlenecks
+
+### Medium Priority
+5. **Parallel Execution** - Run tests in parallel for faster CI/CD (pytest-xdist, Behave parallel)
+6. **Cross-browser Testing** - Add Firefox and Edge support with browser matrix in CI
+7. **Docker Containerization** - Package framework in Docker for consistent execution environments
+8. **Test Data Management** - Externalize test data to JSON/CSV files for data-driven testing
+
+### Nice to Have
+9. **API Tests** - Add API-level tests for faster feedback and better isolation
+10. **Visual Regression Testing** - Integrate visual diff tools (Percy, Applitools)
+11. **Accessibility Testing** - Add axe-core integration for WCAG compliance
+12. **Component Tests** - Test individual UI components in isolation (if application supports)
+
 ## 🤝 Contributing
 
 This is a portfolio project demonstrating professional UAT automation practices following:
-- Outside-in TDD/BDD (Red-Green-Refactor)
-- Page Object Model design pattern
-- Explicit waits (no `time.sleep()`)
-- Atomic commits with Conventional Commits
-- Self-documenting code with docstrings
+- **Testing Pyramid**: Unit → Integration → E2E tests (proper layer separation)
+- **Outside-in TDD/BDD**: Red-Green-Refactor cycle for all production code
+- **Page Object Model**: Clean separation of test logic from page interactions
+- **Explicit Waits**: No `time.sleep()` - proper Selenium wait strategies
+- **Atomic Commits**: Conventional Commits format for clear history
+- **Self-documenting Code**: Comprehensive docstrings and type hints
+- **CI/CD Integration**: Automated testing with every push
+- **Live Reporting**: GitHub Pages hosting with Allure reports and history
 
 ## 📚 Project History
 

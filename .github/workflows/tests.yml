@@ -105,6 +105,11 @@ jobs:
       
       - name: Upload Allure results
         if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-py${{ matrix.python-version }}
+          path: reports/allure-results
+          retention-days: 30
   
   publish-report:
     runs-on: ubuntu-latest
@@ -144,11 +149,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-results-py${{ matrix.python-version }}
-          path: reports/allure-results
-          retention-days: 30
 
   lint:
     runs-on: ubuntu-latest

@@ -76,7 +76,20 @@ This framework uses a **hybrid OOP/Functional programming approach**, choosing t
 ```bash
 # Install dependencies
 poetry install
+
+# Install pre-commit hooks (one-time setup)
+poetry run pre-commit install
 ```
+
+**Pre-commit Hooks:**
+The framework uses pre-commit hooks to maintain code quality automatically:
+- ✅ **Black**: Code formatting (88 char line length)
+- ✅ **Flake8**: Linting and style guide enforcement
+- ✅ **Pylint**: Code analysis for errors and smells
+- ✅ **Security**: Detect private keys, merge conflicts
+- ✅ **Quality**: Trailing whitespace, YAML validation
+
+Hooks run automatically on `git commit`. Manual run: `pre-commit run --all-files`
 
 ### Running Tests
 
@@ -343,5 +356,5 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Author**: Bruno Almeida  
+**Author**: Bruno Almeida
 **Purpose**: Professional portfolio and UAT automation demonstration

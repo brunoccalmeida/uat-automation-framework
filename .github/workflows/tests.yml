@@ -1,0 +1,141 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+      fail-fast: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.2.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+      
+      - name: Install Chrome
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+      
+      - name: Run unit tests
+        run: |
+          poetry run pytest tests/ -v --tb=short
+        env:
+          HEADLESS: true
+      
+      - name: Run BDD tests (Smoke)
+        run: |
+          poetry run behave features/smoke.feature --no-capture
+        env:
+          HEADLESS: true
+      
+      - name: Run BDD tests (Login)
+        run: |
+          poetry run behave features/login.feature --no-capture
+        env:
+          HEADLESS: true
+      
+      - name: Run BDD tests (Cart)
+        run: |
+          poetry run behave features/cart.feature --no-capture
+        env:
+          HEADLESS: true
+      
+      - name: Run BDD tests (Checkout)
+        run: |
+          poetry run behave features/checkout.feature --no-capture
+        env:
+          HEADLESS: true
+      
+      - name: Generate Allure report
+        if: always()
+        run: |
+          poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results
+        env:
+          HEADLESS: true
+        continue-on-error: true
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-py${{ matrix.python-version }}
+          path: |
+            reports/
+            *.log
+          retention-days: 30
+      
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-py${{ matrix.python-version }}
+          path: reports/allure-results
+          retention-days: 30
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.2.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root --with dev
+      
+      - name: Run Black (check only)
+        run: poetry run black --check .
+        continue-on-error: true
+      
+      - name: Run Flake8
+        run: poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        continue-on-error: true
+      
+      - name: Run Pylint
+        run: poetry run pylint **/*.py --exit-zero
+        continue-on-error: true

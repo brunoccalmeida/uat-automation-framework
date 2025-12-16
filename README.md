@@ -4,6 +4,8 @@
 [![Python Version](https://img.shields.io/badge/python-3.14-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
+
 Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium for testing the **Sauce Demo** e-commerce application.
 
 > **Note**: Originally developed for Parabank (banking demo), migrated to Sauce Demo due to instability issues with Parabank public instance. Framework architecture remains fully intact and demonstrates professional testing practices.
@@ -121,7 +123,15 @@ The project uses **GitHub Actions** for continuous integration:
 - ✅ **Headless browser** execution in CI environment
 - ✅ **Code quality** checks (Black, Flake8, Pylint)
 - ✅ **Test artifacts** uploaded for review
-- ✅ **Allure reports** generated automatically
+- ✅ **Allure reports** published to GitHub Pages with history
+
+**View Test Reports:** [https://brunoccalmeida.github.io/uat-automation-framework/](https://brunoccalmeida.github.io/uat-automation-framework/)
+
+The reports include:
+- Test execution trends and history (last 20 runs)
+- Detailed test results with screenshots on failure
+- Duration metrics and performance tracking
+- Categorization by features and scenarios
 
 See [.github/workflows/tests.yml](.github/workflows/tests.yml) for pipeline configuration.
 

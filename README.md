@@ -117,8 +117,21 @@ poetry run pytest tests/ --cov=core --cov=pages --cov-report=term-missing
 # Run specific test module
 poetry run pytest tests/test_login_page.py -v
 
-# Run all tests (unit + E2E)
-poetry run pytest tests/ && poetry run behave
+# Run all tests (unit + integration + E2E)
+poetry run pytest tests/ && poetry run pytest tests/integration/ && poetry run behave
+```
+
+**Integration Tests (Pytest + Real Browser):**
+```bash
+# Run all integration tests
+poetry run pytest tests/integration/ -v
+
+# Run specific integration test
+poetry run pytest tests/integration/test_login_page_integration.py -v
+
+# Run in headless mode
+$env:HEADLESS="true"; poetry run pytest tests/integration/ -v  # PowerShell
+export HEADLESS=true && poetry run pytest tests/integration/ -v  # Bash
 ```
 
 **Headless Mode Configuration:**
@@ -162,6 +175,34 @@ See [.github/workflows/tests.yml](.github/workflows/tests.yml) for pipeline conf
 - **GitHub Actions**: CI/CD pipeline
 - **GitHub Pages**: Live test report hosting
 
+## 🧪 Testing Strategy
+
+This framework implements the complete **Testing Pyramid** architecture with three distinct layers:
+
+```
+        E2E Tests (BDD)           ← Slow, Full User Flows
+      /-------------------\
+     / Integration Tests   \      ← Medium, Page+Browser
+    /-----------------------\
+   /      Unit Tests         \    ← Fast, Component Logic
+  /---------------------------\
+```
+
+**Layer Distribution:**
+- **Unit Tests**: 132 tests (framework components, 98% coverage)
+- **Integration Tests**: 18 tests (Page Objects + real browser)
+- **E2E Tests**: 120 steps, 20 scenarios (complete user journeys)
+- **Total**: 270+ tests across all layers
+
+**When to Use Each Layer:**
+| Test Type | Purpose | Speed | Browser | Example |
+|-----------|---------|-------|---------|---------|
+| **Unit** | Component logic | Fast | Mocked | "Does `login()` call correct methods?" |
+| **Integration** | Page + real DOM | Medium | Real | "Do login fields exist and work?" |
+| **E2E** | Full user flows | Slow | Real | "Can user complete login→shop→checkout?" |
+
+### BDD/E2E Tests (Behave)
+
 | Feature | Scenarios | Steps | Status |
 |---------|-----------|-------|--------|
 | **Smoke Tests** | 4/4 ✅ | 14/14 ✅ | Complete |
@@ -189,6 +230,23 @@ See [.github/workflows/tests.yml](.github/workflows/tests.yml) for pipeline conf
 - **Pages Module**: 100% (194/194 statements)
 - **Core Module**: 95% (62/65 statements)
 - **Overall Framework**: 98%+
+
+### Integration Tests (Pytest + Real Browser)
+
+Integration tests validate Page Objects with real browser interactions, filling the gap between unit tests (mocked) and E2E tests (full user flows).
+
+| Module | Tests | Browser | Status |
+|--------|-------|---------|--------|
+| **LoginPage** | 9 | Chrome | ✅ Complete |
+| **InventoryPage** | 9 | Chrome | ✅ Complete |
+| **TOTAL** | **18** | **Real** | **Complete** |
+
+**Key Differences from Unit Tests:**
+- ✅ Real Selenium WebDriver (not mocked)
+- ✅ Actual DOM elements validation
+- ✅ True locator verification
+- ✅ Browser interaction testing
+- ✅ Faster than E2E (no full flows)
 
 ### Test Scenarios
 

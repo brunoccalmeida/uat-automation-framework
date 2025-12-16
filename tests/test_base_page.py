@@ -95,173 +95,185 @@ class TestFindClickableElement:
 class TestTypeMethod:
     """Test type method (text input)."""
     
-    def test_type_finds_clickable_element(self, mocker):
+    def test_type_finds_clickable_element(self):
         """type should find element using find_clickable_element."""
+        from unittest.mock import patch
+        
         mock_driver = Mock()
         mock_element = Mock()
         
         page = BasePage(mock_driver)
-        mocker.patch.object(page, 'find_clickable_element', return_value=mock_element)
-        mocker.patch.object(page.driver, 'execute_script')
-        mocker.patch.object(page.wait, 'until', return_value=mock_element)
         
-        locator = (By.ID, "input-field")
-        page.type(locator, "test text")
-        
-        page.find_clickable_element.assert_called_once_with(locator)
+        with patch.object(page, 'find_clickable_element', return_value=mock_element) as mock_find:
+            with patch.object(page.driver, 'execute_script'):
+                with patch.object(page.wait, 'until', return_value=mock_element):
+                    locator = (By.ID, "input-field")
+                    page.type(locator, "test text")
+                    
+                    mock_find.assert_called_once_with(locator)
     
-    def test_type_scrolls_element_into_view(self, mocker):
+    def test_type_scrolls_element_into_view(self):
         """type should scroll element to center of viewport."""
+        from unittest.mock import patch
+        
         mock_driver = Mock()
         mock_element = Mock()
         
         page = BasePage(mock_driver)
-        mocker.patch.object(page, 'find_clickable_element', return_value=mock_element)
-        mocker.patch.object(page.driver, 'execute_script')
-        mocker.patch.object(page.wait, 'until', return_value=mock_element)
         
-        locator = (By.ID, "input-field")
-        page.type(locator, "test text")
-        
-        page.driver.execute_script.assert_called_once_with(
-            "arguments[0].scrollIntoView({block: 'center'});",
-            mock_element
-        )
+        with patch.object(page, 'find_clickable_element', return_value=mock_element):
+            with patch.object(page.driver, 'execute_script') as mock_execute:
+                with patch.object(page.wait, 'until', return_value=mock_element):
+                    locator = (By.ID, "input-field")
+                    page.type(locator, "test text")
+                    
+                    mock_execute.assert_called_once_with(
+                        "arguments[0].scrollIntoView({block: 'center'});",
+                        mock_element
+                    )
     
-    def test_type_re_verifies_element_clickable_after_scroll(self, mocker):
+    def test_type_re_verifies_element_clickable_after_scroll(self):
         """type should verify element is still clickable after scrolling."""
+        from unittest.mock import patch
+        
         mock_driver = Mock()
         mock_element = Mock()
         
         page = BasePage(mock_driver)
-        mocker.patch.object(page, 'find_clickable_element', return_value=mock_element)
-        mocker.patch.object(page.driver, 'execute_script')
-        mocker.patch.object(page.wait, 'until', return_value=mock_element)
         
-        locator = (By.ID, "input-field")
-        page.type(locator, "test text")
-        
-        # Should be called once for re-verification
-        page.wait.until.assert_called_once()
+        with patch.object(page, 'find_clickable_element', return_value=mock_element):
+            with patch.object(page.driver, 'execute_script'):
+                with patch.object(page.wait, 'until', return_value=mock_element) as mock_wait:
+                    locator = (By.ID, "input-field")
+                    page.type(locator, "test text")
+                    
+                    # Should be called once for re-verification
+                    mock_wait.assert_called_once()
     
-    def test_type_clears_field_before_typing(self, mocker):
+    def test_type_clears_field_before_typing(self):
         """type should clear existing text before typing new text."""
+        from unittest.mock import patch
+        
         mock_driver = Mock()
         mock_element = Mock()
         
         page = BasePage(mock_driver)
-        mocker.patch.object(page, 'find_clickable_element', return_value=mock_element)
-        mocker.patch.object(page.driver, 'execute_script')
-        mocker.patch.object(page.wait, 'until', return_value=mock_element)
         
-        locator = (By.ID, "input-field")
-        page.type(locator, "test text")
-        
-        mock_element.clear.assert_called_once()
+        with patch.object(page, 'find_clickable_element', return_value=mock_element):
+            with patch.object(page.driver, 'execute_script'):
+                with patch.object(page.wait, 'until', return_value=mock_element):
+                    locator = (By.ID, "input-field")
+                    page.type(locator, "test text")
+                    
+                    mock_element.clear.assert_called_once()
     
-    def test_type_sends_text_to_element(self, mocker):
+    def test_type_sends_text_to_element(self):
         """type should send keys to the element."""
+        from unittest.mock import patch
+        
         mock_driver = Mock()
         mock_element = Mock()
         
         page = BasePage(mock_driver)
-        mocker.patch.object(page, 'find_clickable_element', return_value=mock_element)
-        mocker.patch.object(page.driver, 'execute_script')
-        mocker.patch.object(page.wait, 'until', return_value=mock_element)
         
-        locator = (By.ID, "input-field")
-        test_text = "my test input"
-        page.type(locator, test_text)
-        
-        mock_element.send_keys.assert_called_once_with(test_text)
+        with patch.object(page, 'find_clickable_element', return_value=mock_element):
+            with patch.object(page.driver, 'execute_script'):
+                with patch.object(page.wait, 'until', return_value=mock_element):
+                    locator = (By.ID, "input-field")
+                    test_text = "my test input"
+                    page.type(locator, test_text)
+                    
+                    mock_element.send_keys.assert_called_once_with(test_text)
     
-    def test_type_method_sequence_is_correct(self, mocker):
+    def test_type_method_sequence_is_correct(self):
         """type should execute operations in correct order."""
+        from unittest.mock import patch
+        
         mock_driver = Mock()
         mock_element = Mock()
         
         page = BasePage(mock_driver)
-        mocker.patch.object(page, 'find_clickable_element', return_value=mock_element)
-        mock_execute = mocker.patch.object(page.driver, 'execute_script')
-        mock_wait = mocker.patch.object(page.wait, 'until', return_value=mock_element)
         
-        locator = (By.ID, "input-field")
-        page.type(locator, "text")
-        
-        # Verify call order
-        manager = Mock()
-        manager.attach_mock(page.find_clickable_element, 'find_clickable')
-        manager.attach_mock(mock_execute, 'execute_script')
-        manager.attach_mock(mock_wait, 'wait_until')
-        manager.attach_mock(mock_element.clear, 'clear')
-        manager.attach_mock(mock_element.send_keys, 'send_keys')
-        
-        # Order should be: find → scroll → wait → clear → send_keys
-        assert mock_element.clear.called
-        assert mock_element.send_keys.called
+        with patch.object(page, 'find_clickable_element', return_value=mock_element):
+            with patch.object(page.driver, 'execute_script'):
+                with patch.object(page.wait, 'until', return_value=mock_element):
+                    locator = (By.ID, "input-field")
+                    page.type(locator, "text")
+                    
+                    # Verify key methods were called
+                    assert mock_element.clear.called
+                    assert mock_element.send_keys.called
 
 
 class TestClickMethod:
     """Test click method."""
     
-    def test_click_finds_clickable_element(self, mocker):
+    def test_click_finds_clickable_element(self):
         """click should find element using find_clickable_element."""
+        from unittest.mock import patch
+        
         mock_driver = Mock()
         mock_element = Mock()
         
         page = BasePage(mock_driver)
-        mocker.patch.object(page, 'find_clickable_element', return_value=mock_element)
         
-        locator = (By.ID, "button")
-        page.click(locator)
-        
-        page.find_clickable_element.assert_called_once_with(locator)
+        with patch.object(page, 'find_clickable_element', return_value=mock_element) as mock_find:
+            locator = (By.ID, "button")
+            page.click(locator)
+            
+            mock_find.assert_called_once_with(locator)
     
-    def test_click_calls_element_click(self, mocker):
+    def test_click_calls_element_click(self):
         """click should call click() on the element."""
+        from unittest.mock import patch
+        
         mock_driver = Mock()
         mock_element = Mock()
         
         page = BasePage(mock_driver)
-        mocker.patch.object(page, 'find_clickable_element', return_value=mock_element)
         
-        locator = (By.ID, "button")
-        page.click(locator)
-        
-        mock_element.click.assert_called_once()
+        with patch.object(page, 'find_clickable_element', return_value=mock_element):
+            locator = (By.ID, "button")
+            page.click(locator)
+            
+            mock_element.click.assert_called_once()
 
 
 class TestGetTextMethod:
     """Test get_text method."""
     
-    def test_get_text_finds_visible_element(self, mocker):
+    def test_get_text_finds_visible_element(self):
         """get_text should find element using find_element."""
+        from unittest.mock import patch
+        
         mock_driver = Mock()
         mock_element = Mock()
         mock_element.text = "Sample text"
         
         page = BasePage(mock_driver)
-        mocker.patch.object(page, 'find_element', return_value=mock_element)
         
-        locator = (By.ID, "label")
-        result = page.get_text(locator)
-        
-        page.find_element.assert_called_once_with(locator)
+        with patch.object(page, 'find_element', return_value=mock_element) as mock_find:
+            locator = (By.ID, "label")
+            result = page.get_text(locator)
+            
+            mock_find.assert_called_once_with(locator)
     
-    def test_get_text_returns_element_text(self, mocker):
+    def test_get_text_returns_element_text(self):
         """get_text should return the text property of element."""
+        from unittest.mock import patch
+        
         mock_driver = Mock()
         mock_element = Mock()
         expected_text = "Expected text content"
         mock_element.text = expected_text
         
         page = BasePage(mock_driver)
-        mocker.patch.object(page, 'find_element', return_value=mock_element)
         
-        locator = (By.ID, "label")
-        result = page.get_text(locator)
-        
-        assert result == expected_text
+        with patch.object(page, 'find_element', return_value=mock_element):
+            locator = (By.ID, "label")
+            result = page.get_text(locator)
+            
+            assert result == expected_text
 
 
 class TestIsElementPresentMethod:

@@ -141,10 +141,147 @@ class Page:
 
 ---
 
+## 🔍 Error Diagnosis & Debugging (MANDATÓRIO)
+
+**NUNCA "chute" soluções ao encontrar erros. Siga o processo sistemático:**
+
+### Fluxo de Diagnóstico Profissional
+
+```
+┌──────────────────────────────────────────┐
+│ 1. OBSERVE: Leia a mensagem de erro      │
+│    ✓ Stack trace completo                │
+│    ✓ Linha do erro                        │
+│    ✓ Tipo da exception                    │
+└──────────┬───────────────────────────────┘
+           │
+           ▼
+┌──────────────────────────────────────────┐
+│ 2. CONTEXTUALIZE: Entenda o ambiente     │
+│    ✓ Leia o código ao redor (±10 linhas) │
+│    ✓ Identifique dependências            │
+│    ✓ Verifique padrões no projeto        │
+└──────────┬───────────────────────────────┘
+           │
+           ▼
+┌──────────────────────────────────────────┐
+│ 3. INVESTIGUE: Busque padrões similares  │
+│    ✓ grep_search por patterns            │
+│    ✓ Leia arquivos relacionados          │
+│    ✓ Compare com código funcionando      │
+└──────────┬───────────────────────────────┘
+           │
+           ▼
+┌──────────────────────────────────────────┐
+│ 4. DIAGNOSTIQUE: Identifique causa raiz  │
+│    ✓ É um bug ou design problem?         │
+│    ✓ Qual o padrão esperado?             │
+│    ✓ Há outros locais com mesmo issue?   │
+└──────────┬───────────────────────────────┘
+           │
+           ▼
+┌──────────────────────────────────────────┐
+│ 5. PLANEJE: Solução consistente          │
+│    ✓ Fix único ou refactor sistêmico?    │
+│    ✓ Impacto em outros componentes?      │
+│    ✓ Testes precisam ser ajustados?      │
+└──────────┬───────────────────────────────┘
+           │
+           ▼
+┌──────────────────────────────────────────┐
+│ 6. IMPLEMENTE: Aplique a solução         │
+│    ✓ Multi-replace quando múltiplos      │
+│    ✓ Mantenha consistência               │
+│    ✓ Documente decisão se não óbvio      │
+└──────────┬───────────────────────────────┘
+           │
+           ▼
+┌──────────────────────────────────────────┐
+│ 7. VALIDE: Execute testes                │
+│    ✓ Erro foi resolvido?                 │
+│    ✓ Nenhuma regressão?                  │
+│    ✓ Edge cases cobertos?                │
+└──────────────────────────────────────────┘
+```
+
+### ❌ ANTI-PATTERNS de Debugging:
+
+```python
+# ❌ ERRADO: "Quick fix" sem investigação
+# Erro: AttributeError: 'Context' object has no attribute 'cart_page'
+# Solução RUIM: Apenas adicionar context.cart_page = CartPage() no step
+def step_impl(context):
+    context.cart_page = CartPage(context.driver)  # Fix pontual sem entender padrão
+
+# ✅ CORRETO: Investigar padrão do projeto primeiro
+# 1. grep_search: como outros steps criam pages?
+# 2. Descobrir: alguns criam instância local, outros usam context
+# 3. Decisão: padronizar TODOS para instância local (mais testável)
+# 4. multi_replace: aplicar em todos os steps afetados
+def step_impl(context):
+    page = CartPage(context.driver)  # Consistente com padrão do projeto
+    page.do_something()
+```
+
+```python
+# ❌ ERRADO: Corrigir erro por erro sem ver padrão
+# ImportError: cannot import name 'Select'
+# Fix 1: Adiciona import no método
+# Fix 2: Outra ImportError em outro arquivo
+# Fix 3: Repete processo...
+
+# ✅ CORRETO: Diagnosticar causa raiz antes de agir
+# 1. read_file: verificar todos os imports no topo
+# 2. grep_search: buscar padrão de imports no projeto
+# 3. Verificar: Select deve ser importado no topo ou inline?
+# 4. Decisão baseada em padrão existente + melhores práticas
+# 5. Aplicar consistentemente
+```
+
+### Checklist de Diagnóstico
+
+Antes de propor uma solução:
+
+- [ ] Li a mensagem de erro COMPLETA (não apenas a última linha)?
+- [ ] Entendi o contexto (±10 linhas ao redor do erro)?
+- [ ] Busquei padrões similares no código (grep_search)?
+- [ ] Identifiquei a causa raiz (não apenas o sintoma)?
+- [ ] Verifiquei se há outros locais com mesmo problema?
+- [ ] Planejei solução consistente com arquitetura do projeto?
+- [ ] Considerei impacto em testes existentes?
+
+### Comunicação de Diagnóstico
+
+Ao reportar um erro ao usuário:
+
+```markdown
+## 🔴 Diagnóstico do Erro
+
+**Erro Observado:**
+[Stack trace ou mensagem]
+
+**Causa Raiz:**
+[Explicação técnica do PORQUÊ ocorreu]
+
+**Análise:**
+- Investigação: [O que foi verificado]
+- Padrão identificado: [Consistência no código]
+- Impacto: [Outros locais afetados]
+
+**Solução Proposta:**
+[Estratégia de correção com justificativa]
+
+**Prevenção:**
+[Como evitar recorrência]
+```
+
+---
+
 ## Language & Communication
 - Sempre comunicar em **Português (Brasil)**
 - Explicar **WHY**, não apenas WHAT
 - Opiniões fundamentadas, não apenas concordância
+- **Diagnósticos profissionais, não "chutes"**
 
 ---
 

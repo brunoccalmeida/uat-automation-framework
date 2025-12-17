@@ -27,9 +27,8 @@ def step_have_added_product(context, product_name):
 @given("I am on the cart page")
 def step_on_cart_page(context):
     """Navigate to cart page."""
-    context.inventory_page = InventoryPage(context.driver)
-    context.inventory_page.click_shopping_cart()
-    context.cart_page = CartPage(context.driver)
+    inventory_page = InventoryPage(context.driver)
+    inventory_page.click_shopping_cart()
 
 
 @when('I add "{product_name}" to the cart')
@@ -41,21 +40,23 @@ def step_add_product_to_cart(context, product_name):
 @when("I click the shopping cart icon")
 def step_click_cart_icon(context):
     """Click shopping cart icon to view cart."""
-    context.inventory_page.click_shopping_cart()
-    context.cart_page = CartPage(context.driver)
+    inventory_page = InventoryPage(context.driver)
+    inventory_page.click_shopping_cart()
 
 
 @when('I remove "{product_name}" from the cart')
 def step_remove_product_from_cart(context, product_name):
     """Remove product from cart."""
-    context.cart_page.remove_product(product_name)
+    page = CartPage(context.driver)
+    page.remove_product(product_name)
 
 
 @when('I click "{button_text}"')
 def step_click_button(context, button_text):
     """Click button by text."""
     if button_text == "Continue Shopping":
-        context.cart_page.click_continue_shopping()
+        page = CartPage(context.driver)
+        page.click_continue_shopping()
     else:
         raise NotImplementedError(f"Button '{button_text}' not implemented")
 
@@ -64,10 +65,10 @@ def step_click_button(context, button_text):
 def step_navigate_different_pages(context):
     """Navigate to different pages to test cart persistence."""
     # Navigate to cart and back
-    context.inventory_page.click_shopping_cart()
-    context.cart_page = CartPage(context.driver)
-    context.cart_page.click_continue_shopping()
-    context.inventory_page = InventoryPage(context.driver)
+    inventory_page = InventoryPage(context.driver)
+    inventory_page.click_shopping_cart()
+    cart_page = CartPage(context.driver)
+    cart_page.click_continue_shopping()
 
 
 @then('the cart badge should show "{count}"')
@@ -93,13 +94,15 @@ def step_verify_button_text(context, button_text):
 @then("I should be on the cart page")
 def step_verify_on_cart_page(context):
     """Verify user is on cart page."""
-    assert context.cart_page.is_on_cart_page(), "Should be on cart page"
+    page = CartPage(context.driver)
+    assert page.is_on_cart_page(), "Should be on cart page"
 
 
 @then('I should see "{product_name}" in the cart')
 def step_verify_product_in_cart(context, product_name):
     """Verify specific product is in cart."""
-    assert context.cart_page.is_product_in_cart(
+    page = CartPage(context.driver)
+    assert page.is_product_in_cart(
         product_name
     ), f"Product '{product_name}' should be in cart"
 
@@ -108,7 +111,8 @@ def step_verify_product_in_cart(context, product_name):
 @then("the cart should have {count:d} items")
 def step_verify_cart_item_count(context, count):
     """Verify number of items in cart."""
-    actual_count = context.cart_page.get_cart_item_count()
+    page = CartPage(context.driver)
+    actual_count = page.get_cart_item_count()
     assert (
         actual_count == count
     ), f"Cart should have {count} item(s), but has {actual_count}"
@@ -117,7 +121,8 @@ def step_verify_cart_item_count(context, count):
 @then("the cart should be empty")
 def step_verify_cart_empty(context):
     """Verify cart is empty."""
-    cart_count = context.cart_page.get_cart_item_count()
+    page = CartPage(context.driver)
+    cart_count = page.get_cart_item_count()
     assert cart_count == 0, f"Cart should be empty, but has {cart_count} item(s)"
 
 
@@ -125,7 +130,8 @@ def step_verify_cart_empty(context):
 def step_verify_no_cart_badge(context):
     """Verify cart badge is not displayed."""
     # Return to inventory page to check badge
-    context.cart_page.click_continue_shopping()
-    context.inventory_page = InventoryPage(context.driver)
-    cart_count = context.inventory_page.get_cart_item_count()
+    cart_page = CartPage(context.driver)
+    cart_page.click_continue_shopping()
+    inventory_page = InventoryPage(context.driver)
+    cart_count = inventory_page.get_cart_item_count()
     assert cart_count == 0, "Cart badge should not be visible (count should be 0)"

@@ -95,18 +95,18 @@ Hooks run automatically on `git commit`. Manual run: `pre-commit run --all-files
 
 **BDD/E2E Tests (Behave):**
 ```bash
-# Run all E2E tests (uses config.yaml default)
+# Run all E2E tests (headless by default)
 poetry run behave
 
 # Run specific feature
 poetry run behave features/smoke.feature
 poetry run behave features/login.feature
 
-# Run in headless mode (CLI override)
-poetry run behave -Dheadless=true
-
 # Run with visible browser (useful for debugging)
 poetry run behave -Dheadless=false
+
+# Override to headless if needed
+poetry run behave -Dheadless=true
 
 # Run in headless mode via environment variable (useful for CI/CD)
 $env:HEADLESS="true"; poetry run behave  # PowerShell
@@ -149,10 +149,14 @@ export HEADLESS=true && poetry run pytest tests/integration/ -v  # Bash
 
 **Headless Mode Configuration:**
 
-The framework supports flexible headless mode configuration with the following priority:
+The framework runs in **headless mode by default** (best practice: faster, less resources, consistent with CI/CD).
+
+Configuration priority:
 1. **CLI Parameter** (highest): `-Dheadless=true/false`
 2. **Environment Variable**: `HEADLESS=true/false`
-3. **Config File** (lowest): `config.yaml` default value
+3. **Config File** (lowest): `config.yaml` (default: `true`)
+
+Use `-Dheadless=false` for debugging with visible browser.
 
 See [CONFIGURATION.md](CONFIGURATION.md) for detailed configuration options.
 

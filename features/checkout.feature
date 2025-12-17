@@ -1,3 +1,4 @@
+@e2e @functional
 Feature: Checkout
   As a Sauce Demo customer
   I want to complete the checkout process

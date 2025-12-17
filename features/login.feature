@@ -1,3 +1,4 @@
+@smoke @e2e @functional
 Feature: User Login
   As a Sauce Demo customer
   I want to log into my account

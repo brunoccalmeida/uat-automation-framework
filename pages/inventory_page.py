@@ -118,3 +118,10 @@ class InventoryPage(BasePage):
         dropdown_element = self.find_element(self.SORT_DROPDOWN)
         select = Select(dropdown_element)
         return select.first_selected_option.get_attribute("value")
+
+    def are_product_images_broken(self) -> bool:
+        """Retorna True se todas as imagens de produto estiverem quebradas (src = sl-404)."""
+        images = self.driver.find_elements(By.CSS_SELECTOR, ".inventory_item_img img")
+        if not images:
+            return False
+        return all("sl-404" in img.get_attribute("src") for img in images)

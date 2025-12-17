@@ -5,7 +5,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.14-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**[English](README.md)** | **[Português (Brasil)]**
+**[English](README.md)** | **[Português (Brasil)]** | **[Español](README.es.md)**
 
 📊 **[Ver Relatório de Testes](https://brunoccalmeida.github.io/uat-automation-framework/)**
 

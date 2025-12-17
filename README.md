@@ -136,31 +136,44 @@ allure serve reports/allure-results
 
 **Unit Tests (Pytest):**
 ```bash
-# Run all unit tests
-poetry run pytest tests/ -v
+# Run all unit tests (parallel execution)
+poetry run pytest tests/ -n auto -v
 
-# Run with coverage report
-poetry run pytest tests/ --cov=core --cov=pages --cov-report=term-missing
+# Run with coverage report (parallel)
+poetry run pytest tests/ -n auto --cov=core --cov=pages --cov-report=term-missing
 
 # Run specific test module
 poetry run pytest tests/test_login_page.py -v
 
+# Run sequentially (for debugging)
+poetry run pytest tests/ -n 0 -v
+
 # Run all tests (unit + integration + E2E)
-poetry run pytest tests/ && poetry run pytest tests/integration/ && poetry run behave
+poetry run pytest tests/ -n auto && poetry run pytest tests/integration/ -n auto && poetry run behave
 ```
 
 **Integration Tests (Pytest + Real Browser):**
 ```bash
-# Run all integration tests
-poetry run pytest tests/integration/ -v
+# Run all integration tests (parallel execution)
+poetry run pytest tests/integration/ -n auto -v
 
 # Run specific integration test
 poetry run pytest tests/integration/test_login_page_integration.py -v
 
-# Run in headless mode
-$env:HEADLESS="true"; poetry run pytest tests/integration/ -v  # PowerShell
-export HEADLESS=true && poetry run pytest tests/integration/ -v  # Bash
+# Run in headless mode (parallel)
+$env:HEADLESS="true"; poetry run pytest tests/integration/ -n auto -v  # PowerShell
+export HEADLESS=true && poetry run pytest tests/integration/ -n auto -v  # Bash
 ```
+
+**Parallel Execution:**
+
+This framework supports parallel test execution using `pytest-xdist`:
+- **Performance**: 88% faster (188 tests in ~37s vs ~305s)
+- **Safety**: All tests are independent (function-scoped fixtures)
+- **Automatic**: Use `-n auto` to detect CPU cores automatically
+- **Debugging**: Use `-n 0` to disable parallelization
+
+See [docs/PARALLEL_TESTING.md](docs/PARALLEL_TESTING.md) for detailed documentation.
 
 **Headless Mode Configuration:**
 
@@ -327,7 +340,7 @@ allure serve reports/allure-results
 
 Future enhancements following industry best practices:
 
-- [ ] **Parallel Execution** - pytest-xdist for faster test runs
+- [x] **Parallel Execution** - pytest-xdist implemented (88% faster, ~37s for 188 tests)
 - [ ] **Cross-browser Testing** - Firefox and Edge support
 - [ ] **Docker Containerization** - Consistent execution environments
 - [ ] **Visual Regression Testing** - Percy/Applitools integration

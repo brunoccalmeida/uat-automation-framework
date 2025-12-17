@@ -137,31 +137,44 @@ allure serve reports/allure-results
 
 **Pruebas Unitarias (Pytest):**
 ```bash
-# Ejecutar todas las pruebas unitarias
-poetry run pytest tests/ -v
+# Ejecutar todas las pruebas unitarias (ejecución paralela)
+poetry run pytest tests/ -n auto -v
 
-# Ejecutar con reporte de cobertura
-poetry run pytest tests/ --cov=core --cov=pages --cov-report=term-missing
+# Ejecutar con reporte de cobertura (paralelo)
+poetry run pytest tests/ -n auto --cov=core --cov=pages --cov-report=term-missing
 
 # Ejecutar módulo de prueba específico
 poetry run pytest tests/test_login_page.py -v
 
+# Ejecutar secuencialmente (para debugging)
+poetry run pytest tests/ -n 0 -v
+
 # Ejecutar todas las pruebas (unit + integration + E2E)
-poetry run pytest tests/ && poetry run pytest tests/integration/ && poetry run behave
+poetry run pytest tests/ -n auto && poetry run pytest tests/integration/ -n auto && poetry run behave
 ```
 
 **Pruebas de Integración (Pytest + Navegador Real):**
 ```bash
-# Ejecutar todas las pruebas de integración
-poetry run pytest tests/integration/ -v
+# Ejecutar todas las pruebas de integración (ejecución paralela)
+poetry run pytest tests/integration/ -n auto -v
 
 # Ejecutar prueba de integración específica
 poetry run pytest tests/integration/test_login_page_integration.py -v
 
-# Ejecutar en modo headless
-$env:HEADLESS="true"; poetry run pytest tests/integration/ -v  # PowerShell
-export HEADLESS=true && poetry run pytest tests/integration/ -v  # Bash
+# Ejecutar en modo headless (paralelo)
+$env:HEADLESS="true"; poetry run pytest tests/integration/ -n auto -v  # PowerShell
+export HEADLESS=true && poetry run pytest tests/integration/ -n auto -v  # Bash
 ```
+
+**Ejecución Paralela:**
+
+Este framework soporta ejecución paralela de pruebas usando `pytest-xdist`:
+- **Rendimiento**: 88% más rápido (188 pruebas en ~37s vs ~305s)
+- **Seguridad**: Todas las pruebas son independientes (fixtures function-scoped)
+- **Automático**: Use `-n auto` para detectar núcleos de CPU automáticamente
+- **Debugging**: Use `-n 0` para deshabilitar paralelización
+
+Ver [docs/PARALLEL_TESTING.md](docs/PARALLEL_TESTING.md) para documentación detallada.
 
 **Configuración del Modo Headless:**
 
@@ -329,7 +342,7 @@ Ver [.github/workflows/tests.yml](.github/workflows/tests.yml) para configuraci�
 
 Mejoras futuras siguiendo las mejores prácticas de la industria:
 
-- [ ] **Ejecución Paralela** - pytest-xdist para ejecuciones de prueba más rápidas
+- [x] **Ejecución Paralela** - pytest-xdist implementado (88% más rápido, ~37s para 188 pruebas)
 - [ ] **Pruebas Cross-browser** - Soporte para Firefox y Edge
 - [ ] **Containerización Docker** - Ambientes de ejecución consistentes
 - [ ] **Pruebas de Regresión Visual** - Integración Percy/Applitools

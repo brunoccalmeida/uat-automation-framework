@@ -137,31 +137,44 @@ allure serve reports/allure-results
 
 **Testes Unitários (Pytest):**
 ```bash
-# Executar todos testes unitários
-poetry run pytest tests/ -v
+# Executar todos testes unitários (execução paralela)
+poetry run pytest tests/ -n auto -v
 
-# Executar com relatório de cobertura
-poetry run pytest tests/ --cov=core --cov=pages --cov-report=term-missing
+# Executar com relatório de cobertura (paralelo)
+poetry run pytest tests/ -n auto --cov=core --cov=pages --cov-report=term-missing
 
 # Executar módulo de teste específico
 poetry run pytest tests/test_login_page.py -v
 
+# Executar sequencialmente (para debugging)
+poetry run pytest tests/ -n 0 -v
+
 # Executar todos testes (unit + integration + E2E)
-poetry run pytest tests/ && poetry run pytest tests/integration/ && poetry run behave
+poetry run pytest tests/ -n auto && poetry run pytest tests/integration/ -n auto && poetry run behave
 ```
 
 **Testes de Integração (Pytest + Navegador Real):**
 ```bash
-# Executar todos testes de integração
-poetry run pytest tests/integration/ -v
+# Executar todos testes de integração (execução paralela)
+poetry run pytest tests/integration/ -n auto -v
 
 # Executar teste de integração específico
 poetry run pytest tests/integration/test_login_page_integration.py -v
 
-# Executar em modo headless
-$env:HEADLESS="true"; poetry run pytest tests/integration/ -v  # PowerShell
-export HEADLESS=true && poetry run pytest tests/integration/ -v  # Bash
+# Executar em modo headless (paralelo)
+$env:HEADLESS="true"; poetry run pytest tests/integration/ -n auto -v  # PowerShell
+export HEADLESS=true && poetry run pytest tests/integration/ -n auto -v  # Bash
 ```
+
+**Execução Paralela:**
+
+Este framework suporta execução paralela de testes usando `pytest-xdist`:
+- **Performance**: 88% mais rápido (188 testes em ~37s vs ~305s)
+- **Segurança**: Todos testes são independentes (fixtures function-scoped)
+- **Automático**: Use `-n auto` para detectar núcleos de CPU automaticamente
+- **Debugging**: Use `-n 0` para desabilitar paralelização
+
+Veja [docs/PARALLEL_TESTING.md](docs/PARALLEL_TESTING.md) para documentação detalhada.
 
 **Configuração do Modo Headless:**
 
@@ -329,7 +342,7 @@ Veja [.github/workflows/tests.yml](.github/workflows/tests.yml) para configuraç
 
 Melhorias futuras seguindo as melhores práticas da indústria:
 
-- [ ] **Execução Paralela** - pytest-xdist para execuções de teste mais rápidas
+- [x] **Execução Paralela** - pytest-xdist implementado (88% mais rápido, ~37s para 188 testes)
 - [ ] **Testes Cross-browser** - Suporte para Firefox e Edge
 - [ ] **Containerização Docker** - Ambientes de execução consistentes
 - [ ] **Testes de Regressão Visual** - Integração Percy/Applitools

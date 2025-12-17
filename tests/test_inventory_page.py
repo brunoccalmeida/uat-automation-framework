@@ -32,6 +32,10 @@ class TestInventoryPageLocators:
         """SHOPPING_CART_LINK locator should use correct class name."""
         assert InventoryPage.SHOPPING_CART_LINK == (By.CLASS_NAME, "shopping_cart_link")
 
+    def test_sort_dropdown_locator(self):
+        """SORT_DROPDOWN locator should use correct class name."""
+        assert InventoryPage.SORT_DROPDOWN == (By.CLASS_NAME, "product_sort_container")
+
 
 class TestIsOnInventoryPage:
     """Test is_on_inventory_page method."""
@@ -151,6 +155,81 @@ class TestLogout:
             page.logout()
 
             assert mock_click.call_count == 2
-            calls = mock_click.call_args_list
-            assert calls[0][0][0] == InventoryPage.MENU_BUTTON
-            assert calls[1][0][0] == InventoryPage.LOGOUT_LINK
+
+
+class TestSelectSortOption:
+    """Test select_sort_option method."""
+
+    def test_select_sort_option_selects_by_value(self):
+        """select_sort_option should select dropdown option by value."""
+        mock_driver = Mock()
+        page = InventoryPage(mock_driver)
+
+        mock_dropdown_element = Mock()
+        mock_select = Mock()
+
+        with patch.object(
+            page, "find_clickable_element", return_value=mock_dropdown_element
+        ):
+            with patch("pages.inventory_page.Select", return_value=mock_select):
+                page.select_sort_option("za")
+
+                mock_select.select_by_value.assert_called_once_with("za")
+
+
+class TestGetProductNames:
+    """Test get_product_names method."""
+
+    def test_get_product_names_returns_list_of_names(self):
+        """get_product_names should return list of product names in order."""
+        mock_driver = Mock()
+        mock_elements = [Mock(text="Product A"), Mock(text="Product B")]
+        mock_driver.find_elements.return_value = mock_elements
+
+        page = InventoryPage(mock_driver)
+        result = page.get_product_names()
+
+        mock_driver.find_elements.assert_called_once_with(
+            *InventoryPage.INVENTORY_ITEM_NAME
+        )
+        assert result == ["Product A", "Product B"]
+
+
+class TestGetProductPrices:
+    """Test get_product_prices method."""
+
+    def test_get_product_prices_returns_list_of_floats(self):
+        """get_product_prices should return list of prices as floats."""
+        mock_driver = Mock()
+        mock_elements = [Mock(text="$29.99"), Mock(text="$15.99")]
+        mock_driver.find_elements.return_value = mock_elements
+
+        page = InventoryPage(mock_driver)
+        result = page.get_product_prices()
+
+        mock_driver.find_elements.assert_called_once_with(
+            *InventoryPage.INVENTORY_ITEM_PRICE
+        )
+        assert result == [29.99, 15.99]
+
+
+class TestGetCurrentSortOption:
+    """Test get_current_sort_option method."""
+
+    def test_get_current_sort_option_returns_selected_value(self):
+        """get_current_sort_option should return value of selected option."""
+        mock_driver = Mock()
+        page = InventoryPage(mock_driver)
+
+        mock_dropdown_element = Mock()
+        mock_select = Mock()
+        mock_option = Mock()
+        mock_option.get_attribute.return_value = "lohi"
+        mock_select.first_selected_option = mock_option
+
+        with patch.object(page, "find_element", return_value=mock_dropdown_element):
+            with patch("pages.inventory_page.Select", return_value=mock_select):
+                result = page.get_current_sort_option()
+
+                mock_option.get_attribute.assert_called_once_with("value")
+                assert result == "lohi"

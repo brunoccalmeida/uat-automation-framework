@@ -65,6 +65,15 @@ def step_verify_products_page(context):
     ), "Products page should be displayed"
 
 
+@then("I should be on the inventory page")
+def step_verify_on_inventory_page(context):
+    """Verify user is on inventory/products page."""
+    context.inventory_page = InventoryPage(context.driver)
+    assert (
+        context.inventory_page.is_on_inventory_page()
+    ), "User should be on inventory page"
+
+
 @then('the page title should be "{expected_title}"')
 def step_verify_page_title(context, expected_title):
     """Verify page title matches expected text."""

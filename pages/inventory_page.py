@@ -4,6 +4,7 @@ Represents the products/inventory page after successful login.
 """
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.select import Select
 
 from pages.base_page import BasePage
 
@@ -14,11 +15,14 @@ class InventoryPage(BasePage):
     # Locators
     INVENTORY_CONTAINER = (By.ID, "inventory_container")
     INVENTORY_ITEMS = (By.CLASS_NAME, "inventory_item")
+    INVENTORY_ITEM_NAME = (By.CLASS_NAME, "inventory_item_name")
+    INVENTORY_ITEM_PRICE = (By.CLASS_NAME, "inventory_item_price")
     PAGE_TITLE = (By.CLASS_NAME, "title")
     SHOPPING_CART_BADGE = (By.CLASS_NAME, "shopping_cart_badge")
     SHOPPING_CART_LINK = (By.CLASS_NAME, "shopping_cart_link")
     MENU_BUTTON = (By.ID, "react-burger-menu-btn")
     LOGOUT_LINK = (By.ID, "logout_sidebar_link")
+    SORT_DROPDOWN = (By.CLASS_NAME, "product_sort_container")
 
     def is_on_inventory_page(self) -> bool:
         """Check if user is on inventory page.
@@ -76,3 +80,41 @@ class InventoryPage(BasePage):
         """Log out from application."""
         self.click(self.MENU_BUTTON)
         self.click(self.LOGOUT_LINK)
+
+    def select_sort_option(self, option: str) -> None:
+        """Select sort option from dropdown.
+
+        Args:
+            option: Sort option value (az, za, lohi, hilo).
+        """
+        dropdown_element = self.find_clickable_element(self.SORT_DROPDOWN)
+        select = Select(dropdown_element)
+        select.select_by_value(option)
+
+    def get_product_names(self) -> list[str]:
+        """Get all product names from inventory page.
+
+        Returns:
+            List of product names in display order.
+        """
+        name_elements = self.driver.find_elements(*self.INVENTORY_ITEM_NAME)
+        return [element.text for element in name_elements]
+
+    def get_product_prices(self) -> list[float]:
+        """Get all product prices from inventory page.
+
+        Returns:
+            List of product prices in display order as floats.
+        """
+        price_elements = self.driver.find_elements(*self.INVENTORY_ITEM_PRICE)
+        return [float(element.text.replace("$", "")) for element in price_elements]
+
+    def get_current_sort_option(self) -> str:
+        """Get currently selected sort option from dropdown.
+
+        Returns:
+            Value of selected sort option (az, za, lohi, hilo).
+        """
+        dropdown_element = self.find_element(self.SORT_DROPDOWN)
+        select = Select(dropdown_element)
+        return select.first_selected_option.get_attribute("value")

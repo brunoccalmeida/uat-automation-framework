@@ -5,9 +5,23 @@
 [![Python Version](https://img.shields.io/badge/python-3.14-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+**[English]** | **[Português (Brasil)](README.pt-BR.md)**
+
 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
 
 Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium for testing the **Sauce Demo** e-commerce application.
+
+## 📑 Table of Contents
+
+- [Purpose](#-purpose)
+- [Architecture](#️-architecture)
+- [Getting Started](#-getting-started)
+- [Testing Strategy](#-testing-strategy)
+- [Technology Stack](#️-technology-stack)
+- [CI/CD](#-cicd)
+- [Project History](#-project-history)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 > **Note**: Originally developed for Parabank (banking demo), migrated to Sauce Demo due to instability issues with Parabank public instance. Framework architecture remains fully intact and demonstrates professional testing practices.
 
@@ -309,27 +323,15 @@ poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-r
 allure serve reports/allure-results
 ```
 
-## 🎯 Next Steps (Best Practices Roadmap)
+## 🎯 Roadmap
 
-Following industry best practices, the recommended next steps are:
+Future enhancements following industry best practices:
 
-### High Priority
-1. **Integration Tests** - Test Page Objects with real browser (faster than E2E, more realistic than unit tests)
-2. **Coverage Badges** - Add coverage badges to README using Codecov or Coveralls
-3. **Pre-commit Hooks** - Automated code quality checks before commits (Black, Flake8, Pylint)
-4. **Performance Testing** - Measure and track test execution times, identify bottlenecks
-
-### Medium Priority
-5. **Parallel Execution** - Run tests in parallel for faster CI/CD (pytest-xdist, Behave parallel)
-6. **Cross-browser Testing** - Add Firefox and Edge support with browser matrix in CI
-7. **Docker Containerization** - Package framework in Docker for consistent execution environments
-8. **Test Data Management** - Externalize test data to JSON/CSV files for data-driven testing
-
-### Nice to Have
-9. **API Tests** - Add API-level tests for faster feedback and better isolation
-10. **Visual Regression Testing** - Integrate visual diff tools (Percy, Applitools)
-11. **Accessibility Testing** - Add axe-core integration for WCAG compliance
-12. **Component Tests** - Test individual UI components in isolation (if application supports)
+- [ ] **Parallel Execution** - pytest-xdist for faster test runs
+- [ ] **Cross-browser Testing** - Firefox and Edge support
+- [ ] **Docker Containerization** - Consistent execution environments
+- [ ] **Visual Regression Testing** - Percy/Applitools integration
+- [ ] **API Tests** - Faster feedback with API-level testing
 
 ## 🤝 Contributing
 
@@ -345,19 +347,7 @@ This is a portfolio project demonstrating professional UAT automation practices 
 
 ## 📚 Project History
 
-**Migration Note**: This framework was originally developed for Parabank (banking demo) and successfully migrated to Sauce Demo in <1 hour, proving the robustness of its architecture. All core design patterns (BDD, POM, Selenium best practices) remained unchanged, demonstrating true framework portability.ogin: Successful login (with dynamic pre-registration) and failed login
-- Driver setup: Maximize window, disable autofill prompts, reduce automation detection
-- Instructions: Workspace-wide rules in .github/copilot-instructions.md
-
-### Quick Run
-
-```bash
-# Run registration feature
-poetry run behave features/register.feature
-
-# Run login feature
-poetry run behave features/login.feature
-```
+**Migration Note**: This framework was originally developed for Parabank (banking demo) and successfully migrated to Sauce Demo in <1 hour, proving the robustness of its architecture. All core design patterns (BDD, POM, Selenium best practices) remained unchanged, demonstrating true framework portability.
 
 ## 📄 License
 

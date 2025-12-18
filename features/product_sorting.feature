@@ -34,3 +34,10 @@ Feature: Product Sorting
   Scenario: Sorting persists product count
     When I select sort option "hilo"
     Then I should see 6 products on the page
+
+  Scenario: Sorting after adding and removing products from cart
+    When I add the product "Sauce Labs Backpack" to the cart
+    And I remove the product "Sauce Labs Backpack" from the cart
+    And I select sort option "za"
+    Then products should be sorted by name Z to A
+    Then the sort dropdown should show "za" as selected

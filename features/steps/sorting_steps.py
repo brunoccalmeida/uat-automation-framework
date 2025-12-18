@@ -1,4 +1,63 @@
-"""Step definitions for product sorting feature."""
+from pages.inventory_page import InventoryPage
+
+
+@when("I refresh the page")
+def step_refresh_page(context):
+    """Refresh the current browser page and espera inventory carregar."""
+    context.driver.refresh()
+    page = InventoryPage(context.driver)
+    assert page.is_on_inventory_page(), "Inventory page did not load after refresh"
+
+
+from behave import given, then, when
+
+
+@then('the sort dropdown should NOT show "{option}" as selected')
+def step_verify_sort_dropdown_not_selected(context, option):
+    """Verify sort dropdown does NOT show the given option as selected (for bug scenarios).
+
+    Args:
+        context: Behave context.
+        option: Option value that should NOT be selected.
+    """
+    page = InventoryPage(context.driver)
+    current_option = page.get_current_sort_option()
+    assert (
+        current_option != option
+    ), f"Sort dropdown unexpectedly shows '{option}' as selected (actual: '{current_option}')"
+
+
+@then("products should NOT be sorted by name Z to A")
+def step_verify_sort_name_za_not_sorted(context):
+    """Verify products are NOT sorted by name Z to A (for problem_user bug scenario).
+
+    Args:
+        context: Behave context.
+    """
+    page = InventoryPage(context.driver)
+    product_names = page.get_product_names()
+    sorted_names = sorted(product_names, reverse=True)
+    assert (
+        product_names != sorted_names
+    ), f"Products are (unexpectedly) sorted Z-A: {product_names}"
+
+
+from pages.cart_page import CartPage
+
+
+@when('I add the product "{product_name}" to the cart')
+def step_add_product_to_cart(context, product_name):
+    """Add a product to the cart from inventory page."""
+    page = InventoryPage(context.driver)
+    page.add_product_to_cart(product_name)
+
+
+@when('I remove the product "{product_name}" from the cart')
+def step_remove_product_from_cart(context, product_name):
+    """Remove a product from the cart from inventory page."""
+    page = InventoryPage(context.driver)
+    page.remove_product_from_cart(product_name)
+
 
 from behave import given, then, when
 
@@ -6,6 +65,7 @@ from pages.inventory_page import InventoryPage
 
 
 @when('I select sort option "{option}"')
+@then('I select sort option "{option}"')
 def step_select_sort_option(context, option):
     """Select sort option from dropdown.
 

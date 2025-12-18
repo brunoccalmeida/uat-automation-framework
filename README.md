@@ -1,3 +1,26 @@
+## 🧩 Edge Cases & Known Bugs
+
+Some users in Sauce Demo (notably `problem_user`) are intentionally designed to exhibit bugs or non-standard behaviors, such as sorting failures or visual glitches. To ensure clarity and maintainability:
+
+- **Normal user scenarios** are kept in their respective feature files (e.g., `product_sorting.feature`).
+- **Edge cases and known bugs** (like `problem_user` sorting bug) are isolated in dedicated feature files (e.g., `product_sorting_problem_user.feature`), tagged with `@edgecase`.
+
+### Why this separation?
+- Keeps business requirements and regression tests clean and focused.
+- Makes it easy to run only edge case scenarios:
+  `poetry run behave --tags=edgecase`
+- Facilitates maintenance when bugs are fixed or new edge cases are discovered.
+- Improves reporting and communication with stakeholders.
+
+### Example: Running edge case scenarios only
+
+```bash
+poetry run behave features/product_sorting_problem_user.feature
+# Or, using tags:
+poetry run behave --tags=edgecase
+```
+
+> If the application behavior changes (e.g., bug is fixed), update or remove the edge case scenario accordingly.
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -96,15 +119,19 @@ poetry install
 poetry run pre-commit install
 ```
 
-**Pre-commit Hooks:**
-The framework uses pre-commit hooks to maintain code quality automatically:
-- ✅ **Black**: Code formatting (88 char line length)
-- ✅ **Flake8**: Linting and style guide enforcement
-- ✅ **Pylint**: Code analysis for errors and smells
+
+**Pre-commit Hooks & Lint Configuration:**
+All linting and formatting configuration is centralized in the `.pre-commit-config.yaml` file. There is **no** `.flake8` file: all Flake8, Black, and Pylint settings are managed via pre-commit hooks only.
+
+- ✅ **Black**: Code formatting (`--line-length=88`)
+- ✅ **Flake8**: Linting and style guide enforcement (`--max-line-length=88`, `--extend-ignore=E203,W503,E501`)
+- ✅ **Pylint**: Code analysis for errors and smells (configured via `pyproject.toml`)
 - ✅ **Security**: Detect private keys, merge conflicts
 - ✅ **Quality**: Trailing whitespace, YAML validation
 
-Hooks run automatically on `git commit`. Manual run: `pre-commit run --all-files`
+> **Note:** Do **not** create a `.flake8` file. All configuration is managed in `.pre-commit-config.yaml` for consistency and maintainability.
+
+Hooks run automatically on `git commit`. To run all hooks manually: `pre-commit run --all-files`
 
 ### Running Tests
 

@@ -20,6 +20,17 @@ def step_sort_by_price_low_to_high(context):
     page.select_sort_option("lohi")
 
 
+@when("I sort products by price high to low")
+def step_sort_by_price_high_to_low(context):
+    """Sort products by price from high to low.
+
+    Args:
+        context: Behave context.
+    """
+    page = InventoryPage(context.driver)
+    page.select_sort_option("hilo")
+
+
 @when("I add the first product to cart")
 def step_add_first_product_to_cart(context):
     """Add the first displayed product to cart.

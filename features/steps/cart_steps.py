@@ -54,9 +54,11 @@ def step_remove_product_from_cart(context, product_name):
 @when('I click "{button_text}"')
 def step_click_button(context, button_text):
     """Click button by text."""
+    page = CartPage(context.driver)
     if button_text == "Continue Shopping":
-        page = CartPage(context.driver)
         page.click_continue_shopping()
+    elif button_text == "Checkout":
+        page.click_checkout()
     else:
         raise NotImplementedError(f"Button '{button_text}' not implemented")
 

@@ -141,3 +141,25 @@ class InventoryPage(BasePage):
         if not images:
             return False
         return all("sl-404" in img.get_attribute("src") for img in images)
+
+    def get_sort_dropdown_options(self) -> list[str]:
+        """Get all available sort options from dropdown.
+
+        Returns:
+            List of option texts (visible text, e.g., 'Name (A to Z)').
+        """
+        dropdown_element = self.find_element(self.SORT_DROPDOWN)
+        select = Select(dropdown_element)
+        return [option.text for option in select.options]
+
+    def sort_dropdown_contains_option(self, option_text: str) -> bool:
+        """Check if sort dropdown contains specific option.
+
+        Args:
+            option_text: Visible text of option (e.g., 'Name (A to Z)').
+
+        Returns:
+            True if option is present, False otherwise.
+        """
+        options = self.get_sort_dropdown_options()
+        return option_text in options

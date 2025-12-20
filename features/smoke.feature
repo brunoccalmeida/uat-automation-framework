@@ -1,4 +1,4 @@
-@smoke
+@e2e @smoke
 Feature: Application Smoke Tests
   As a QA engineer
   I want to verify basic application functionality

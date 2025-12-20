@@ -1,9 +1,10 @@
+@e2e @user_journey
 Feature: Complete Purchase Journey
   As a budget-conscious customer
   I want to find and purchase the cheapest product
   So that I can stay within my budget
 
-  @e2e @user_journey
+
   Scenario: Customer finds and buys cheapest product successfully
     Given I am on the Sauce Demo login page
     When I login with username "standard_user" and password "secret_sauce"

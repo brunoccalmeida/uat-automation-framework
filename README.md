@@ -195,6 +195,48 @@ poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-r
 allure serve reports/allure-results
 ```
 
+**Running Tests by Tags:**
+
+The framework uses a hierarchical tag system for precise test filtering:
+
+```bash
+# Run by test layer
+poetry run behave --tags=@e2e              # All E2E tests (default)
+
+# Run by test type
+poetry run behave --tags=@smoke            # Critical smoke tests only
+poetry run behave --tags=@functional       # Happy path scenarios
+poetry run behave --tags=@negative         # Negative/edge cases
+poetry run behave --tags=@user_journey     # Complete user flows
+
+# Run by domain/feature
+poetry run behave --tags=@login            # All login tests (functional + negative)
+poetry run behave --tags=@cart             # All cart tests
+poetry run behave --tags=@checkout         # All checkout tests
+poetry run behave --tags=@sorting          # All sorting tests
+
+# Run by priority/special
+poetry run behave --tags=@critical         # Critical user journeys
+poetry run behave --tags=@edgecase         # Known bugs/edge cases
+poetry run behave --tags=@problem_user     # Problem user scenarios
+
+# Combine tags (AND logic)
+poetry run behave --tags=@cart --tags=@negative    # Cart negative tests only
+poetry run behave --tags=@functional --tags=@cart  # Cart functional tests only
+
+# Exclude tags (NOT logic)
+poetry run behave --tags=~@edgecase        # All except edge cases
+poetry run behave --tags=@e2e --tags=~@smoke  # E2E excluding smoke
+```
+
+**Tag Hierarchy:**
+- **Layer**: `@e2e` (all features use this)
+- **Type**: `@functional` | `@negative` | `@user_journey` | `@smoke` | `@edgecase`
+- **Domain**: `@login` | `@cart` | `@checkout` | `@sorting`
+- **Priority**: `@critical` | `@problem_user`
+
+```
+
 **Unit Tests (Pytest):**
 ```bash
 # Run all unit tests (parallel execution)

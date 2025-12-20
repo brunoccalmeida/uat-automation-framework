@@ -1,4 +1,4 @@
-@e2e @functional
+@e2e @functional @sorting
 Feature: Product Sorting
   As a customer
   I want to sort products by different criteria

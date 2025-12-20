@@ -1,4 +1,4 @@
-@e2e @edgecase
+@e2e @edgecase @sorting @problem_user
 Feature: Product Sorting - Problem User
   As a QA
   I want to validate known bugs and edge cases for the problem_user

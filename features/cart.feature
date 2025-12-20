@@ -1,4 +1,4 @@
-@e2e @functional
+@e2e @functional @cart
 Feature: Shopping Cart
   As a Sauce Demo customer
   I want to manage my shopping cart

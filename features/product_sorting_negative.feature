@@ -1,4 +1,4 @@
-@e2e @negative @edge_case
+@e2e @negative @edgecase
 Feature: Product Sorting - Edge Cases
   As a QA engineer
   I want to test edge cases in product sorting

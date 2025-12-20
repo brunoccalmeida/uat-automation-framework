@@ -26,25 +26,26 @@ def driver():
 
 ### 2. No Shared State
 
-**Unit Tests (132 tests):**
+**Unit Tests (146 tests):**
 - Use mocked WebDriver (no real browser)
 - No file system dependencies
 - No database connections
 - Pure functional logic testing
 - ✅ **Fully parallelizable**
 
-**Integration Tests (56 tests):**
+**Integration Tests (57 tests):**
 - Each test authenticates independently
 - Fresh browser session per test
 - No test data dependencies
 - No order-dependent assertions
 - ✅ **Fully parallelizable**
 
-**E2E Tests (Behave - 20 scenarios):**
+**E2E Tests (Behave - 55 scenarios):**
 - Each scenario has Background step (fresh setup)
 - Independent user credentials
 - No scenario depends on previous scenario
-- ✅ **Parallelizable with behave-parallel**
+- ✅ Conceitualmente paralelizável (cenários independentes)
+- ⚠️ Execução paralela no Behave requer ferramenta adicional (ex.: behave-parallel) e não faz parte das dependências padrão
 
 ### 3. Test Design Patterns
 
@@ -86,15 +87,7 @@ pytest tests/ -n 0
 
 ### Performance Impact
 
-**Before Parallelization:**
-- Unit Tests: ~78s (132 tests)
-- Integration Tests: ~227s (56 tests)
-- **Total: ~305s (~5 minutes)**
-
-**After Parallelization (8 cores):**
-- Unit Tests: ~15-20s (6x faster)
-- Integration Tests: ~45-60s (4x faster)
-- **Total: ~75s (~1.2 minutes)**
+Os ganhos variam por máquina/CPU e pelo custo de subir browsers (integração). Como referência, este projeto foi desenhado para suportar paralelização com segurança (isolamento por teste/cenário).
 
 **Why not 8x faster?**
 - Browser startup overhead (not CPU-bound)

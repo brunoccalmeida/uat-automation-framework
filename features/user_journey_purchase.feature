@@ -10,7 +10,7 @@ Feature: Complete Purchase Journey
     Then I should be on the inventory page
     When I sort products by price low to high
     And I add the first product to cart
-    And I click the shopping cart
+    And I click the shopping cart icon
     Then I should be on the cart page
     And the cart should have 1 item
     When I proceed to checkout

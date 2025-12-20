@@ -45,20 +45,6 @@ def step_verify_sort_name_za_not_sorted(context):
 from pages.cart_page import CartPage
 
 
-@when('I add the product "{product_name}" to the cart')
-def step_add_product_to_cart(context, product_name):
-    """Add a product to the cart from inventory page."""
-    page = InventoryPage(context.driver)
-    page.add_product_to_cart(product_name)
-
-
-@when('I remove the product "{product_name}" from the cart')
-def step_remove_product_from_cart(context, product_name):
-    """Remove a product from the cart from inventory page."""
-    page = InventoryPage(context.driver)
-    page.remove_product_from_cart(product_name)
-
-
 from behave import given, then, when
 
 from pages.inventory_page import InventoryPage

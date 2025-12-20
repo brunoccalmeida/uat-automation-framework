@@ -24,7 +24,7 @@ Feature: Product Sorting - Edge Cases
 
   Scenario: Sort after navigation to cart and back
     When I select sort option "hilo"
-    And I click the cart button
+    And I click the shopping cart icon
     And I click the continue shopping button
     Then products should be sorted by name A to Z
     And the sort dropdown should show "az" as selected
@@ -32,7 +32,7 @@ Feature: Product Sorting - Edge Cases
   Scenario: Sort persists after adding product
     When I select sort option "za"
     Then products should be sorted by name Z to A
-    When I add the product "Test.allTheThings() T-Shirt (Red)" to the cart
+    When I add "Test.allTheThings() T-Shirt (Red)" to the cart
     Then products should be sorted by name Z to A
     And the sort dropdown should show "za" as selected
 

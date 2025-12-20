@@ -27,8 +27,9 @@ def step_have_added_product(context, product_name):
 @given("I am on the cart page")
 def step_on_cart_page(context):
     """Navigate to cart page."""
-    inventory_page = InventoryPage(context.driver)
-    inventory_page.click_shopping_cart()
+    if not hasattr(context, "inventory_page"):
+        context.inventory_page = InventoryPage(context.driver)
+    context.inventory_page.click_shopping_cart()
 
 
 @when('I add "{product_name}" to the cart')
@@ -40,8 +41,9 @@ def step_add_product_to_cart(context, product_name):
 @when("I click the shopping cart icon")
 def step_click_cart_icon(context):
     """Click shopping cart icon to view cart."""
-    inventory_page = InventoryPage(context.driver)
-    inventory_page.click_shopping_cart()
+    if not hasattr(context, "inventory_page"):
+        context.inventory_page = InventoryPage(context.driver)
+    context.inventory_page.click_shopping_cart()
 
 
 @when('I remove "{product_name}" from the cart')
@@ -67,8 +69,9 @@ def step_click_button(context, button_text):
 def step_navigate_different_pages(context):
     """Navigate to different pages to test cart persistence."""
     # Navigate to cart and back
-    inventory_page = InventoryPage(context.driver)
-    inventory_page.click_shopping_cart()
+    if not hasattr(context, "inventory_page"):
+        context.inventory_page = InventoryPage(context.driver)
+    context.inventory_page.click_shopping_cart()
     cart_page = CartPage(context.driver)
     cart_page.click_continue_shopping()
 

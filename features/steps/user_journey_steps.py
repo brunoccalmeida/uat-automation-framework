@@ -45,17 +45,6 @@ def step_add_first_product_to_cart(context):
         page.add_product_to_cart(context.first_product)
 
 
-@when("I click the shopping cart")
-def step_click_shopping_cart(context):
-    """Click the shopping cart icon.
-
-    Args:
-        context: Behave context.
-    """
-    page = InventoryPage(context.driver)
-    page.click_shopping_cart()
-
-
 @when("I proceed to checkout")
 def step_proceed_to_checkout(context):
     """Click checkout button to proceed.

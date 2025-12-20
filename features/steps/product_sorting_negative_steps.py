@@ -24,17 +24,6 @@ def step_verify_sort_dropdown_correct_option(context):
     ], f"Sort option '{current_option}' should be one of valid options"
 
 
-@when("I click the cart button")
-def step_click_cart_button(context):
-    """Click the cart/shopping cart button.
-
-    Args:
-        context: Behave context.
-    """
-    page = InventoryPage(context.driver)
-    page.click_shopping_cart()
-
-
 @when("I click the continue shopping button")
 def step_click_continue_shopping(context):
     """Click continue shopping button to return to inventory.

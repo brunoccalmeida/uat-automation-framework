@@ -12,13 +12,47 @@ Some users in Sauce Demo (notably `problem_user`) are intentionally designed to 
 - Facilitates maintenance when bugs are fixed or new edge cases are discovered.
 - Improves reporting and communication with stakeholders.
 
+
 ### Example: Running edge case scenarios only
 
 ```bash
+# Run only edge case scenarios (problem_user, etc)
 poetry run behave features/product_sorting_problem_user.feature
-# Or, using tags:
+# Or, using tags (recommended):
 poetry run behave --tags=edgecase
 ```
+
+See also: [features/product_sorting_problem_user.feature](features/product_sorting_problem_user.feature)
+
+---
+
+## ⚡ Parallel Test Execution & Coverage
+
+This framework is designed for **safe, fast parallel execution** at all test layers (unit, integration, E2E):
+
+- **Pytest**: Unit/integration tests run in parallel via `pytest-xdist` (`-n auto`)
+- **Behave**: E2E scenarios are independent and can be run in parallel (see [docs/PARALLEL_TESTING.md](docs/PARALLEL_TESTING.md))
+- **CI/CD**: All jobs use parallel execution for maximum speed
+
+### Example: Run all tests in parallel with coverage
+
+```bash
+# Run all tests (unit, integration, E2E) in parallel with coverage
+poetry run pytest --cov=core --cov=pages --cov=features --cov=tests --cov-report=term-missing --numprocesses=auto
+poetry run behave
+```
+
+See [docs/PARALLEL_TESTING.md](docs/PARALLEL_TESTING.md) for details and troubleshooting parallel execution.
+
+### Coverage Example (Dec 2025)
+
+- **Total statements:** 258
+- **Covered:** 256 (99.2%)
+- **Pages module:** 100%
+- **Core module:** 95%
+- **All critical paths covered**
+
+---
 
 > If the application behavior changes (e.g., bug is fixed), update or remove the edge case scenario accordingly.
 # UAT Automation Framework

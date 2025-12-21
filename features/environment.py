@@ -28,6 +28,11 @@ def before_scenario(context, scenario):
     2. Environment variable: HEADLESS=true
     3. Config file: config.yaml
 
+    Browser selection hierarchy (highest to lowest priority):
+    1. CLI parameter: -Dbrowser=firefox
+    2. Environment variable: BROWSER=firefox
+    3. Config file: config.yaml (browser.name)
+
     Args:
         context: Behave context object.
         scenario: Current scenario being executed.
@@ -40,6 +45,14 @@ def before_scenario(context, scenario):
         key="headless",
         cli_value=context.config.userdata.get("headless"),
         env_value=os.getenv("HEADLESS"),
+    )
+
+    # Apply configuration hierarchy for browser name
+    apply_config_hierarchy(
+        config=browser_config,
+        key="name",
+        cli_value=context.config.userdata.get("browser"),
+        env_value=os.getenv("BROWSER"),
     )
 
     context.driver_manager = DriverManager(browser_config)

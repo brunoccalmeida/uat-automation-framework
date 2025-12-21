@@ -152,11 +152,48 @@ browser:
 
 ### Browser Type
 
-Atualmente suporta apenas Chrome. Configurado via `config.yaml`:
+O framework suporta **Chrome** e **Firefox**. A configuração segue a mesma hierarquia (CLI > ENV > config.yaml).
+
+#### Hierarquia de Configuração (Browser)
+
+**Ordem de Prioridade** (do maior para o menor):
+
+1. **Parâmetro CLI**: `-Dbrowser=firefox`
+2. **Variável de Ambiente**: `BROWSER=firefox`
+3. **Arquivo de Configuração**: `config.yaml` (`browser.name`)
+
+#### Exemplos de Uso
+
+**CLI (Prioridade máxima):**
+```bash
+# Forçar Firefox
+poetry run behave -Dbrowser=firefox
+
+# Forçar Chrome
+poetry run behave -Dbrowser=chrome
+```
+
+**Variável de ambiente (Prioridade média):**
+
+PowerShell (Windows):
+```powershell
+$env:BROWSER="firefox"
+poetry run behave
+```
+
+Bash/Zsh (Linux/Mac):
+```bash
+export BROWSER=firefox
+poetry run behave
+```
+
+**Arquivo de configuração (Prioridade baixa):**
 ```yaml
 browser:
-  name: chrome
+  name: "chrome"  # chrome | firefox
 ```
+
+> Nota: `edge` pode aparecer em documentação/config, mas não está implementado no `DriverManager` e resultará em erro de browser não suportado.
 
 ### Timeout Padrão
 

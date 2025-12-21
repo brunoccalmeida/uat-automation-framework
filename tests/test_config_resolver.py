@@ -7,6 +7,7 @@ import pytest
 
 from core.config_resolver import (
     resolve_headless_mode,
+    resolve_browser_name,
     _str_to_bool,
     apply_config_hierarchy,
 )
@@ -142,6 +143,89 @@ class TestApplyConfigHierarchy:
         )
 
         assert result["headless"] is False
+
+    def test_apply_browser_name_with_cli_override(self):
+        """Should apply CLI browser override to config dictionary."""
+        config = {"name": "chrome"}
+        result = apply_config_hierarchy(
+            config, key="name", cli_value="firefox", env_value=None
+        )
+
+        assert result["name"] == "firefox"
+        assert result is config  # Should modify in place
+
+    def test_apply_browser_name_with_env_override(self):
+        """Should apply ENV browser override when CLI not set."""
+        config = {"name": "chrome"}
+        result = apply_config_hierarchy(
+            config, key="name", cli_value=None, env_value="firefox"
+        )
+
+        assert result["name"] == "firefox"
+
+    def test_apply_browser_name_defaults_to_config_value(self):
+        """Should use config value when no overrides are provided."""
+        config = {"name": "chrome"}
+        result = apply_config_hierarchy(
+            config, key="name", cli_value=None, env_value=None
+        )
+
+        assert result["name"] == "chrome"
+
+    def test_apply_browser_name_handles_missing_key(self):
+        """Should default browser name to chrome when missing."""
+        config = {}
+        result = apply_config_hierarchy(
+            config, key="name", cli_value=None, env_value=None
+        )
+
+        assert result["name"] == "chrome"
+
+
+class TestResolveBrowserName:
+    """Test browser name resolution with configuration hierarchy."""
+
+    def test_cli_parameter_has_highest_priority(self):
+        """CLI parameter should override environment and config values."""
+        result = resolve_browser_name(
+            cli_value="firefox", env_value="chrome", config_value="chrome"
+        )
+        assert result == "firefox"
+
+    def test_env_variable_overrides_config(self):
+        """Environment variable should override config file when CLI not set."""
+        result = resolve_browser_name(
+            cli_value=None, env_value="firefox", config_value="chrome"
+        )
+        assert result == "firefox"
+
+    def test_config_file_is_fallback(self):
+        """Config file value should be used when CLI and ENV not set."""
+        result = resolve_browser_name(
+            cli_value=None, env_value=None, config_value="firefox"
+        )
+        assert result == "firefox"
+
+    def test_empty_string_cli_falls_through_to_env(self):
+        """Empty string CLI value should fall through to environment variable."""
+        result = resolve_browser_name(
+            cli_value="", env_value="firefox", config_value="chrome"
+        )
+        assert result == "firefox"
+
+    def test_empty_string_env_falls_through_to_config(self):
+        """Empty string ENV value should fall through to config."""
+        result = resolve_browser_name(
+            cli_value=None, env_value="", config_value="firefox"
+        )
+        assert result == "firefox"
+
+    def test_normalizes_case_and_whitespace(self):
+        """Should normalize browser name to lowercase and strip whitespace."""
+        result = resolve_browser_name(
+            cli_value="  FIREFOX ", env_value=None, config_value="chrome"
+        )
+        assert result == "firefox"
 
 
 class TestRealWorldScenarios:

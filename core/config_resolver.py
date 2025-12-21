@@ -45,6 +45,38 @@ def resolve_headless_mode(
     return _str_to_bool(effective_value)
 
 
+def resolve_browser_name(
+    cli_value: str | None, env_value: str | None, config_value: str
+) -> str:
+    """Resolve browser name from multiple configuration sources.
+
+    Follows configuration hierarchy (12-factor):
+    1. CLI parameters (highest priority)
+    2. Environment variables
+    3. Config file values (lowest priority)
+
+    Args:
+        cli_value: Value from CLI parameter (-Dbrowser=firefox) or None.
+        env_value: Value from environment variable (BROWSER=firefox) or None.
+        config_value: Value from config file (config.yaml).
+
+    Returns:
+        str: Normalized browser name (lowercase).
+
+    Examples:
+        >>> resolve_browser_name("firefox", None, "chrome")
+        'firefox'
+        >>> resolve_browser_name(None, "firefox", "chrome")
+        'firefox'
+        >>> resolve_browser_name(None, None, "chrome")
+        'chrome'
+        >>> resolve_browser_name("  FIREFOX ", None, "chrome")
+        'firefox'
+    """
+    effective_value = cli_value or env_value or config_value
+    return str(effective_value).strip().lower()
+
+
 def _str_to_bool(value: str) -> bool:
     """Convert string value to boolean.
 
@@ -90,12 +122,19 @@ def apply_config_hierarchy(
     Returns:
         dict: Modified configuration dictionary (for chaining).
 
-    Raises:
-        KeyError: If key doesn't exist in config.
+    Notes:
+        This function modifies the config dict in place and will set
+        sensible defaults when keys are missing (e.g., headless=False,
+        name='chrome').
     """
     if key == "headless":
         config[key] = resolve_headless_mode(
             cli_value, env_value, config.get(key, False)
+        )
+
+    if key == "name":
+        config[key] = resolve_browser_name(
+            cli_value, env_value, config.get(key, "chrome")
         )
 
     return config

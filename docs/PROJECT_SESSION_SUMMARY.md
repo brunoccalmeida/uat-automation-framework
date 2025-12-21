@@ -1,19 +1,21 @@
 # PROJECT_SESSION_SUMMARY.md
 
-## Resumo do Contexto e Progresso (até 18/12/2025)
+## Resumo do Contexto e Progresso (até 21/12/2025)
 
 ### Visão Geral
 - Framework UAT profissional para Sauce Demo (originalmente Parabank), com Python, Behave, Selenium, Pytest, Poetry, pre-commit, CI/CD e cobertura Codecov.
 - Estrutura robusta: Page Object Model, separação de edge cases, execução paralela, documentação multilíngue.
 - TDD/BDD rigoroso: sempre feature → steps → RED → implementação mínima → GREEN → refactor.
+- **Cross-browser**: Chrome + Firefox suportados com hierarquia de configuração (CLI > ENV > config.yaml)
+- **CI matrix**: smoke tests rodando em ambos browsers automaticamente
 
 ### Principais Marcos e Lições
 - Migração de Parabank para Sauce Demo por estabilidade.
 - Implementação de sorting, cart, checkout, login, smoke e edge cases (problem_user).
 - Correção de anti-padrões: nunca implementar Page Object antes do cenário/step RED.
 - Debug profissional: sempre buscar causa raiz, evitar "chutar" soluções.
-- Pipeline CI/CD cobre testes, lint, cobertura, Allure, badges.
-- Roadmap: cross-browser, Docker, visual regression, API, revisão contínua de cenários.
+- Pipeline CI/CD cobre testes, lint, cobertura, Allure, badges, **matriz cross-browser**.
+- Hierarquia de configuração consistente para browser e headless mode.
 
 ### Últimas Ações (18/12/2025 - Sessão Completa)
 
@@ -104,17 +106,56 @@
   - `pages/inventory_page.py` (modificado - dropdown methods)
   - `tests/test_login_steps.py` (novo - 9 unit tests)
 
+---
+
+### Sessões 20-21/12/2025 (Cross-browser & Quality)
+
+#### ✅ FASE 1: Refatoração de Código (20/12)
+- Removidas 2 step definitions duplicadas ("click shopping cart")
+- Padronizado uso de `context.inventory_page` com verificações `hasattr()`
+- Unificado vocabulário Gherkin: "I add {product} to the cart"
+
+#### ✅ FASE 2: Documentação e Tags (20/12)
+- Corrigido tag @edge_case → @edgecase
+- Atualizado PARALLEL_TESTING.md com métricas corretas
+- Implementada hierarquia de tags: @e2e + @type + @domain + @priority
+- Documentada no README com exemplos de filtragem
+
+#### ✅ FASE 3: Cobertura de Código (20/12)
+- inventory_page.py: 79% → 100% (67/67 statements)
+- Adicionados 7 testes unitários para métodos não cobertos
+- Análise concluiu que 0% em steps files é esperado (cobertos por E2E)
+
+#### ✅ FASE 4: Cross-browser Firefox (20-21/12)
+- Implementado `_create_firefox_driver` em DriverManager
+- Criados 19 testes unitários para DriverManager (100% coverage)
+- Validado smoke tests: Chrome (4.4s) vs Firefox (4.7s) - 100% compatível
+
+#### ✅ FASE 5: Hierarquia de Configuração (21/12)
+- Implementado `resolve_browser_name` com CLI > ENV > YAML
+- Aplicado no Behave hook para `-Dbrowser=` e `BROWSER=`
+- Adicionados 10 testes unitários para resolução de browser
+- Atualizado CONFIGURATION.md com documentação completa
+
+#### ✅ FASE 6: CI Matrix (21/12)
+- Adicionado job `smoke-matrix` (Chrome + Firefox)
+- Removido step smoke duplicado do job principal
+- Cada browser instala apenas o driver necessário
+
+#### 📊 Resultados Sessões 20-21/12
+- **Unit tests**: 239 passando (vs 203 anterior)
+- **E2E scenarios**: 55/55 passando (inalterado)
+- **Browsers suportados**: Chrome + Firefox
+- **Commits**: 6 (refactor steps, docs, coverage, firefox support, browser hierarchy, ci matrix)
+
 ### Próximos Passos Recomendados
-1. ✅ ~~login.feature completion~~ (COMPLETO - 4/4 scenarios)
-2. ✅ ~~checkout_negative.feature~~ (COMPLETO - 6/6 scenarios)
-3. ✅ ~~product_sorting_negative.feature~~ (COMPLETO - 5/5 scenarios)
-4. **Screenshots e README visual**: Adicionar capturas de execução, Allure reports, terminal output
-5. **Diagrama de arquitetura**: Visual do Page Object Model, hierarquia de páginas, driver management
-6. **Cross-browser testing**: Explorar Firefox básico, comparar com Chrome
-7. **Considerar features avançadas**:
+1. **Simplificar CI**: Rodar suite E2E via `--tags=@e2e` ao invés de por arquivo individual
+2. **Reduzir duplicação Allure**: Atualmente roda Behave extra só para gerar relatório
+3. **Considerar features avançadas**:
+   - Product details page
+   - Error user scenarios
    - Visual regression (screenshots baseline)
-   - API layer testing (se disponível)
-   - Docker containerization para CI/CD
+   - Docker containerization
 
 ### Como Continuar
 1. Sempre iniciar pelo ciclo TDD/BDD: feature → steps → RED → implementação mínima → GREEN → refactor.
@@ -124,4 +165,4 @@
 
 ---
 
-**Este arquivo resume todo o contexto, decisões e progresso do projeto até 18/12/2025. Atualize sempre ao final de cada ciclo relevante.**
+**Este arquivo resume todo o contexto, decisões e progresso do projeto até 21/12/2025. Atualize sempre ao final de cada ciclo relevante.**

@@ -8,6 +8,7 @@ from typing import Any
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.remote.webdriver import WebDriver
 
 
@@ -53,6 +54,8 @@ class DriverManager:
 
         if browser_name == "chrome":
             return self._create_chrome_driver()
+        elif browser_name == "firefox":
+            return self._create_firefox_driver()
         else:
             raise ValueError(f"Unsupported browser: {browser_name}")
 
@@ -102,6 +105,37 @@ class DriverManager:
 
         # Create driver (Selenium Manager will handle driver binary)
         driver = webdriver.Chrome(options=options)
+
+        # Maximize window for better visibility
+        driver.maximize_window()
+
+        return driver
+
+    def _create_firefox_driver(self) -> WebDriver:
+        """Create Firefox WebDriver with configuration.
+
+        Returns:
+            Configured Firefox WebDriver.
+        """
+        options = FirefoxOptions()
+
+        # Apply headless mode if configured
+        if self.browser_config.get("headless", False):
+            options.add_argument("--headless")
+
+        # Set window size
+        window_size = self.browser_config.get("window_size", "1920,1080")
+        width, height = window_size.split(",")
+        options.add_argument(f"--width={width}")
+        options.add_argument(f"--height={height}")
+
+        # Disable notifications and autofill
+        options.set_preference("dom.webnotifications.enabled", False)
+        options.set_preference("signon.rememberSignons", False)
+        options.set_preference("signon.autofillForms", False)
+
+        # Create driver (Selenium Manager will handle geckodriver binary)
+        driver = webdriver.Firefox(options=options)
 
         # Maximize window for better visibility
         driver.maximize_window()

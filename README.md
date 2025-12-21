@@ -141,7 +141,7 @@ This framework uses a **hybrid OOP/Functional programming approach**, choosing t
 
 - Python 3.14+
 - Poetry (dependency management)
-- Chrome browser
+- Chrome or Firefox browser (drivers managed automatically by Selenium Manager)
 
 ### Installation
 
@@ -181,12 +181,19 @@ poetry run behave features/login.feature
 # Run with visible browser (useful for debugging)
 poetry run behave -Dheadless=false
 
-# Override to headless if needed
-poetry run behave -Dheadless=true
+# Run with Firefox (Chrome is default)
+poetry run behave -Dbrowser=firefox
+
+# Run Firefox in visible mode
+poetry run behave -Dbrowser=firefox -Dheadless=false
 
 # Run in headless mode via environment variable (useful for CI/CD)
 $env:HEADLESS="true"; poetry run behave  # PowerShell
 export HEADLESS=true && poetry run behave  # Bash
+
+# Override browser via environment variable
+$env:BROWSER="firefox"; poetry run behave  # PowerShell
+export BROWSER=firefox && poetry run behave  # Bash
 
 # Run with Allure reporting
 poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results
@@ -234,6 +241,30 @@ poetry run behave --tags=@e2e --tags=~@smoke  # E2E excluding smoke
 - **Type**: `@functional` | `@negative` | `@user_journey` | `@smoke` | `@edgecase`
 - **Domain**: `@login` | `@cart` | `@checkout` | `@sorting`
 - **Priority**: `@critical` | `@problem_user`
+
+**Cross-Browser Testing:**
+
+The framework supports Chrome and Firefox browsers. Use `-D` flags to override default configuration:
+
+```bash
+# Run smoke tests with Firefox (headless)
+poetry run behave --tags=@smoke -Dbrowser=firefox -Dheadless=true
+
+# Run smoke tests with Firefox (visible browser)
+poetry run behave --tags=@smoke -Dbrowser=firefox -Dheadless=false
+
+# Run all tests with Chrome (default)
+poetry run behave -Dbrowser=chrome
+
+# Override multiple config values
+poetry run behave -Dbrowser=firefox -Dheadless=false -Dtimeout=15
+```
+
+**Supported browsers:**
+- `chrome` (default) - Google Chrome with ChromeDriver
+- `firefox` - Mozilla Firefox with GeckoDriver
+
+**Note**: Selenium Manager automatically downloads and manages browser drivers - no manual installation required.
 
 ```
 

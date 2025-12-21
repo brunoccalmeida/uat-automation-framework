@@ -233,3 +233,119 @@ class TestGetCurrentSortOption:
 
                 mock_option.get_attribute.assert_called_once_with("value")
                 assert result == "lohi"
+
+
+class TestRemoveProductFromCart:
+    """Test remove_product_from_cart method."""
+
+    def test_remove_product_from_cart_navigates_to_cart_removes_and_returns(self):
+        """remove_product_from_cart should navigate to cart, remove product, and return to inventory."""
+        mock_driver = Mock()
+        page = InventoryPage(mock_driver)
+
+        mock_cart_page = Mock()
+
+        with patch.object(page, "click_shopping_cart") as mock_click_cart:
+            with patch("pages.cart_page.CartPage", return_value=mock_cart_page):
+                page.remove_product_from_cart("Sauce Labs Backpack")
+
+                mock_click_cart.assert_called_once()
+                mock_cart_page.remove_product.assert_called_once_with(
+                    "Sauce Labs Backpack"
+                )
+                mock_cart_page.click_continue_shopping.assert_called_once()
+
+
+class TestAreProductImagesBroken:
+    """Test are_product_images_broken method."""
+
+    def test_are_product_images_broken_returns_true_when_all_broken(self):
+        """are_product_images_broken should return True when all images have sl-404 src."""
+        mock_driver = Mock()
+        mock_img1 = Mock()
+        mock_img1.get_attribute.return_value = "/static/media/sl-404.png"
+        mock_img2 = Mock()
+        mock_img2.get_attribute.return_value = "/static/media/sl-404.png"
+        mock_driver.find_elements.return_value = [mock_img1, mock_img2]
+
+        page = InventoryPage(mock_driver)
+        result = page.are_product_images_broken()
+
+        assert result is True
+
+    def test_are_product_images_broken_returns_false_when_some_valid(self):
+        """are_product_images_broken should return False when at least one image is valid."""
+        mock_driver = Mock()
+        mock_img1 = Mock()
+        mock_img1.get_attribute.return_value = "/static/media/sl-404.png"
+        mock_img2 = Mock()
+        mock_img2.get_attribute.return_value = "/static/media/backpack.jpg"
+        mock_driver.find_elements.return_value = [mock_img1, mock_img2]
+
+        page = InventoryPage(mock_driver)
+        result = page.are_product_images_broken()
+
+        assert result is False
+
+    def test_are_product_images_broken_returns_false_when_no_images(self):
+        """are_product_images_broken should return False when no images found."""
+        mock_driver = Mock()
+        mock_driver.find_elements.return_value = []
+
+        page = InventoryPage(mock_driver)
+        result = page.are_product_images_broken()
+
+        assert result is False
+
+
+class TestGetSortDropdownOptions:
+    """Test get_sort_dropdown_options method."""
+
+    def test_get_sort_dropdown_options_returns_option_texts(self):
+        """get_sort_dropdown_options should return list of visible option texts."""
+        mock_driver = Mock()
+        page = InventoryPage(mock_driver)
+
+        mock_dropdown_element = Mock()
+        mock_select = Mock()
+        mock_opt1 = Mock(text="Name (A to Z)")
+        mock_opt2 = Mock(text="Name (Z to A)")
+        mock_select.options = [mock_opt1, mock_opt2]
+
+        with patch.object(page, "find_element", return_value=mock_dropdown_element):
+            with patch("pages.inventory_page.Select", return_value=mock_select):
+                result = page.get_sort_dropdown_options()
+
+                assert result == ["Name (A to Z)", "Name (Z to A)"]
+
+
+class TestSortDropdownContainsOption:
+    """Test sort_dropdown_contains_option method."""
+
+    def test_sort_dropdown_contains_option_returns_true_when_present(self):
+        """sort_dropdown_contains_option should return True when option exists."""
+        mock_driver = Mock()
+        page = InventoryPage(mock_driver)
+
+        with patch.object(
+            page,
+            "get_sort_dropdown_options",
+            return_value=["Name (A to Z)", "Price (low to high)"],
+        ):
+            result = page.sort_dropdown_contains_option("Name (A to Z)")
+
+            assert result is True
+
+    def test_sort_dropdown_contains_option_returns_false_when_absent(self):
+        """sort_dropdown_contains_option should return False when option doesn't exist."""
+        mock_driver = Mock()
+        page = InventoryPage(mock_driver)
+
+        with patch.object(
+            page,
+            "get_sort_dropdown_options",
+            return_value=["Name (A to Z)", "Price (low to high)"],
+        ):
+            result = page.sort_dropdown_contains_option("Invalid Option")
+
+            assert result is False

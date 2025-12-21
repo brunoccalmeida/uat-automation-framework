@@ -12,46 +12,46 @@ Feature: Checkout - Negative and Edge Cases
 
   Scenario: ZIP code with invalid format (letters)
     When I fill in the checkout information:
-      | field      | value    |
-      | First Name | John     |
-      | Last Name  | Doe      |
-      | Zip Code   | ABCDE    |
+      | field      | value |
+      | First Name | John  |
+      | Last Name  | Doe   |
+      | Zip Code   | ABCDE |
     And I click continue
     Then I should be on the checkout overview page
 
   Scenario: First name with special characters
     When I fill in the checkout information:
-      | field      | value    |
-      | First Name | @#$%     |
-      | Last Name  | Smith    |
-      | Zip Code   | 12345    |
+      | field      | value |
+      | First Name | @#$%  |
+      | Last Name  | Smith |
+      | Zip Code   | 12345 |
     And I click continue
     Then I should be on the checkout overview page
 
   Scenario: Last name with numbers
     When I fill in the checkout information:
-      | field      | value    |
-      | First Name | Jane     |
-      | Last Name  | 12345    |
-      | Zip Code   | 54321    |
+      | field      | value |
+      | First Name | Jane  |
+      | Last Name  | 12345 |
+      | Zip Code   | 54321 |
     And I click continue
     Then I should be on the checkout overview page
 
   Scenario: Very long input values
     When I fill in the checkout information:
-      | field      | value                                        |
+      | field      | value                                          |
       | First Name | ThisIsAVeryLongFirstNameWithMoreThanFiftyChars |
       | Last Name  | ThisIsAVeryLongLastNameWithMoreThanFiftyChars  |
-      | Zip Code   | 123456789012345                              |
+      | Zip Code   | 123456789012345                                |
     And I click continue
     Then I should be on the checkout overview page
 
   Scenario: Cancel checkout from overview page
     When I fill in the checkout information:
-      | field      | value    |
-      | First Name | Cancel   |
-      | Last Name  | User     |
-      | Zip Code   | 11111    |
+      | field      | value  |
+      | First Name | Cancel |
+      | Last Name  | User   |
+      | Zip Code   | 11111  |
     And I click continue
     And I click cancel
     Then I should be on the products page

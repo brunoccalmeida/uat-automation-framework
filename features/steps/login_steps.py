@@ -56,8 +56,6 @@ def step_click_login_button(context):
 # Remover steps duplicados/placeholders inválidos e garantir steps corretos
 
 
-
-
 @then("I should be on the inventory page")
 def step_verify_on_inventory_page(context):
     """Verify user is on inventory/products page."""
@@ -88,12 +86,12 @@ def step_verify_login_error(context):
 @then('the error should mention "{text}"')
 def step_verify_error_contains(context, text):
     """Verify error message contains specific text.
-    
+
     Supports OR logic with ' or ' separator for alternative texts.
     Example: 'locked out" or "too many attempts'
     """
     error_message = context.login_page.get_error_message()
-    
+
     # Check if text contains OR operator
     if '" or "' in text:
         # Extract alternative texts - split by '" or "' and clean up quotes
@@ -123,7 +121,9 @@ def step_verify_on_login_page(context):
 def step_verify_logged_in_successfully(context):
     """Verify user successfully logged in (on inventory page)."""
     inventory_page = InventoryPage(context.driver)
-    assert inventory_page.is_on_inventory_page(), "Should be on inventory page after successful login"
+    assert (
+        inventory_page.is_on_inventory_page()
+    ), "Should be on inventory page after successful login"
 
 
 @then("I should see the products page")

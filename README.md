@@ -46,11 +46,13 @@ See [docs/PARALLEL_TESTING.md](docs/PARALLEL_TESTING.md) for details and trouble
 
 ### Coverage Example (Dec 2025)
 
-- **Total statements:** 258
-- **Covered:** 256 (99.2%)
+- **Total statements:** 316
+- **Covered:** 315 (99%)
 - **Pages module:** 100%
-- **Core module:** 95%
-- **All critical paths covered**
+- **Core module:** 98%+
+- **Unit tests:** 164 (framework components)
+- **Integration tests:** 75 (real browser)
+- **E2E scenarios:** 55 (BDD/Behave)
 
 ---
 
@@ -368,10 +370,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 132 tests (framework components, 98% coverage)
-- **Integration Tests**: 56 tests (Page Objects + real browser, 100% coverage)
-- **E2E Tests**: 120 steps, 20 scenarios (complete user journeys)
-- **Total**: 308 tests across all layers
+- **Unit Tests**: 164 tests (framework components, 100% Page Objects coverage)
+- **Integration Tests**: 75 tests (Page Objects + real browser, 100% coverage)
+- **E2E Tests**: 55 scenarios, 386 steps (complete user journeys)
+- **Total**: 239 unit/integration tests + 55 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -384,11 +386,13 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 
 | Feature | Scenarios | Steps | Status |
 |---------|-----------|-------|--------|
-| **Smoke Tests** | 4/4 ✅ | 14/14 ✅ | Complete |
-| **User Login** | 4/4 ✅ | 18/18 ✅ | Complete |
-| **Shopping Cart** | 6/6 ✅ | 35/35 ✅ | Complete |
-| **Checkout** | 6/6 ✅ | 52/52 ✅ | Complete |
-| **TOTAL** | **20** | **120** | **100%** |
+| **Smoke Tests** | 8/8 ✅ | 33/33 ✅ | Complete |
+| **User Login** | 6/6 ✅ | 26/26 ✅ | Complete |
+| **Shopping Cart** | 8/8 ✅ | 59/59 ✅ | Complete |
+| **Checkout** | 8/8 ✅ | 73/73 ✅ | Complete |
+| **Product Sorting** | 12/12 ✅ | 86/86 ✅ | Complete |
+| **User Journey** | 13/13 ✅ | 109/109 ✅ | Complete |
+| **TOTAL** | **55** | **386** | **100%** |
 
 ### Unit Tests (Pytest)
 
@@ -402,13 +406,14 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **CheckoutStepTwoPage** | 15 | 100% | ✅ Complete |
 | **CheckoutCompletePage** | 12 | 100% | ✅ Complete |
 | **ConfigResolver** | 30 | 100% | ✅ Complete |
+| **DriverManager** | 19 | 100% | ✅ Complete |
 | **Smoke Tests** | 4 | N/A | ✅ Complete |
-| **TOTAL** | **132** | **98%** | **Complete** |
+| **TOTAL** | **164** | **100%** | **Complete** |
 
 **Code Coverage:**
-- **Pages Module**: 100% (194/194 statements)
-- **Core Module**: 95% (62/65 statements)
-- **Overall Framework**: 98%+
+- **Pages Module**: 100%
+- **Core Module**: 98%+
+- **Overall Framework**: 99% (315/316 statements)
 
 ### Integration Tests (Pytest + Real Browser)
 
@@ -421,7 +426,8 @@ Integration tests validate Page Objects with real browser interactions, filling 
 | **CartPage** | 10 | Chrome | ✅ Complete |
 | **CheckoutStepOnePage** | 15 | Chrome | ✅ Complete |
 | **CheckoutStepTwoPage** | 13 | Chrome | ✅ Complete |
-| **TOTAL** | **56** | **Real** | **Complete** |
+| **InventoryPage (extended)** | 16 | Chrome | ✅ Complete |
+| **TOTAL** | **75** | **Real** | **Complete** |
 
 **Key Differences from Unit Tests:**
 - ✅ Real Selenium WebDriver (not mocked)
@@ -474,8 +480,9 @@ allure serve reports/allure-results
 
 Future enhancements following industry best practices:
 
-- [x] **Parallel Execution** - pytest-xdist implemented (88% faster, ~37s for 188 tests)
-- [ ] **Cross-browser Testing** - Firefox and Edge support
+- [x] **Parallel Execution** - pytest-xdist implemented (88% faster)
+- [x] **Cross-browser Testing** - Chrome + Firefox support with CLI/ENV/config hierarchy
+- [x] **CI Matrix** - Smoke tests run on both browsers automatically
 - [ ] **Docker Containerization** - Consistent execution environments
 - [ ] **Visual Regression Testing** - Percy/Applitools integration
 - [ ] **API Tests** - Faster feedback with API-level testing

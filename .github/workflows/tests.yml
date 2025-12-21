@@ -13,6 +13,62 @@ permissions:
   id-token: write
 
 jobs:
+  smoke-matrix:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.14']
+        browser: ['chrome', 'firefox']
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.2.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Install Chrome
+        if: matrix.browser == 'chrome'
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install Firefox
+        if: matrix.browser == 'firefox'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y firefox
+
+      - name: Run BDD smoke tests (${{ matrix.browser }})
+        run: |
+          poetry run behave --tags=@smoke -Dbrowser=${{ matrix.browser }} --no-capture
+        env:
+          HEADLESS: true
+
   test:
     runs-on: ubuntu-latest
 
@@ -72,12 +128,6 @@ jobs:
       - name: Run integration tests (parallel)
         run: |
           poetry run pytest tests/integration/ -n auto -v --tb=short
-        env:
-          HEADLESS: true
-
-      - name: Run BDD tests (Smoke)
-        run: |
-          poetry run behave features/smoke.feature --no-capture
         env:
           HEADLESS: true
 

@@ -31,6 +31,13 @@ repos:
         args: ['--rcfile=pyproject.toml', '--exit-zero']
         exclude: ^(tests/|features/steps/)
 
+      - id: validate-readme-metrics
+        name: Validate README.md metrics
+        entry: poetry run python scripts/validate_readme_metrics.py
+        language: system
+        files: ^README\.md$
+        pass_filenames: false
+
   # Trailing whitespace removal
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

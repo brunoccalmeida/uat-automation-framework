@@ -131,28 +131,10 @@ jobs:
         env:
           HEADLESS: true
 
-      - name: Run BDD tests (Login)
-        run: |
-          poetry run behave features/login.feature --no-capture
-        env:
-          HEADLESS: true
-
-      - name: Run BDD tests (Cart)
-        run: |
-          poetry run behave features/cart.feature --no-capture
-        env:
-          HEADLESS: true
-
-      - name: Run BDD tests (Checkout)
-        run: |
-          poetry run behave features/checkout.feature --no-capture
-        env:
-          HEADLESS: true
-
-      - name: Generate Allure report
+      - name: Run E2E tests (all scenarios with Allure)
         if: always()
         run: |
-          poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results
+          poetry run behave --tags=@e2e -f allure_behave.formatter:AllureFormatter -o reports/allure-results --no-capture
         env:
           HEADLESS: true
         continue-on-error: true

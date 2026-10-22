@@ -1,62 +1,3 @@
-## 🧩 Edge Cases & Known Bugs
-
-Some users in Sauce Demo (notably `problem_user`) are intentionally designed to exhibit bugs or non-standard behaviors, such as sorting failures or visual glitches. To ensure clarity and maintainability:
-
-- **Normal user scenarios** are kept in their respective feature files (e.g., `product_sorting.feature`).
-- **Edge cases and known bugs** (like `problem_user` sorting bug) are isolated in dedicated feature files (e.g., `product_sorting_problem_user.feature`), tagged with `@edgecase`.
-
-### Why this separation?
-- Keeps business requirements and regression tests clean and focused.
-- Makes it easy to run only edge case scenarios:
-  `poetry run behave --tags=edgecase`
-- Facilitates maintenance when bugs are fixed or new edge cases are discovered.
-- Improves reporting and communication with stakeholders.
-
-
-### Example: Running edge case scenarios only
-
-```bash
-# Run only edge case scenarios (problem_user, etc)
-poetry run behave features/product_sorting_problem_user.feature
-# Or, using tags (recommended):
-poetry run behave --tags=edgecase
-```
-
-See also: [features/product_sorting_problem_user.feature](features/product_sorting_problem_user.feature)
-
----
-
-## ⚡ Parallel Test Execution & Coverage
-
-This framework is designed for **safe, fast parallel execution** at all test layers (unit, integration, E2E):
-
-- **Pytest**: Unit/integration tests run in parallel via `pytest-xdist` (`-n auto`)
-- **Behave**: E2E scenarios are independent and can be run in parallel (see [docs/PARALLEL_TESTING.md](docs/PARALLEL_TESTING.md))
-- **CI/CD**: All jobs use parallel execution for maximum speed
-
-### Example: Run all tests in parallel with coverage
-
-```bash
-# Run all tests (unit, integration, E2E) in parallel with coverage
-poetry run pytest --cov=core --cov=pages --cov=features --cov=tests --cov-report=term-missing --numprocesses=auto
-poetry run behave
-```
-
-See [docs/PARALLEL_TESTING.md](docs/PARALLEL_TESTING.md) for details and troubleshooting parallel execution.
-
-### Coverage Example (Dec 2025)
-
-- **Total statements:** 316
-- **Covered:** 315 (99%)
-- **Pages module:** 100%
-- **Core module:** 98%+
-- **Unit tests:** 164 (framework components)
-- **Integration tests:** 75 (real browser)
-- **E2E scenarios:** 55 (BDD/Behave)
-
----
-
-> If the application behavior changes (e.g., bug is fixed), update or remove the edge case scenario accordingly.
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -92,7 +33,8 @@ This framework demonstrates professional UAT automation practices for web applic
 - Page Object Model design pattern
 - Comprehensive reporting with Allure
 - Pre-configured test users (no credential management needed)
-Test Users
+
+### Test Users
 
 Sauce Demo provides pre-configured test users (password: `secret_sauce` for all):
 
@@ -324,7 +266,7 @@ Use `-Dheadless=false` for debugging with visible browser.
 
 See [CONFIGURATION.md](CONFIGURATION.md) for detailed configuration options.
 
-## � CI/CD
+## 🔄 CI/CD
 
 The project uses **GitHub Actions** for continuous integration:
 
@@ -411,9 +353,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **TOTAL** | **164** | **100%** | **Complete** |
 
 **Code Coverage:**
+- **Total statements:** 316
+- **Covered:** 315 (99%)
 - **Pages Module**: 100%
 - **Core Module**: 98%+
-- **Overall Framework**: 99% (315/316 statements)
 
 ### Integration Tests (Pytest + Real Browser)
 
@@ -466,7 +409,23 @@ Integration tests validate Page Objects with real browser interactions, filling 
 - ✅ Cancel checkout and return to cart
 - ✅ Order confirmation message
 - ✅ Post-purchase cart clearing
-- 🚧� Test Reports
+
+### Edge Cases & Known Bugs
+
+Some Sauce Demo users (notably `problem_user`) are intentionally designed to exhibit bugs or non-standard behaviors, such as sorting failures or visual glitches. To keep the suite clear and maintainable:
+
+- **Normal user scenarios** live in their respective feature files (e.g., `product_sorting.feature`).
+- **Edge cases and known bugs** (like the `problem_user` sorting bug) are isolated in dedicated feature files (e.g., [`product_sorting_problem_user.feature`](features/product_sorting_problem_user.feature)), tagged with `@edgecase`.
+
+Why this separation?
+- Keeps business requirements and regression tests clean and focused
+- Makes it easy to run only edge case scenarios: `poetry run behave --tags=edgecase`
+- Simplifies maintenance when bugs are fixed or new edge cases are discovered
+- Improves reporting and communication with stakeholders
+
+> If the application behavior changes (e.g., a bug is fixed), update or remove the edge case scenario accordingly.
+
+## 📊 Test Reports
 
 Reports are generated in the `reports/` directory and are automatically excluded from version control.
 
@@ -509,5 +468,5 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Author**: Bruno Almeida
+**Author**: Bruno Almeida, QA Automation Engineer / SDET · [LinkedIn](https://www.linkedin.com/in/brunoccalmeida/)
 **Purpose**: Professional portfolio and UAT automation demonstration

@@ -123,26 +123,34 @@ class TestRemoveProduct:
 class TestClickContinueShopping:
     """Test click_continue_shopping method."""
 
-    def test_click_continue_shopping_calls_click(self):
-        """click_continue_shopping should call click with correct locator."""
-        mock_driver = Mock()
-        page = CartPage(mock_driver)
+    def test_click_continue_shopping_clicks_and_returns_loaded_inventory_page(self):
+        """click_continue_shopping should click CONTINUE_SHOPPING_BUTTON and return loaded InventoryPage."""
+        page = CartPage(Mock())
 
-        with patch.object(page, "click") as mock_click:
-            page.click_continue_shopping()
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.inventory_page.InventoryPage") as mock_next,
+        ):
+            result = page.click_continue_shopping()
 
             mock_click.assert_called_once_with(CartPage.CONTINUE_SHOPPING_BUTTON)
+            mock_next.assert_called_once_with(page.driver)
+            assert result is mock_next.return_value.wait_until_loaded.return_value
 
 
 class TestClickCheckout:
     """Test click_checkout method."""
 
-    def test_click_checkout_calls_click(self):
-        """click_checkout should call click with correct locator."""
-        mock_driver = Mock()
-        page = CartPage(mock_driver)
+    def test_click_checkout_clicks_and_returns_loaded_checkout_step_one_page(self):
+        """click_checkout should click CHECKOUT_BUTTON and return loaded CheckoutStepOnePage."""
+        page = CartPage(Mock())
 
-        with patch.object(page, "click") as mock_click:
-            page.click_checkout()
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.checkout_step_one_page.CheckoutStepOnePage") as mock_next,
+        ):
+            result = page.click_checkout()
 
             mock_click.assert_called_once_with(CartPage.CHECKOUT_BUTTON)
+            mock_next.assert_called_once_with(page.driver)
+            assert result is mock_next.return_value.wait_until_loaded.return_value

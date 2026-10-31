@@ -5,7 +5,7 @@ Uses mocks to isolate the logic from Selenium WebDriver.
 """
 
 import pytest
-from unittest.mock import Mock, MagicMock, call
+from unittest.mock import Mock, MagicMock, call, patch
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
@@ -333,3 +333,50 @@ class TestIsElementPresentMethod:
 
             # Verify WebDriverWait was created with custom timeout
             mock_wait_class.assert_called_with(mock_driver, custom_timeout)
+
+
+class _LoadablePage(BasePage):
+    """Minimal page with a PAGE_LOADED marker for testing."""
+
+    PAGE_LOADED = (By.ID, "page-marker")
+
+
+class TestWaitUntilLoaded:
+    """Test wait_until_loaded method."""
+
+    def test_wait_until_loaded_waits_for_page_marker_and_returns_self(self):
+        """wait_until_loaded should wait for PAGE_LOADED and return the page."""
+        page = _LoadablePage(Mock())
+        page.wait = Mock()
+
+        with patch("pages.base_page.EC") as mock_ec:
+            result = page.wait_until_loaded()
+
+            mock_ec.visibility_of_element_located.assert_called_once_with(
+                _LoadablePage.PAGE_LOADED
+            )
+            page.wait.until.assert_called_once_with(
+                mock_ec.visibility_of_element_located.return_value
+            )
+            assert result is page
+
+
+class TestIsLoaded:
+    """Test is_loaded method."""
+
+    def test_is_loaded_returns_true_when_marker_in_dom(self):
+        """is_loaded should return True when PAGE_LOADED element exists."""
+        mock_driver = Mock()
+        mock_driver.find_elements.return_value = [Mock()]
+        page = _LoadablePage(mock_driver)
+
+        assert page.is_loaded() is True
+        mock_driver.find_elements.assert_called_once_with(*_LoadablePage.PAGE_LOADED)
+
+    def test_is_loaded_returns_false_when_marker_absent(self):
+        """is_loaded should return False, without waiting, when marker is absent."""
+        mock_driver = Mock()
+        mock_driver.find_elements.return_value = []
+        page = _LoadablePage(mock_driver)
+
+        assert page.is_loaded() is False

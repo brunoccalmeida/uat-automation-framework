@@ -4,11 +4,10 @@ Represents the products/inventory page after successful login.
 """
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 
+from pages import cart_page, login_page
 from pages.base_page import BasePage
-from pages.cart_page import CartPage
 
 
 class InventoryPage(BasePage):
@@ -21,15 +20,15 @@ class InventoryPage(BasePage):
             product_name: Name of product (e.g., 'Sauce Labs Backpack').
         """
         # 1. Click cart icon to go to cart page
-        self.click_shopping_cart()
+        cart = self.click_shopping_cart()
         # 2. Remove product using CartPage
-        cart_page = CartPage(self.driver)
-        cart_page.remove_product(product_name)
+        cart.remove_product(product_name)
         # 3. Click 'Continue Shopping' to return to inventory
-        cart_page.click_continue_shopping()
+        cart.click_continue_shopping()
 
     # Locators
     INVENTORY_CONTAINER = (By.ID, "inventory_container")
+    PAGE_LOADED = INVENTORY_CONTAINER
     INVENTORY_ITEMS = (By.CLASS_NAME, "inventory_item")
     INVENTORY_ITEM_NAME = (By.CLASS_NAME, "inventory_item_name")
     INVENTORY_ITEM_PRICE = (By.CLASS_NAME, "inventory_item_price")
@@ -88,19 +87,24 @@ class InventoryPage(BasePage):
             return int(badge_text)
         return 0
 
-    def click_shopping_cart(self) -> None:
-        """Click shopping cart icon and wait for cart page to render.
+    def click_shopping_cart(self) -> "cart_page.CartPage":
+        """Click shopping cart icon to view cart.
 
-        Sauce Demo is a SPA: the URL changes before the new page renders, so
-        returning right after the click lets callers act on the old page.
+        Returns:
+            CartPage, once rendered.
         """
         self.click(self.SHOPPING_CART_LINK)
-        self.wait.until(EC.visibility_of_element_located(CartPage.CART_CONTAINER))
+        return cart_page.CartPage(self.driver).wait_until_loaded()
 
-    def logout(self) -> None:
-        """Log out from application."""
+    def logout(self) -> "login_page.LoginPage":
+        """Log out from application.
+
+        Returns:
+            LoginPage, once rendered.
+        """
         self.click(self.MENU_BUTTON)
         self.click(self.LOGOUT_LINK)
+        return login_page.LoginPage(self.driver).wait_until_loaded()
 
     def select_sort_option(self, option: str) -> None:
         """Select sort option from dropdown.

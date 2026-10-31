@@ -5,11 +5,12 @@ that methods call the correct BasePage functionality with proper parameters.
 Follows Testing Pyramid best practices.
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 from selenium.webdriver.common.by import By
 
 from pages.login_page import LoginPage
+from pages.inventory_page import InventoryPage
 
 
 class TestLoginPageLocators:
@@ -65,15 +66,22 @@ class TestEnterPassword:
 class TestClickLogin:
     """Test click_login method."""
 
-    def test_click_login_calls_click_with_login_button_locator(self):
-        """click_login should call click() with LOGIN_BUTTON locator."""
-        mock_driver = Mock()
-        page = LoginPage(mock_driver)
+    def test_click_login_clicks_and_waits_for_success_or_error(self):
+        """click_login should click LOGIN_BUTTON and wait for success or error."""
+        page = LoginPage(Mock())
+        page.wait = Mock()
 
-        with patch.object(page, "click") as mock_click:
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.login_page.EC") as mock_ec,
+        ):
             page.click_login()
 
             mock_click.assert_called_once_with(LoginPage.LOGIN_BUTTON)
+            mock_ec.visibility_of_element_located.assert_has_calls(
+                [call(InventoryPage.PAGE_LOADED), call(LoginPage.ERROR_MESSAGE)]
+            )
+            page.wait.until.assert_called_once_with(mock_ec.any_of.return_value)
 
 
 class TestLoginMethod:

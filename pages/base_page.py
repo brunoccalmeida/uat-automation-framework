@@ -3,6 +3,8 @@
 All page objects should inherit from this base class.
 """
 
+from typing import Self
+
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,7 +15,14 @@ class BasePage:
     """Base class for all page objects.
 
     Provides common methods for interacting with web pages.
+
+    Subclasses define PAGE_LOADED: a locator unique to the page, visible once
+    the page has rendered. Sauce Demo is a SPA, so the URL changes before the
+    new page renders; navigation methods must wait for the destination's
+    PAGE_LOADED before returning.
     """
+
+    PAGE_LOADED: tuple[str, str]
 
     def __init__(self, driver: WebDriver, timeout: int = 10):
         """Initialize base page.
@@ -25,6 +34,26 @@ class BasePage:
         self.driver = driver
         self.timeout = timeout
         self.wait = WebDriverWait(driver, timeout)
+
+    def wait_until_loaded(self) -> Self:
+        """Wait until this page has rendered.
+
+        Returns:
+            This page object, for chaining from navigation methods.
+
+        Raises:
+            TimeoutException: If page does not render within timeout.
+        """
+        self.wait.until(EC.visibility_of_element_located(self.PAGE_LOADED))
+        return self
+
+    def is_loaded(self) -> bool:
+        """Check, without waiting, if this page is currently rendered.
+
+        Returns:
+            True if PAGE_LOADED element is in the DOM, False otherwise.
+        """
+        return bool(self.driver.find_elements(*self.PAGE_LOADED))
 
     def find_element(self, locator: tuple[str, str]):
         """Find element with explicit wait.

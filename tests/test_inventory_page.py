@@ -3,11 +3,10 @@
 Tests the InventoryPage Page Object in isolation using mocks.
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 from selenium.webdriver.common.by import By
 
-from pages.cart_page import CartPage
 from pages.inventory_page import InventoryPage
 
 
@@ -133,51 +132,40 @@ class TestGetCartItemCount:
 class TestClickShoppingCart:
     """Test click_shopping_cart method."""
 
-    def test_click_shopping_cart_calls_click(self):
-        """click_shopping_cart should call click with correct locator."""
-        mock_driver = Mock()
-        page = InventoryPage(mock_driver)
-        page.wait = Mock()
-
-        with patch.object(page, "click") as mock_click:
-            page.click_shopping_cart()
-
-            mock_click.assert_called_once_with(InventoryPage.SHOPPING_CART_LINK)
-
-    def test_click_shopping_cart_waits_for_cart_page_after_click(self):
-        """click_shopping_cart should wait for cart container after clicking."""
-        mock_driver = Mock()
-        page = InventoryPage(mock_driver)
-        page.wait = Mock()
-        calls = Mock()
-        calls.attach_mock(page.wait.until, "wait_until")
+    def test_click_shopping_cart_clicks_and_returns_loaded_cart_page(self):
+        """click_shopping_cart should click SHOPPING_CART_LINK and return loaded CartPage."""
+        page = InventoryPage(Mock())
 
         with (
             patch.object(page, "click") as mock_click,
-            patch(
-                "pages.inventory_page.EC.visibility_of_element_located"
-            ) as mock_visibility,
+            patch("pages.cart_page.CartPage") as mock_next,
         ):
-            calls.attach_mock(mock_click, "click")
-            page.click_shopping_cart()
+            result = page.click_shopping_cart()
 
-            mock_visibility.assert_called_once_with(CartPage.CART_CONTAINER)
-            page.wait.until.assert_called_once_with(mock_visibility.return_value)
-            assert [c[0] for c in calls.mock_calls] == ["click", "wait_until"]
+            mock_click.assert_called_once_with(InventoryPage.SHOPPING_CART_LINK)
+            mock_next.assert_called_once_with(page.driver)
+            assert result is mock_next.return_value.wait_until_loaded.return_value
 
 
 class TestLogout:
     """Test logout method."""
 
-    def test_logout_clicks_menu_then_logout_link(self):
-        """logout should click menu button then logout link."""
-        mock_driver = Mock()
-        page = InventoryPage(mock_driver)
+    def test_logout_clicks_menu_then_logout_and_returns_loaded_login_page(self):
+        """logout should click menu, then logout link, and return loaded LoginPage."""
+        page = InventoryPage(Mock())
 
-        with patch.object(page, "click") as mock_click:
-            page.logout()
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.login_page.LoginPage") as mock_next,
+        ):
+            result = page.logout()
 
-            assert mock_click.call_count == 2
+            assert mock_click.call_args_list == [
+                call(InventoryPage.MENU_BUTTON),
+                call(InventoryPage.LOGOUT_LINK),
+            ]
+            mock_next.assert_called_once_with(page.driver)
+            assert result is mock_next.return_value.wait_until_loaded.return_value
 
 
 class TestSelectSortOption:
@@ -262,21 +250,16 @@ class TestRemoveProductFromCart:
     """Test remove_product_from_cart method."""
 
     def test_remove_product_from_cart_navigates_to_cart_removes_and_returns(self):
-        """remove_product_from_cart should navigate to cart, remove product, and return to inventory."""
-        mock_driver = Mock()
-        page = InventoryPage(mock_driver)
-
-        mock_cart_page = Mock()
+        """remove_product_from_cart should go to cart, remove product and return."""
+        page = InventoryPage(Mock())
 
         with patch.object(page, "click_shopping_cart") as mock_click_cart:
-            with patch("pages.inventory_page.CartPage", return_value=mock_cart_page):
-                page.remove_product_from_cart("Sauce Labs Backpack")
+            page.remove_product_from_cart("Sauce Labs Backpack")
 
-                mock_click_cart.assert_called_once()
-                mock_cart_page.remove_product.assert_called_once_with(
-                    "Sauce Labs Backpack"
-                )
-                mock_cart_page.click_continue_shopping.assert_called_once()
+            mock_click_cart.assert_called_once()
+            cart = mock_click_cart.return_value
+            cart.remove_product.assert_called_once_with("Sauce Labs Backpack")
+            cart.click_continue_shopping.assert_called_once()
 
 
 class TestAreProductImagesBroken:

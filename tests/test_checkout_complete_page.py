@@ -110,15 +110,19 @@ class TestGetConfirmationText:
 class TestClickBackHome:
     """Test click_back_home method."""
 
-    def test_click_back_home_calls_click(self):
-        """click_back_home should call click with BACK_HOME_BUTTON locator."""
-        mock_driver = Mock()
-        page = CheckoutCompletePage(mock_driver)
+    def test_click_back_home_clicks_and_returns_loaded_inventory_page(self):
+        """click_back_home should click BACK_HOME_BUTTON and return loaded InventoryPage."""
+        page = CheckoutCompletePage(Mock())
 
-        with patch.object(page, "click") as mock_click:
-            page.click_back_home()
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.inventory_page.InventoryPage") as mock_next,
+        ):
+            result = page.click_back_home()
 
             mock_click.assert_called_once_with(CheckoutCompletePage.BACK_HOME_BUTTON)
+            mock_next.assert_called_once_with(page.driver)
+            assert result is mock_next.return_value.wait_until_loaded.return_value
 
 
 class TestIsPonyExpressDisplayed:

@@ -3,11 +3,12 @@
 Tests the CheckoutStepOnePage Page Object in isolation using mocks.
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 from selenium.webdriver.common.by import By
 
 from pages.checkout_step_one_page import CheckoutStepOnePage
+from pages.checkout_step_two_page import CheckoutStepTwoPage
 
 
 class TestCheckoutStepOnePageLocators:
@@ -107,29 +108,43 @@ class TestEnterZipCode:
 class TestClickContinue:
     """Test click_continue method."""
 
-    def test_click_continue_calls_click(self):
-        """click_continue should call click with CONTINUE_BUTTON locator."""
-        mock_driver = Mock()
-        page = CheckoutStepOnePage(mock_driver)
+    def test_click_continue_clicks_and_waits_for_success_or_error(self):
+        """click_continue should click CONTINUE_BUTTON and wait for success or error."""
+        page = CheckoutStepOnePage(Mock())
+        page.wait = Mock()
 
-        with patch.object(page, "click") as mock_click:
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.checkout_step_one_page.EC") as mock_ec,
+        ):
             page.click_continue()
 
             mock_click.assert_called_once_with(CheckoutStepOnePage.CONTINUE_BUTTON)
+            mock_ec.visibility_of_element_located.assert_has_calls(
+                [
+                    call(CheckoutStepTwoPage.PAGE_LOADED),
+                    call(CheckoutStepOnePage.ERROR_MESSAGE),
+                ]
+            )
+            page.wait.until.assert_called_once_with(mock_ec.any_of.return_value)
 
 
 class TestClickCancel:
     """Test click_cancel method."""
 
-    def test_click_cancel_calls_click(self):
-        """click_cancel should call click with CANCEL_BUTTON locator."""
-        mock_driver = Mock()
-        page = CheckoutStepOnePage(mock_driver)
+    def test_click_cancel_clicks_and_returns_loaded_cart_page(self):
+        """click_cancel should click CANCEL_BUTTON and return loaded CartPage."""
+        page = CheckoutStepOnePage(Mock())
 
-        with patch.object(page, "click") as mock_click:
-            page.click_cancel()
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.cart_page.CartPage") as mock_next,
+        ):
+            result = page.click_cancel()
 
             mock_click.assert_called_once_with(CheckoutStepOnePage.CANCEL_BUTTON)
+            mock_next.assert_called_once_with(page.driver)
+            assert result is mock_next.return_value.wait_until_loaded.return_value
 
 
 class TestIsErrorDisplayed:

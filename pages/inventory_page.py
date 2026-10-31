@@ -4,9 +4,11 @@ Represents the products/inventory page after successful login.
 """
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 
 from pages.base_page import BasePage
+from pages.cart_page import CartPage
 
 
 class InventoryPage(BasePage):
@@ -21,8 +23,6 @@ class InventoryPage(BasePage):
         # 1. Click cart icon to go to cart page
         self.click_shopping_cart()
         # 2. Remove product using CartPage
-        from pages.cart_page import CartPage
-
         cart_page = CartPage(self.driver)
         cart_page.remove_product(product_name)
         # 3. Click 'Continue Shopping' to return to inventory
@@ -89,8 +89,13 @@ class InventoryPage(BasePage):
         return 0
 
     def click_shopping_cart(self) -> None:
-        """Click shopping cart icon to view cart."""
+        """Click shopping cart icon and wait for cart page to render.
+
+        Sauce Demo is a SPA: the URL changes before the new page renders, so
+        returning right after the click lets callers act on the old page.
+        """
         self.click(self.SHOPPING_CART_LINK)
+        self.wait.until(EC.visibility_of_element_located(CartPage.CART_CONTAINER))
 
     def logout(self) -> None:
         """Log out from application."""

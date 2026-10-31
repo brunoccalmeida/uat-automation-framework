@@ -3,6 +3,13 @@
 ## ⚠️ REGRA DE OURO: TDD É OBRIGATÓRIO
 **NUNCA implemente código de produção sem antes ter um teste falhando.**
 
+## ⚠️ REGRA: MELHORES PRÁTICAS SEMPRE
+**Toda decisão (código, testes, CI, ambiente, processo) segue as melhores práticas reconhecidas da indústria.**
+
+- Havendo mais de um caminho, recomende o indicado pelas melhores práticas e cite o princípio que o sustenta (ex.: dev/prod parity, YAGNI, fail fast).
+- Não escolha atalhos por conveniência (ex.: contornar um problema de ambiente com código novo).
+- Desvios só com justificativa explícita, registrada no commit ou na documentação.
+
 ---
 
 ## 🔄 TDD/BDD Workflow (FLUXOGRAMA OBRIGATÓRIO)

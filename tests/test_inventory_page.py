@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 
 from selenium.webdriver.common.by import By
 
+from pages.cart_page import CartPage
 from pages.inventory_page import InventoryPage
 
 
@@ -136,11 +137,33 @@ class TestClickShoppingCart:
         """click_shopping_cart should call click with correct locator."""
         mock_driver = Mock()
         page = InventoryPage(mock_driver)
+        page.wait = Mock()
 
         with patch.object(page, "click") as mock_click:
             page.click_shopping_cart()
 
             mock_click.assert_called_once_with(InventoryPage.SHOPPING_CART_LINK)
+
+    def test_click_shopping_cart_waits_for_cart_page_after_click(self):
+        """click_shopping_cart should wait for cart container after clicking."""
+        mock_driver = Mock()
+        page = InventoryPage(mock_driver)
+        page.wait = Mock()
+        calls = Mock()
+        calls.attach_mock(page.wait.until, "wait_until")
+
+        with (
+            patch.object(page, "click") as mock_click,
+            patch(
+                "pages.inventory_page.EC.visibility_of_element_located"
+            ) as mock_visibility,
+        ):
+            calls.attach_mock(mock_click, "click")
+            page.click_shopping_cart()
+
+            mock_visibility.assert_called_once_with(CartPage.CART_CONTAINER)
+            page.wait.until.assert_called_once_with(mock_visibility.return_value)
+            assert [c[0] for c in calls.mock_calls] == ["click", "wait_until"]
 
 
 class TestLogout:
@@ -246,7 +269,7 @@ class TestRemoveProductFromCart:
         mock_cart_page = Mock()
 
         with patch.object(page, "click_shopping_cart") as mock_click_cart:
-            with patch("pages.cart_page.CartPage", return_value=mock_cart_page):
+            with patch("pages.inventory_page.CartPage", return_value=mock_cart_page):
                 page.remove_product_from_cart("Sauce Labs Backpack")
 
                 mock_click_cart.assert_called_once()

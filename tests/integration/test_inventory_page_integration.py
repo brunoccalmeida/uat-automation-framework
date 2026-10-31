@@ -5,6 +5,7 @@ Tests InventoryPage interactions with actual DOM elements.
 
 import pytest
 
+from pages.cart_page import CartPage
 from pages.inventory_page import InventoryPage
 from pages.login_page import LoginPage
 
@@ -86,6 +87,23 @@ class TestInventoryPageInteractions:
         page.click_shopping_cart()
 
         assert "/cart.html" in authenticated_driver.current_url
+
+    def test_click_shopping_cart_returns_after_cart_page_renders(
+        self, authenticated_driver
+    ):
+        """click_shopping_cart should return only after cart page is rendered.
+
+        Sauce Demo is a SPA: the URL changes before the new page renders.
+        Reading the DOM right after the click (no wait) must see the cart items.
+        """
+        page = InventoryPage(authenticated_driver)
+        page.add_product_to_cart("Sauce Labs Backpack")
+        page.add_product_to_cart("Sauce Labs Bike Light")
+
+        page.click_shopping_cart()
+
+        cart_items = authenticated_driver.find_elements(*CartPage.CART_ITEMS)
+        assert len(cart_items) == 2
 
     def test_logout_returns_to_login_page(self, authenticated_driver):
         """Logout should return user to login page."""

@@ -5,7 +5,7 @@ Uses mocks to isolate the logic from Selenium WebDriver.
 """
 
 import pytest
-from unittest.mock import Mock, MagicMock, call
+from unittest.mock import Mock, MagicMock, call, patch
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
@@ -333,3 +333,95 @@ class TestIsElementPresentMethod:
 
             # Verify WebDriverWait was created with custom timeout
             mock_wait_class.assert_called_with(mock_driver, custom_timeout)
+
+
+class _LoadablePage(BasePage):
+    """Minimal page with a PAGE_LOADED marker for testing."""
+
+    PAGE_LOADED = (By.ID, "page-marker")
+
+
+class TestWaitUntilLoaded:
+    """Test wait_until_loaded method."""
+
+    def test_wait_until_loaded_waits_for_page_marker_and_returns_self(self):
+        """wait_until_loaded should wait for PAGE_LOADED and return the page."""
+        page = _LoadablePage(Mock())
+        page.wait = Mock()
+
+        with patch("pages.base_page.EC") as mock_ec:
+            result = page.wait_until_loaded()
+
+            mock_ec.visibility_of_element_located.assert_called_once_with(
+                _LoadablePage.PAGE_LOADED
+            )
+            page.wait.until.assert_called_once_with(
+                mock_ec.visibility_of_element_located.return_value,
+                message="_LoadablePage did not render",
+            )
+            assert result is page
+
+
+class _FormPage(_LoadablePage):
+    """Minimal form page with error locators for testing."""
+
+    ERROR_MESSAGE = (By.ID, "form-error")
+    ERROR_CLOSE_BUTTON = (By.ID, "form-error-close")
+    SUBMIT_BUTTON = (By.ID, "submit")
+
+
+class TestSubmitAndWaitForOutcome:
+    """Test submit_and_wait_for_outcome method."""
+
+    def test_submit_without_leftover_error_clicks_and_waits_for_either_outcome(
+        self,
+    ):
+        """Without an error on screen, it should submit and wait for an outcome."""
+        mock_driver = Mock()
+        mock_driver.find_elements.return_value = []
+        page = _FormPage(mock_driver)
+        page.wait = Mock()
+
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.base_page.EC") as mock_ec,
+        ):
+            page.submit_and_wait_for_outcome(_FormPage.SUBMIT_BUTTON, _LoadablePage)
+
+            mock_click.assert_called_once_with(_FormPage.SUBMIT_BUTTON)
+            mock_ec.visibility_of_element_located.assert_has_calls(
+                [call(_LoadablePage.PAGE_LOADED), call(_FormPage.ERROR_MESSAGE)]
+            )
+            page.wait.until.assert_called_once_with(
+                mock_ec.any_of.return_value,
+                message="Neither _LoadablePage nor error message rendered",
+            )
+
+    def test_submit_dismisses_leftover_error_before_clicking(self):
+        """A leftover error must be dismissed, and gone, before submitting."""
+        mock_driver = Mock()
+        mock_driver.find_elements.return_value = [Mock()]
+        page = _FormPage(mock_driver)
+        page.wait = Mock()
+        calls = Mock()
+        calls.attach_mock(page.wait.until, "wait_until")
+
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.base_page.EC") as mock_ec,
+        ):
+            calls.attach_mock(mock_click, "click")
+            page.submit_and_wait_for_outcome(_FormPage.SUBMIT_BUTTON, _LoadablePage)
+
+            mock_ec.invisibility_of_element_located.assert_called_once_with(
+                _FormPage.ERROR_MESSAGE
+            )
+            assert calls.mock_calls == [
+                call.click(_FormPage.ERROR_CLOSE_BUTTON),
+                call.wait_until(mock_ec.invisibility_of_element_located.return_value),
+                call.click(_FormPage.SUBMIT_BUTTON),
+                call.wait_until(
+                    mock_ec.any_of.return_value,
+                    message="Neither _LoadablePage nor error message rendered",
+                ),
+            ]

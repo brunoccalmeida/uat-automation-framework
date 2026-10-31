@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 from selenium.webdriver.common.by import By
 
 from pages.login_page import LoginPage
+from pages.inventory_page import InventoryPage
 
 
 class TestLoginPageLocators:
@@ -65,15 +66,14 @@ class TestEnterPassword:
 class TestClickLogin:
     """Test click_login method."""
 
-    def test_click_login_calls_click_with_login_button_locator(self):
-        """click_login should call click() with LOGIN_BUTTON locator."""
-        mock_driver = Mock()
-        page = LoginPage(mock_driver)
+    def test_click_login_submits_and_waits_for_outcome(self):
+        """click_login should submit LOGIN_BUTTON and wait for InventoryPage or error."""
+        page = LoginPage(Mock())
 
-        with patch.object(page, "click") as mock_click:
+        with patch.object(page, "submit_and_wait_for_outcome") as mock_submit:
             page.click_login()
 
-            mock_click.assert_called_once_with(LoginPage.LOGIN_BUTTON)
+            mock_submit.assert_called_once_with(LoginPage.LOGIN_BUTTON, InventoryPage)
 
 
 class TestLoginMethod:

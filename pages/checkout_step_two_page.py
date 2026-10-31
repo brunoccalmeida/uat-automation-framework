@@ -5,6 +5,7 @@ Represents the checkout overview page with order summary.
 
 from selenium.webdriver.common.by import By
 
+from pages import checkout_complete_page, inventory_page
 from pages.base_page import BasePage
 
 
@@ -13,6 +14,7 @@ class CheckoutStepTwoPage(BasePage):
 
     # Locators
     CHECKOUT_SUMMARY_CONTAINER = (By.ID, "checkout_summary_container")
+    PAGE_LOADED = CHECKOUT_SUMMARY_CONTAINER
     CART_ITEMS = (By.CLASS_NAME, "cart_item")
     ITEM_NAME = (By.CLASS_NAME, "inventory_item_name")
     SUBTOTAL_LABEL = (By.CLASS_NAME, "summary_subtotal_label")
@@ -92,10 +94,22 @@ class CheckoutStepTwoPage(BasePage):
         # Extract number from "Total: $32.39"
         return float(total_text.split("$")[1])
 
-    def click_finish(self) -> None:
-        """Click Finish button to complete order."""
-        self.click(self.FINISH_BUTTON)
+    def click_finish(self) -> "checkout_complete_page.CheckoutCompletePage":
+        """Click Finish button to complete order.
 
-    def click_cancel(self) -> None:
-        """Click Cancel button to return to products page."""
+        Returns:
+            CheckoutCompletePage, once rendered.
+        """
+        self.click(self.FINISH_BUTTON)
+        return checkout_complete_page.CheckoutCompletePage(
+            self.driver
+        ).wait_until_loaded()
+
+    def click_cancel(self) -> "inventory_page.InventoryPage":
+        """Click Cancel button to return to products page.
+
+        Returns:
+            InventoryPage, once rendered.
+        """
         self.click(self.CANCEL_BUTTON)
+        return inventory_page.InventoryPage(self.driver).wait_until_loaded()

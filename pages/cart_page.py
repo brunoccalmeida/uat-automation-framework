@@ -5,6 +5,7 @@ Represents the shopping cart page.
 
 from selenium.webdriver.common.by import By
 
+from pages import checkout_step_one_page, inventory_page
 from pages.base_page import BasePage
 
 
@@ -13,6 +14,7 @@ class CartPage(BasePage):
 
     # Locators
     CART_CONTAINER = (By.ID, "cart_contents_container")
+    PAGE_LOADED = CART_CONTAINER
     CART_ITEMS = (By.CLASS_NAME, "cart_item")
     CART_ITEM_NAME = (By.CLASS_NAME, "inventory_item_name")
     REMOVE_BUTTON_PREFIX = "remove-"  # Will be combined with product name
@@ -65,10 +67,22 @@ class CartPage(BasePage):
         remove_button = (By.ID, button_id)
         self.click(remove_button)
 
-    def click_continue_shopping(self) -> None:
-        """Click Continue Shopping button."""
-        self.click(self.CONTINUE_SHOPPING_BUTTON)
+    def click_continue_shopping(self) -> "inventory_page.InventoryPage":
+        """Click Continue Shopping button.
 
-    def click_checkout(self) -> None:
-        """Click Checkout button to proceed to checkout."""
+        Returns:
+            InventoryPage, once rendered.
+        """
+        self.click(self.CONTINUE_SHOPPING_BUTTON)
+        return inventory_page.InventoryPage(self.driver).wait_until_loaded()
+
+    def click_checkout(self) -> "checkout_step_one_page.CheckoutStepOnePage":
+        """Click Checkout button to proceed to checkout.
+
+        Returns:
+            CheckoutStepOnePage, once rendered.
+        """
         self.click(self.CHECKOUT_BUTTON)
+        return checkout_step_one_page.CheckoutStepOnePage(
+            self.driver
+        ).wait_until_loaded()

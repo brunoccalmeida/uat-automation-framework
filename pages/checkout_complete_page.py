@@ -5,6 +5,7 @@ Represents the order confirmation page after successful checkout.
 
 from selenium.webdriver.common.by import By
 
+from pages import inventory_page
 from pages.base_page import BasePage
 
 
@@ -13,6 +14,7 @@ class CheckoutCompletePage(BasePage):
 
     # Locators
     CHECKOUT_COMPLETE_CONTAINER = (By.ID, "checkout_complete_container")
+    PAGE_LOADED = CHECKOUT_COMPLETE_CONTAINER
     COMPLETE_HEADER = (By.CLASS_NAME, "complete-header")
     COMPLETE_TEXT = (By.CLASS_NAME, "complete-text")
     BACK_HOME_BUTTON = (By.ID, "back-to-products")
@@ -42,9 +44,14 @@ class CheckoutCompletePage(BasePage):
         """
         return self.get_text(self.COMPLETE_TEXT)
 
-    def click_back_home(self) -> None:
-        """Click Back Home button to return to products page."""
+    def click_back_home(self) -> "inventory_page.InventoryPage":
+        """Click Back Home button to return to products page.
+
+        Returns:
+            InventoryPage, once rendered.
+        """
         self.click(self.BACK_HOME_BUTTON)
+        return inventory_page.InventoryPage(self.driver).wait_until_loaded()
 
     def is_pony_express_displayed(self) -> bool:
         """Check if Pony Express delivery image is displayed.

@@ -100,10 +100,11 @@ class TestInventoryPageInteractions:
         page.add_product_to_cart("Sauce Labs Backpack")
         page.add_product_to_cart("Sauce Labs Bike Light")
 
-        page.click_shopping_cart()
+        next_page = page.click_shopping_cart()
 
         cart_items = authenticated_driver.find_elements(*CartPage.CART_ITEMS)
         assert len(cart_items) == 2
+        assert isinstance(next_page, CartPage)
 
     def test_logout_returns_to_login_page(self, authenticated_driver):
         """Logout should return user to login page."""

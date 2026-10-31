@@ -5,6 +5,7 @@ Represents the login functionality on Sauce Demo e-commerce application.
 
 from selenium.webdriver.common.by import By
 
+from pages import inventory_page
 from pages.base_page import BasePage
 
 
@@ -16,6 +17,8 @@ class LoginPage(BasePage):
     PASSWORD_INPUT = (By.ID, "password")
     LOGIN_BUTTON = (By.ID, "login-button")
     ERROR_MESSAGE = (By.CSS_SELECTOR, "[data-test='error']")
+    ERROR_CLOSE_BUTTON = (By.CSS_SELECTOR, "[data-test='error-button']")
+    PAGE_LOADED = LOGIN_BUTTON
 
     def enter_username(self, username: str) -> None:
         """Enter username into login form.
@@ -34,8 +37,14 @@ class LoginPage(BasePage):
         self.type(self.PASSWORD_INPUT, password)
 
     def click_login(self) -> None:
-        """Click the login button."""
-        self.click(self.LOGIN_BUTTON)
+        """Click the login button and wait for the outcome.
+
+        The outcome depends on the credentials: inventory page on success,
+        error message on failure.
+        """
+        self.submit_and_wait_for_outcome(
+            self.LOGIN_BUTTON, inventory_page.InventoryPage
+        )
 
     def login(self, username: str, password: str) -> None:
         """Perform complete login action.

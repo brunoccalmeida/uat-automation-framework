@@ -49,7 +49,8 @@ class LoginPage(BasePage):
                     inventory_page.InventoryPage.PAGE_LOADED
                 ),
                 EC.visibility_of_element_located(self.ERROR_MESSAGE),
-            )
+            ),
+            message="Neither InventoryPage nor login error rendered",
         )
 
     def login(self, username: str, password: str) -> None:

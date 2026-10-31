@@ -126,7 +126,10 @@ class TestClickContinue:
                     call(CheckoutStepOnePage.ERROR_MESSAGE),
                 ]
             )
-            page.wait.until.assert_called_once_with(mock_ec.any_of.return_value)
+            page.wait.until.assert_called_once_with(
+                mock_ec.any_of.return_value,
+                message="Neither CheckoutStepTwoPage nor form error rendered",
+            )
 
 
 class TestClickCancel:

@@ -81,7 +81,10 @@ class TestClickLogin:
             mock_ec.visibility_of_element_located.assert_has_calls(
                 [call(InventoryPage.PAGE_LOADED), call(LoginPage.ERROR_MESSAGE)]
             )
-            page.wait.until.assert_called_once_with(mock_ec.any_of.return_value)
+            page.wait.until.assert_called_once_with(
+                mock_ec.any_of.return_value,
+                message="Neither InventoryPage nor login error rendered",
+            )
 
 
 class TestLoginMethod:

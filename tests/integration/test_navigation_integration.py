@@ -3,6 +3,11 @@
 Sauce Demo is a SPA: the URL changes before the new page renders. Every
 navigation method must return only after the destination is rendered, so
 these tests read the DOM right after the call, without any wait.
+
+These tests are probabilistic: without the fix they fail only when the race
+is lost (often locally, more often on slower CI runners). The deterministic
+guard is the unit tests, which assert that each navigation method waits for
+its destination (e.g. tests/test_cart_page.py). Keep both layers.
 """
 
 from pages.cart_page import CartPage

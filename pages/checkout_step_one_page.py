@@ -68,7 +68,8 @@ class CheckoutStepOnePage(BasePage):
                     checkout_step_two_page.CheckoutStepTwoPage.PAGE_LOADED
                 ),
                 EC.visibility_of_element_located(self.ERROR_MESSAGE),
-            )
+            ),
+            message="Neither CheckoutStepTwoPage nor form error rendered",
         )
 
     def click_cancel(self) -> "cart_page.CartPage":

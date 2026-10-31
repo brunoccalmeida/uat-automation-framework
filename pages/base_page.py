@@ -44,7 +44,10 @@ class BasePage:
         Raises:
             TimeoutException: If page does not render within timeout.
         """
-        self.wait.until(EC.visibility_of_element_located(self.PAGE_LOADED))
+        self.wait.until(
+            EC.visibility_of_element_located(self.PAGE_LOADED),
+            message=f"{type(self).__name__} did not render",
+        )
         return self
 
     def is_loaded(self) -> bool:

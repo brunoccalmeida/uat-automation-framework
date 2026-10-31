@@ -356,7 +356,8 @@ class TestWaitUntilLoaded:
                 _LoadablePage.PAGE_LOADED
             )
             page.wait.until.assert_called_once_with(
-                mock_ec.visibility_of_element_located.return_value
+                mock_ec.visibility_of_element_located.return_value,
+                message="_LoadablePage did not render",
             )
             assert result is page
 

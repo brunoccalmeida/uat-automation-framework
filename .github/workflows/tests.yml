@@ -49,19 +49,16 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
-      - name: Install Chrome
-        if: matrix.browser == 'chrome'
+      # Browsers and drivers come preinstalled and version-matched on the
+      # GitHub runner image. Do not apt-install them: on Ubuntu 24.04
+      # "apt-get install firefox" replaces the working Firefox with the snap
+      # build, which geckodriver cannot drive.
+      - name: Show browser versions
         run: |
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-
-      - name: Install Firefox
-        if: matrix.browser == 'firefox'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y firefox
+          google-chrome --version
+          chromedriver --version
+          firefox --version
+          geckodriver --version | head -1
 
       - name: Run BDD smoke tests (${{ matrix.browser }})
         run: |
@@ -104,12 +101,11 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
-      - name: Install Chrome
+      # Chrome and ChromeDriver come preinstalled on the runner image
+      - name: Show browser versions
         run: |
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          google-chrome --version
+          chromedriver --version
 
       - name: Run unit tests with coverage (parallel)
         run: |

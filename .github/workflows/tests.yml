@@ -106,9 +106,17 @@ jobs:
           google-chrome --version
           chromedriver --version
 
+      # One layer per step. Later layers still run when an earlier one fails
+      # (!cancelled) so each run reports every layer, but any failure fails
+      # the job.
       - name: Run unit tests with coverage (parallel)
         run: |
-          poetry run pytest tests/ -n auto -v --tb=short --cov=core --cov=pages --cov-report=xml --cov-report=term
+          poetry run pytest tests/ --ignore=tests/integration -n auto -v --tb=short --cov=core --cov=pages --cov-report=term
+
+      - name: Run integration tests with coverage (parallel)
+        if: ${{ !cancelled() }}
+        run: |
+          poetry run pytest tests/integration/ -n auto -v --tb=short --cov=core --cov=pages --cov-append --cov-report=xml --cov-report=term
         env:
           HEADLESS: true
 
@@ -120,19 +128,12 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
 
-      - name: Run integration tests (parallel)
-        run: |
-          poetry run pytest tests/integration/ -n auto -v --tb=short
-        env:
-          HEADLESS: true
-
       - name: Run E2E tests (all scenarios with Allure)
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           poetry run behave --tags=@e2e -f allure_behave.formatter:AllureFormatter -o reports/allure-results --no-capture
         env:
           HEADLESS: true
-        continue-on-error: true
 
       - name: Upload test results
         if: always()

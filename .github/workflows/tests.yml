@@ -7,10 +7,9 @@ on:
     branches: [ master, main ]
   workflow_dispatch:
 
+# Least privilege: read-only by default; jobs that publish ask for more
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 jobs:
   smoke-matrix:
@@ -153,44 +152,69 @@ jobs:
           path: reports/allure-results
           retention-days: 30
 
-  publish-report:
+  # Builds on every run (so PRs validate it) but only master deploys it.
+  # Runs even when tests failed: that is when the report matters most.
+  build-report:
     runs-on: ubuntu-latest
     needs: test
-    if: always()
+    if: ${{ !cancelled() }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Download Allure results
         uses: actions/download-artifact@v4
         with:
           name: allure-results-py3.14
           path: allure-results
 
-      - name: Get Allure history
+      - name: Get previous report (for trend history)
         uses: actions/checkout@v4
-        if: always()
-        continue-on-error: true
+        continue-on-error: true  # gh-pages may not exist yet
         with:
           ref: gh-pages
           path: gh-pages
 
+      # Allure CLI runs on the runner's Java; no Docker image to pull
       - name: Build Allure report
-        uses: simple-elf/allure-report-action@master
-        if: always()
+        run: |
+          if [ -d gh-pages/history ]; then
+            cp -r gh-pages/history allure-results/history
+          fi
+          npx --yes allure-commandline@2.46.1 generate allure-results --clean -o site
+          test -f site/index.html
+
+      - name: Upload Allure report
+        uses: actions/upload-artifact@v4
         with:
-          allure_results: allure-results
-          allure_history: allure-history
-          keep_reports: 20
+          name: allure-report
+          path: site
+          retention-days: 30
+
+  # Only master pushes publish the public report; PRs must not overwrite it.
+  # Steps have no "if: always()": a failed build must never deploy an empty
+  # site over the last good report.
+  deploy-report:
+    runs-on: ubuntu-latest
+    needs: build-report
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    permissions:
+      contents: write  # push to gh-pages
+    concurrency:
+      group: deploy-report
+      cancel-in-progress: false
+
+    steps:
+      - name: Download Allure report
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-report
+          path: site
 
       - name: Deploy to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453  # v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: allure-history
+          publish_dir: site
 
   lint:
     runs-on: ubuntu-latest

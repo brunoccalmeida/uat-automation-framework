@@ -5,7 +5,7 @@ that methods call the correct BasePage functionality with proper parameters.
 Follows Testing Pyramid best practices.
 """
 
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 from selenium.webdriver.common.by import By
 
@@ -66,25 +66,14 @@ class TestEnterPassword:
 class TestClickLogin:
     """Test click_login method."""
 
-    def test_click_login_clicks_and_waits_for_success_or_error(self):
-        """click_login should click LOGIN_BUTTON and wait for success or error."""
+    def test_click_login_submits_and_waits_for_outcome(self):
+        """click_login should submit LOGIN_BUTTON and wait for InventoryPage or error."""
         page = LoginPage(Mock())
-        page.wait = Mock()
 
-        with (
-            patch.object(page, "click") as mock_click,
-            patch("pages.login_page.EC") as mock_ec,
-        ):
+        with patch.object(page, "submit_and_wait_for_outcome") as mock_submit:
             page.click_login()
 
-            mock_click.assert_called_once_with(LoginPage.LOGIN_BUTTON)
-            mock_ec.visibility_of_element_located.assert_has_calls(
-                [call(InventoryPage.PAGE_LOADED), call(LoginPage.ERROR_MESSAGE)]
-            )
-            page.wait.until.assert_called_once_with(
-                mock_ec.any_of.return_value,
-                message="Neither InventoryPage nor login error rendered",
-            )
+            mock_submit.assert_called_once_with(LoginPage.LOGIN_BUTTON, InventoryPage)
 
 
 class TestLoginMethod:

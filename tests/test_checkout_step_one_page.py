@@ -3,7 +3,7 @@
 Tests the CheckoutStepOnePage Page Object in isolation using mocks.
 """
 
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 from selenium.webdriver.common.by import By
 
@@ -108,27 +108,15 @@ class TestEnterZipCode:
 class TestClickContinue:
     """Test click_continue method."""
 
-    def test_click_continue_clicks_and_waits_for_success_or_error(self):
-        """click_continue should click CONTINUE_BUTTON and wait for success or error."""
+    def test_click_continue_submits_and_waits_for_outcome(self):
+        """click_continue should submit CONTINUE_BUTTON and wait for CheckoutStepTwoPage or error."""
         page = CheckoutStepOnePage(Mock())
-        page.wait = Mock()
 
-        with (
-            patch.object(page, "click") as mock_click,
-            patch("pages.checkout_step_one_page.EC") as mock_ec,
-        ):
+        with patch.object(page, "submit_and_wait_for_outcome") as mock_submit:
             page.click_continue()
 
-            mock_click.assert_called_once_with(CheckoutStepOnePage.CONTINUE_BUTTON)
-            mock_ec.visibility_of_element_located.assert_has_calls(
-                [
-                    call(CheckoutStepTwoPage.PAGE_LOADED),
-                    call(CheckoutStepOnePage.ERROR_MESSAGE),
-                ]
-            )
-            page.wait.until.assert_called_once_with(
-                mock_ec.any_of.return_value,
-                message="Neither CheckoutStepTwoPage nor form error rendered",
+            mock_submit.assert_called_once_with(
+                CheckoutStepOnePage.CONTINUE_BUTTON, CheckoutStepTwoPage
             )
 
 
@@ -143,10 +131,18 @@ class TestClickCancel:
             patch.object(page, "click") as mock_click,
             patch("pages.cart_page.CartPage") as mock_next,
         ):
+            calls = Mock()
+            calls.attach_mock(mock_click, "click")
+            calls.attach_mock(mock_next, "destination")
             result = page.click_cancel()
 
             mock_click.assert_called_once_with(CheckoutStepOnePage.CANCEL_BUTTON)
             mock_next.assert_called_once_with(page.driver)
+            assert [c[0] for c in calls.mock_calls] == [
+                "click",
+                "destination",
+                "destination().wait_until_loaded",
+            ]
             assert result is mock_next.return_value.wait_until_loaded.return_value
 
 

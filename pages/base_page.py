@@ -20,9 +20,14 @@ class BasePage:
     the page has rendered. Sauce Demo is a SPA, so the URL changes before the
     new page renders; navigation methods must wait for the destination's
     PAGE_LOADED before returning.
+
+    Form pages whose submit may fail validation also define ERROR_MESSAGE and
+    ERROR_CLOSE_BUTTON, and submit through submit_and_wait_for_outcome.
     """
 
     PAGE_LOADED: tuple[str, str]
+    ERROR_MESSAGE: tuple[str, str]
+    ERROR_CLOSE_BUTTON: tuple[str, str]
 
     def __init__(self, driver: WebDriver, timeout: int = 10):
         """Initialize base page.
@@ -50,13 +55,33 @@ class BasePage:
         )
         return self
 
-    def is_loaded(self) -> bool:
-        """Check, without waiting, if this page is currently rendered.
+    def submit_and_wait_for_outcome(
+        self, submit_button: tuple[str, str], success_page: type["BasePage"]
+    ) -> None:
+        """Submit a form and wait for its outcome: success page or error.
 
-        Returns:
-            True if PAGE_LOADED element is in the DOM, False otherwise.
+        Sauce Demo keeps the same error banner on screen when a resubmit fails
+        again, so a leftover banner would look like the new outcome. It is
+        dismissed first, making any error after the click belong to this submit.
+
+        Args:
+            submit_button: Locator of the button that submits the form.
+            success_page: Page object class shown when the submit succeeds.
+
+        Raises:
+            TimeoutException: If neither outcome renders within timeout.
         """
-        return bool(self.driver.find_elements(*self.PAGE_LOADED))
+        if self.driver.find_elements(*self.ERROR_MESSAGE):
+            self.click(self.ERROR_CLOSE_BUTTON)
+            self.wait.until(EC.invisibility_of_element_located(self.ERROR_MESSAGE))
+        self.click(submit_button)
+        self.wait.until(
+            EC.any_of(
+                EC.visibility_of_element_located(success_page.PAGE_LOADED),
+                EC.visibility_of_element_located(self.ERROR_MESSAGE),
+            ),
+            message=f"Neither {success_page.__name__} nor error message rendered",
+        )
 
     def find_element(self, locator: tuple[str, str]):
         """Find element with explicit wait.

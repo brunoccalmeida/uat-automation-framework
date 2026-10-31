@@ -168,10 +168,18 @@ class TestClickFinish:
             patch.object(page, "click") as mock_click,
             patch("pages.checkout_complete_page.CheckoutCompletePage") as mock_next,
         ):
+            calls = Mock()
+            calls.attach_mock(mock_click, "click")
+            calls.attach_mock(mock_next, "destination")
             result = page.click_finish()
 
             mock_click.assert_called_once_with(CheckoutStepTwoPage.FINISH_BUTTON)
             mock_next.assert_called_once_with(page.driver)
+            assert [c[0] for c in calls.mock_calls] == [
+                "click",
+                "destination",
+                "destination().wait_until_loaded",
+            ]
             assert result is mock_next.return_value.wait_until_loaded.return_value
 
 
@@ -186,8 +194,16 @@ class TestClickCancel:
             patch.object(page, "click") as mock_click,
             patch("pages.inventory_page.InventoryPage") as mock_next,
         ):
+            calls = Mock()
+            calls.attach_mock(mock_click, "click")
+            calls.attach_mock(mock_next, "destination")
             result = page.click_cancel()
 
             mock_click.assert_called_once_with(CheckoutStepTwoPage.CANCEL_BUTTON)
             mock_next.assert_called_once_with(page.driver)
+            assert [c[0] for c in calls.mock_calls] == [
+                "click",
+                "destination",
+                "destination().wait_until_loaded",
+            ]
             assert result is mock_next.return_value.wait_until_loaded.return_value

@@ -45,14 +45,16 @@ def step_click_continue(context):
     page.click_continue()
 
 
-@when("I click cancel")
-def step_click_cancel(context):
-    """Click cancel button on the current checkout step."""
-    step_two_page = CheckoutStepTwoPage(context.driver)
-    if step_two_page.is_loaded():
-        step_two_page.click_cancel()
-    else:
-        CheckoutStepOnePage(context.driver).click_cancel()
+@when("I click cancel on the checkout information page")
+def step_click_cancel_on_information(context):
+    """Click cancel button on checkout step one."""
+    CheckoutStepOnePage(context.driver).click_cancel()
+
+
+@when("I click cancel on the checkout overview page")
+def step_click_cancel_on_overview(context):
+    """Click cancel button on checkout step two."""
+    CheckoutStepTwoPage(context.driver).click_cancel()
 
 
 @when("I click finish")

@@ -53,7 +53,7 @@ Feature: Checkout
 
   Scenario: Cancel checkout and return to cart
     When I click the checkout button
-    And I click cancel
+    And I click cancel on the checkout information page
     Then I should be on the cart page
 
   Scenario: Return to products from confirmation page

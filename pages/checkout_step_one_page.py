@@ -4,7 +4,6 @@ Represents the first step of checkout where customer information is entered.
 """
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 
 from pages import cart_page, checkout_step_two_page
 from pages.base_page import BasePage
@@ -22,6 +21,7 @@ class CheckoutStepOnePage(BasePage):
     CONTINUE_BUTTON = (By.ID, "continue")
     CANCEL_BUTTON = (By.ID, "cancel")
     ERROR_MESSAGE = (By.CSS_SELECTOR, "[data-test='error']")
+    ERROR_CLOSE_BUTTON = (By.CSS_SELECTOR, "[data-test='error-button']")
 
     def is_on_checkout_form(self) -> bool:
         """Check if user is on checkout form page.
@@ -59,17 +59,10 @@ class CheckoutStepOnePage(BasePage):
         """Click Continue button and wait for the outcome.
 
         The outcome depends on the form: step two on valid info, error
-        message on missing info. Waits for whichever renders first.
+        message on missing info.
         """
-        self.click(self.CONTINUE_BUTTON)
-        self.wait.until(
-            EC.any_of(
-                EC.visibility_of_element_located(
-                    checkout_step_two_page.CheckoutStepTwoPage.PAGE_LOADED
-                ),
-                EC.visibility_of_element_located(self.ERROR_MESSAGE),
-            ),
-            message="Neither CheckoutStepTwoPage nor form error rendered",
+        self.submit_and_wait_for_outcome(
+            self.CONTINUE_BUTTON, checkout_step_two_page.CheckoutStepTwoPage
         )
 
     def click_cancel(self) -> "cart_page.CartPage":

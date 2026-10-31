@@ -53,7 +53,7 @@ Feature: Checkout - Negative and Edge Cases
       | Last Name  | User   |
       | Zip Code   | 11111  |
     And I click continue
-    And I click cancel
+    And I click cancel on the checkout overview page
     Then I should be on the products page
 
   Scenario: Only spaces in required fields

@@ -62,6 +62,18 @@ class TestLoginNavigation:
 
         assert driver.find_elements(*LoginPage.ERROR_MESSAGE)
 
+    def test_valid_login_after_failed_one_returns_after_inventory_renders(
+        self, driver, base_url
+    ):
+        """A leftover error banner must not count as the new login's outcome."""
+        driver.get(base_url)
+        login_page = LoginPage(driver)
+        login_page.login("invalid_user", "wrong_password")
+
+        login_page.login("standard_user", "secret_sauce")
+
+        assert driver.find_elements(*InventoryPage.INVENTORY_CONTAINER)
+
 
 class TestInventoryNavigation:
     """Test navigation methods on inventory page."""
@@ -123,6 +135,21 @@ class TestCheckoutStepOneNavigation:
         CheckoutStepOnePage(driver).click_continue()
 
         assert driver.find_elements(*CheckoutStepOnePage.ERROR_MESSAGE)
+
+    def test_continue_after_validation_error_returns_after_step_two_renders(
+        self, driver, base_url
+    ):
+        """A leftover error banner must not count as the new Continue's outcome."""
+        _go_to_step_one(driver, base_url)
+        step_one_page = CheckoutStepOnePage(driver)
+        step_one_page.click_continue()
+        step_one_page.enter_first_name("John")
+        step_one_page.enter_last_name("Doe")
+        step_one_page.enter_zip_code("12345")
+
+        step_one_page.click_continue()
+
+        assert driver.find_elements(*CheckoutStepTwoPage.CHECKOUT_SUMMARY_CONTAINER)
 
     def test_cancel_returns_loaded_cart_page(self, driver, base_url):
         """click_cancel should return CartPage after it renders."""

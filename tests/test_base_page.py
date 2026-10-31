@@ -362,22 +362,66 @@ class TestWaitUntilLoaded:
             assert result is page
 
 
-class TestIsLoaded:
-    """Test is_loaded method."""
+class _FormPage(_LoadablePage):
+    """Minimal form page with error locators for testing."""
 
-    def test_is_loaded_returns_true_when_marker_in_dom(self):
-        """is_loaded should return True when PAGE_LOADED element exists."""
-        mock_driver = Mock()
-        mock_driver.find_elements.return_value = [Mock()]
-        page = _LoadablePage(mock_driver)
+    ERROR_MESSAGE = (By.ID, "form-error")
+    ERROR_CLOSE_BUTTON = (By.ID, "form-error-close")
+    SUBMIT_BUTTON = (By.ID, "submit")
 
-        assert page.is_loaded() is True
-        mock_driver.find_elements.assert_called_once_with(*_LoadablePage.PAGE_LOADED)
 
-    def test_is_loaded_returns_false_when_marker_absent(self):
-        """is_loaded should return False, without waiting, when marker is absent."""
+class TestSubmitAndWaitForOutcome:
+    """Test submit_and_wait_for_outcome method."""
+
+    def test_submit_without_leftover_error_clicks_and_waits_for_either_outcome(
+        self,
+    ):
+        """Without an error on screen, it should submit and wait for an outcome."""
         mock_driver = Mock()
         mock_driver.find_elements.return_value = []
-        page = _LoadablePage(mock_driver)
+        page = _FormPage(mock_driver)
+        page.wait = Mock()
 
-        assert page.is_loaded() is False
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.base_page.EC") as mock_ec,
+        ):
+            page.submit_and_wait_for_outcome(_FormPage.SUBMIT_BUTTON, _LoadablePage)
+
+            mock_click.assert_called_once_with(_FormPage.SUBMIT_BUTTON)
+            mock_ec.visibility_of_element_located.assert_has_calls(
+                [call(_LoadablePage.PAGE_LOADED), call(_FormPage.ERROR_MESSAGE)]
+            )
+            page.wait.until.assert_called_once_with(
+                mock_ec.any_of.return_value,
+                message="Neither _LoadablePage nor error message rendered",
+            )
+
+    def test_submit_dismisses_leftover_error_before_clicking(self):
+        """A leftover error must be dismissed, and gone, before submitting."""
+        mock_driver = Mock()
+        mock_driver.find_elements.return_value = [Mock()]
+        page = _FormPage(mock_driver)
+        page.wait = Mock()
+        calls = Mock()
+        calls.attach_mock(page.wait.until, "wait_until")
+
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.base_page.EC") as mock_ec,
+        ):
+            calls.attach_mock(mock_click, "click")
+            page.submit_and_wait_for_outcome(_FormPage.SUBMIT_BUTTON, _LoadablePage)
+
+            mock_ec.invisibility_of_element_located.assert_called_once_with(
+                _FormPage.ERROR_MESSAGE
+            )
+            assert calls.mock_calls == [
+                call.click(_FormPage.ERROR_CLOSE_BUTTON),
+                call.wait_until(mock_ec.invisibility_of_element_located.return_value),
+                call.click(_FormPage.SUBMIT_BUTTON),
+                call.wait_until(
+                    mock_ec.any_of.return_value,
+                    message="Neither _LoadablePage nor error message rendered",
+                ),
+            ]

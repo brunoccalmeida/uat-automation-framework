@@ -13,12 +13,12 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 324 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
+| Testes | 322 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
 | Segurança | **Toda action fixada por SHA de commit** (inclusive `actions/*`), barrada por `tests/test_workflow_pinning.py` · Duas fontes: Dependabot (alerts + security updates) e `pip-audit --strict` no workflow `Security` (PRs, push no `master` e diário); versão travada no `poetry.lock` (grupo dev) |
-| Portão de lint | CI roda `pre-commit run --all-files`: os mesmos hooks do commit local (black, **ruff** (só regra `I`, ordem de imports, #28), flake8, pylint, pyright, validador de métricas…). O editor ordena com a mesma ferramenta: `charliermarsh.ruff` recomendada e `source.organizeImports.ruff` ao salvar (o `source.organizeImports` genérico chamava também o Pylance, de ordem diferente); `tests/test_lint_gate.py` cobra. Linters via Poetry (versão do `poetry.lock`), sem exclusões, sem `--exit-zero`/`continue-on-error` (`tests/test_lint_gate.py`). 0 avisos no repo. Config: `.flake8` (o flake8 não lê `pyproject.toml`), `[tool.pylint.*]` e `[tool.pyright]` no `pyproject.toml`. Supressões só com o porquê ao lado. Auxiliares de teste em `tests/helpers/` (fora do `name-tests-test`) |
+| Portão de lint | CI roda `pre-commit run --all-files`: os mesmos hooks do commit local (black, **ruff** (regras `E`, `W`, `F` do flake8, que ele substituiu no #73, e `I`, ordem de imports, #28), pylint, pyright, validador de métricas…). O editor ordena com a mesma ferramenta: `charliermarsh.ruff` recomendada e `source.organizeImports.ruff` ao salvar (o `source.organizeImports` genérico chamava também o Pylance, de ordem diferente); `tests/test_lint_gate.py` cobra. Linters via Poetry (versão do `poetry.lock`), sem exclusões, sem `--exit-zero`/`continue-on-error` (`tests/test_lint_gate.py`). 0 avisos no repo. Config toda no `pyproject.toml`: `[tool.ruff.lint]` (sem `ignore`: E203 é só preview no ruff e o E701 dele aceita o `class A: ...` do black; ambos com 88 colunas por padrão), `[tool.pylint.*]` e `[tool.pyright]`. Supressões só com o porquê ao lado. Auxiliares de teste em `tests/helpers/` (fora do `name-tests-test`) |
 | Encoding e fim de linha | Hook `check-text-encoding` (`scripts/check_text_encoding.py`, #26) barra texto fora de UTF-8 **ou com NUL** (NUL é UTF-8 válido: só decodificar aceitaria o `.gitignore` quebrado). `types: [text]`: o `identify` classifica nomes conhecidos pelo nome, então UTF-16 chega ao hook; extensão desconhecida em UTF-16 escapa (limitação documentada). `.gitattributes` `* text=auto`: índice sempre LF, disco no padrão da plataforma (CRLF no Windows); `eol=lf` rejeitado por forçar LF no disco. `tests/test_check_text_encoding.py` |
 | Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · ruff 0.17 · pyright 1.1.414 (grupo dev) · **Selenium 4.52** · actions atualizadas (checkout 7, codecov v7) · browsers/drivers pré-instalados no runner |
 | Regras do agente | Sempre carregadas: 106 linhas (#58: docs por seção, prática estabelecida por padrão, subagente simples com modelo menor), **4,1 mil tokens medidos no #54** no `/context` (estimativa ÷ 4 dava 2,45 mil; aqui são ~2,4 bytes/token). Escopo de caminho: `.claude/rules/` = `.github/instructions/` (Selenium, Python, workflows, Poetry), carga sob demanda confirmada no Claude Code; Copilot conferido pelo formato oficial + `chat.includeApplyingInstructions`. `tests/test_agent_rules.py` barra > 200 linhas, divergência entre as cópias e regressão da config de diagnósticos |
@@ -29,7 +29,9 @@
 
 ## Próxima missão recomendada
 
-**#73 — substituir o flake8 pelo ruff** (portão antes de refatorar; uma ferramenta a menos). Medido no #28: as regras do ruff equivalentes ao flake8 dão 0 achados. Remove `.flake8` e o hook `flake8`; `tests/test_lint_gate.py` (`LINTERS`) e as regras de Python (`.claude/rules/python.md` = `.github/instructions/`) citam o flake8 e mudam junto.
+**#29 — `BasePage.find_element` com `visibility_of`** (risco de teste instável; a regra de Selenium exige visibilidade para leitura). O portão de lint já está na forma final (#73), então a refatoração passa por ele uma vez só.
+
+Do #73 (flake8 → ruff): RED por comportamento, não por lista. Tirar `flake8` de `LINTERS` só reduz testes parametrizados e não falha nada; o RED veio de `TestRuffReplacesFlake8` (ruff seleciona E/W/F; flake8 fora do hook, das dependências e sem `.flake8`). A tradução 1:1 do `.flake8` (`ignore E203,E701`) foi **medida antes de copiada**: o próprio ruff avisa que o E203 "has no effect" (preview), e o E701 dele aceita os corpos `...` do black. As duas exceções seriam config morta, então não entraram. 0 achados com E/W/F/I. O validador de métricas pegou o total (395 → 393) mas não a linha "Lint gate" da tabela (24 → 22), corrigida à mão: é o #34 na prática. Avaliar as regras do ruff que se sobrepõem ao pylint ficou para issue própria (#78).
 
 Do #26: o arquivo era UTF-8 com só a cauda em UTF-16 sem BOM. O TDD estrito foi questionado pelo dono; consenso da indústria (meta-análises mistas sobre TDD como ritual; regressão-primeiro e "ver falhar" incontestes): aqui o rótulo certo é **teste de regressão + portão visto barrando pelo pre-commit**, não ciclos red-green. Hipótese minha (o `identify` trataria UTF-16 como binário e o hook nunca o veria) foi **refutada em parte por medição** antes de virar código. Mutação: sem a checagem de NUL, só o teste de NUL falha; com "sempre reclama", os 5 de "passa".
 
@@ -39,10 +41,10 @@ Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercad
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #73 substituir o flake8 pelo ruff (acima)
-2. #29 `find_element` com `visibility_of` (risco de flaky)
-3. #34 → #39 validador de métricas (já tem testes de caracterização, `tests/test_validate_readme_metrics.py`) + READMEs traduzidos
-4. #30 config/senha hardcoded · #31 page objects retornados
+1. #29 `find_element` com `visibility_of` (risco de flaky)
+2. #34 → #39 validador de métricas (já tem testes de caracterização, `tests/test_validate_readme_metrics.py`) + READMEs traduzidos
+3. #30 config/senha hardcoded · #31 page objects retornados
+4. #78 avaliar regras do ruff que se sobrepõem ao pylint (medido, separado)
 
 **Antes de trocar a versão do Python na matriz** (3.15 já saiu): resolva o #48 (`build-report` baixa `allure-results-py3.14` por nome fixo; a troca quebra o report, de forma visível). O ruleset já não depende da matriz (#36).
 

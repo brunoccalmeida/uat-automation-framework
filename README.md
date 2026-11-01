@@ -103,7 +103,7 @@ poetry run pre-commit install
 The hooks in `.pre-commit-config.yaml` are the lint gate: the CI `lint` job runs the same hooks (`pre-commit run --all-files`), with no excluded folders and no ignored failures (`tests/test_lint_gate.py`). Linters run through Poetry, so their versions come from `poetry.lock`.
 
 - ✅ **Black**: Code formatting (88 columns)
-- ✅ **Flake8**: Style guide enforcement (`.flake8`, black-compatible: 88 columns, `E203,E701` ignored; flake8 does not read `pyproject.toml`)
+- ✅ **Ruff**: Style and error rules (flake8's `E`, `W`, `F`) and import order (`I`), configured in `[tool.ruff.lint]` (`pyproject.toml`)
 - ✅ **Pylint**: Errors and code smells (`[tool.pylint.*]` in `pyproject.toml`; each disabled check has its reason next to it)
 - ✅ **Pyright**: Static type checking (`[tool.pyright]` in `pyproject.toml`; the editor runs the same checker)
 - ✅ **Security**: Detect private keys, merge conflicts
@@ -273,7 +273,7 @@ The project uses **GitHub Actions** for continuous integration:
 - ✅ **Automated testing** on every push and pull request
 - ✅ **Python 3.14** latest stable version
 - ✅ **Headless browser** execution in CI environment
-- ✅ **Code quality** checks (Black, Flake8, Pylint)
+- ✅ **Code quality** checks (Black, Ruff, Pylint, Pyright)
 - ✅ **Test artifacts** uploaded for review
 - ✅ **Allure reports** published to GitHub Pages with history
 - ✅ **Vulnerability audit** with `pip-audit` (PyPI/OSV) on every pull request and daily, as a second source next to Dependabot (GitHub Advisory Database)
@@ -322,10 +322,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 324 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 322 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 71 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 55 scenarios, 386 steps (complete user journeys)
-- **Total**: 395 unit/integration tests + 55 E2E scenarios
+- **Total**: 393 unit/integration tests + 55 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -366,10 +366,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Codecov upload (CI)** | 6 | N/A | ✅ Complete |
 | **Agent rules (size, sync, editor diagnostics, code intelligence)** | 28 | N/A | ✅ Complete |
 | **Agent test-output hook** | 21 | N/A | ✅ Complete |
-| **Lint gate (pre-commit + CI + editor import order)** | 24 | N/A | ✅ Complete |
+| **Lint gate (pre-commit + CI + editor import order, ruff replaces flake8)** | 22 | N/A | ✅ Complete |
 | **README metrics validator** | 6 | N/A | ✅ Complete |
 | **Text encoding gate (pre-commit, `.gitattributes`)** | 12 | N/A | ✅ Complete |
-| **TOTAL** | **324** | **100%** | **Complete** |
+| **TOTAL** | **322** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 346

@@ -63,12 +63,15 @@ class TestFindElement:
         page = BasePage(mock_driver)
 
         locator = (By.ID, "test-id")
-        # This will test that EC.visibility_of_element_located is used
-        # by checking the wait.until was called (actual EC testing is integration)
         page.wait = Mock()
-        page.find_element(locator)
 
-        page.wait.until.assert_called_once()
+        with patch("pages.base_page.EC") as mock_ec:
+            page.find_element(locator)
+
+            mock_ec.visibility_of_element_located.assert_called_once_with(locator)
+            page.wait.until.assert_called_once_with(
+                mock_ec.visibility_of_element_located.return_value
+            )
 
 
 class TestFindClickableElement:

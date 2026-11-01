@@ -84,18 +84,21 @@ class BasePage:
         )
 
     def find_element(self, locator: tuple[str, str]):
-        """Find element with explicit wait.
+        """Find visible element with explicit wait.
+
+        Waits for visibility, not presence: an element can be in the DOM
+        before it renders, and reading it then returns an intermediate state.
 
         Args:
             locator: Tuple of (By strategy, locator value).
 
         Returns:
-            WebElement if found.
+            WebElement if found and visible.
 
         Raises:
-            TimeoutException: If element not found within timeout.
+            TimeoutException: If element not visible within timeout.
         """
-        return self.wait.until(EC.presence_of_element_located(locator))
+        return self.wait.until(EC.visibility_of_element_located(locator))
 
     def find_clickable_element(self, locator: tuple[str, str]):
         """Find clickable element with explicit wait.

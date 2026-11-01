@@ -13,7 +13,7 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 348 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
+| Testes | 364 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
@@ -25,12 +25,14 @@
 | Diagnósticos do editor | Ortografia só no Code Spell Checker (`en,pt_BR,es` + `cSpell.words`); LTeX+ só gramática. Uma edição de doc: 45 → 6 diagnósticos (~11 → ~1,6 KB). `.vscode/settings.json` e `extensions.json` versionados |
 | Hook de saída de testes | `PreToolUse` (`Bash\|PowerShell`) em `.claude/settings.json` reescreve `pytest` → `-q` e `behave` → `-f progress2` (`scripts/filter_test_output.py`, #65): `behave` 51 → 1,1 KB, `pytest -v` 28 → ~1,6 KB. Flags nativas, sem pipe (o pipe troca o exit code pelo do `head`); `behave` com `-f` explícito fica intacto. `tests/test_filter_test_output.py` |
 | Code intelligence | Plugin oficial `pyright-lsp` ligado no escopo do projeto (`enabledPlugins` em `.claude/settings.json`); servidor por máquina via `pipx install "pyright[nodejs]"` (precisa estar no PATH; o `.venv` não está no PATH da extensão). `[tool.pyright] venv = ".venv"` + `poetry.toml` (`in-project`) para resolver os imports do projeto. Verificado: erro proposital → diagnóstico `reportAssignmentType`, assíncrono (chega logo após a edição). Passo a passo por máquina em `docs/AGENT_TOKEN_SPEND.md`. `tests/test_agent_rules.py` |
-| Métricas do README | Hook `validate-readme-metrics` **corrige e reprova** (padrão do black; DRY, como `terraform-docs`/`cog --check`): cada linha das tabelas de testes cita seus arquivos na coluna `Source`; o hook reescreve contagens por linha, TOTAL e resumo por camada (`pytest --co -qq` + `behave --dry-run -f json`), e reprova arquivo sem linha, em duas linhas ou desconhecido. Roda quando README, `tests/` ou `features/` mudam; no CI pelo `--all-files`. Falha de coleta reprova (antes era pulada). Cobertura só conferida, e nunca no CI (#87). `tests/test_validate_readme_metrics.py` |
+| Métricas do README | Hook `validate-readme-metrics` **corrige e reprova** (padrão do black; DRY, como `terraform-docs`/`cog --check`): cada linha das tabelas de testes cita seus arquivos na coluna `Source`; o hook reescreve contagens por linha, TOTAL e resumo por camada (`pytest --co -qq` + `behave --dry-run -f json`), e reprova arquivo sem linha, em duas linhas ou desconhecido. Roda quando README, `tests/` ou `features/` mudam; no CI pelo `--all-files`. Falha de coleta reprova (antes era pulada). Cobertura só conferida, e nunca no CI (#87). **Traduções (#39)**: `README.pt-BR.md` e `README.es.md` têm os mesmos números (rótulos por idioma, `Locale`) e uma marca `translation-source` com o hash do `README.md` de origem (números do hook mascarados); mudou o texto do inglês, o hook reprova até atualizar as traduções e diz a marca nova. `tests/test_validate_readme_metrics.py` |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
-**#39 — sincronizar os READMEs traduzidos (pt-BR, es) com o README.md.** As métricas agora são confiáveis (#34). Decidir pelas melhores práticas se as traduções também ganham a coluna `Source` e passam pelo mesmo hook (o script hoje lê só `README.md`), para não voltarem a divergir.
+**#87 — conferir no CI a cobertura citada no README.** Hoje o hook só confere a cobertura quando há um `coverage.xml` local (no CI, nunca), e o `WARN` de pulo some porque o `pre-commit` esconde a saída de hook que passa. Agora vale para os três READMEs.
+
+Do #39: as traduções estavam ~120 linhas atrás (seções, tabelas e todas as métricas), não só nos números. Decisão do dono, após **consulta** às práticas (Kubernetes `lsync.sh`/`diff_l10n_branches.py`, MDN `l10n.sourceCommit`, pygame-ce/PostgreSQL): retraduzir e **reprovar** quando o inglês muda. Desvio registrado no commit: Kubernetes e MDN só detectam, porque têm equipes de tradução separadas; aqui o mesmo autor muda tudo no mesmo PR. Hash de conteúdo em vez de SHA (mesmo repositório: um commit não contém o próprio SHA), com os números do hook mascarados para um teste novo não envelhecer as traduções. RED era `AttributeError`: 7 mutações, todas mortas. O dono cobrou que as práticas fossem **consultadas**, não citadas de memória: a regra foi reforçada (commit `docs(rules)`). Achados: o `README.md` tinha uma cerca de código solta que engolia o título dos testes unitários (corrigida); o `pre-commit` recusa commit com `.pre-commit-config.yaml` fora do stage (separar commits com `git stash push -- <arquivo>`); e um diagnóstico meu errado no meio do caminho (culpei o hook de saída de testes por um heredoc quebrado sem ler o regex, que só casa no início do comando), corrigido ao ler o código.
 
 Do #34: a tabela do Behave estava errada **em todas as linhas** (ex.: User Journey 13/109, real 5/78), só os totais certos: ajustada à mão para fechar a soma desde dez/2025. Validar o total aceita qualquer distribuição que some certo. Decisão (pedida pelo dono, "o que indicam as melhores práticas?"): DRY (*Pragmatic Programmer*: gerar a doc que repete o código) + padrão "gerar e cobrar no CI"; o mapeamento linha → arquivos é decisão humana e mora ao lado da tabela (coluna `Source`), não num dict no script (segunda cópia dos rótulos). RED da API nova era `AttributeError` (não prova comportamento): confirmado com 4 mutações, cada uma morta (a do caso #34 pelo `test_wrong_split_with_right_total_is_fixed`). O próprio hook corrigiu o README real (1ª execução reescreve e sai 1, 2ª sai 0). Achado: `pre-commit` esconde a saída de hook que passa, então o `WARN` de cobertura pulada some no CI (#87).
 
@@ -46,7 +48,7 @@ Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercad
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #39 READMEs traduzidos · #87 cobertura do README conferida no CI
+1. #87 cobertura do README conferida no CI
 2. #30 config/senha hardcoded · #31 page objects retornados
 3. #78 avaliar regras do ruff que se sobrepõem ao pylint (medido, separado)
 

@@ -305,6 +305,17 @@ Ao reportar um erro ao usuário:
 - Commits atômicos (uma mudança lógica por commit)
 - Atualizar README.md ao final da sessão
 
+### Pull Requests e Merge (limite de trabalho em andamento)
+O `master` é protegido (ruleset): só aceita PR com os checks obrigatórios verdes e **branch atualizada**. Por isso cada merge desatualiza todos os outros PRs abertos, custando um novo ciclo de CI e revisão para cada um.
+
+- **Um PR aberto por vez.** Trabalho pronto espera em commit local até a fila esvaziar; só então abra o próximo PR.
+- **Merge antes do próximo PR**, não PRs empilhados. Empilhar só se justifica quando a revisão demora (equipes), não em fluxo solo.
+- **Dependabot agrupado:** GitHub Actions e Python minor/patch em um PR cada; só versões maiores do Python ficam isoladas, uma por PR.
+- **Merge só com checks verdes no commit mais recente do PR** (SHA da head). Branch atrás do `master`: atualizar e esperar o CI de novo.
+- **Nunca usar `--admin`** para furar o ruleset. Se a regra atrapalha, discuta a regra, não a contorne.
+- **Squash merge**, mantendo o histórico do `master` linear.
+- Automação de merge segue lista de permissão: só faz o merge se **cada** check obrigatório estiver explicitamente aprovado; qualquer outro estado (falha, pendente, resposta vazia) interrompe.
+
 ---
 
 ## Core Principles (Zen of Python)

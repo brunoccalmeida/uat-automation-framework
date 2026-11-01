@@ -67,6 +67,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # OIDC credential for the Codecov upload
 
     strategy:
       matrix:
@@ -120,13 +123,18 @@ jobs:
         env:
           HEADLESS: true
 
+      # OIDC: a short-lived credential per run, no stored secret. GitHub
+      # withholds the OIDC token from Dependabot runs and fork PRs, so the
+      # upload is skipped exactly there; everywhere else a failure fails CI.
       - name: Upload coverage to Codecov
+        if: ${{ github.actor != 'dependabot[bot]' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1
         with:
           files: ./coverage.xml  # "file" was removed in v5+
           flags: unittests
           name: codecov-umbrella
-          fail_ci_if_error: false
+          use_oidc: true
+          fail_ci_if_error: true
 
       - name: Run E2E tests (all scenarios with Allure)
         if: ${{ !cancelled() }}

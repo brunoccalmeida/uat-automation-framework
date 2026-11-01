@@ -282,6 +282,25 @@ class TestIsElementPresentMethod:
         assert result is True
         mock_wait.until.assert_called_once()
 
+    def test_is_element_present_uses_visibility_condition(self):
+        """is_element_present should wait for element to be visible."""
+        mock_driver = Mock()
+        mock_wait = Mock()
+
+        page = BasePage(mock_driver)
+
+        with (
+            patch("pages.base_page.WebDriverWait", return_value=mock_wait),
+            patch("pages.base_page.EC") as mock_ec,
+        ):
+            locator = (By.ID, "element")
+            page.is_element_present(locator, timeout=3)
+
+            mock_ec.visibility_of_element_located.assert_called_once_with(locator)
+            mock_wait.until.assert_called_once_with(
+                mock_ec.visibility_of_element_located.return_value
+            )
+
     def test_is_element_present_returns_false_on_timeout(self):
         """is_element_present should return False if element not found."""
         mock_driver = Mock()

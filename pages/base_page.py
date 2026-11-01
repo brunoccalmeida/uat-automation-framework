@@ -158,18 +158,18 @@ class BasePage:
         return element.text
 
     def is_element_present(self, locator: tuple[str, str], timeout: int = 3) -> bool:
-        """Check if element is present on page.
+        """Check if element is visible on page.
 
         Args:
             locator: Tuple of (By strategy, locator value).
             timeout: Custom timeout for this check.
 
         Returns:
-            True if element is present, False otherwise.
+            True if element becomes visible within timeout, False otherwise.
         """
         try:
             wait = WebDriverWait(self.driver, timeout)
-            wait.until(EC.presence_of_element_located(locator))
+            wait.until(EC.visibility_of_element_located(locator))
             return True
         except TimeoutException:
             return False

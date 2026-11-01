@@ -4,7 +4,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "práticas de gasto de tokens do agente" (#41)
+**Última atualização:** 01/11/2026 — fim da missão "condensar as regras do agente" (#35)
 
 ---
 
@@ -13,23 +13,29 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 231 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
+| Testes | 242 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
 | Segurança | **Toda action fixada por SHA de commit** (inclusive `actions/*`), barrada por `tests/test_workflow_pinning.py` · Duas fontes: Dependabot (alerts + security updates) e `pip-audit --strict` no workflow `Security` (PRs, push no `master` e diário); versão travada no `poetry.lock` (grupo dev) |
 | Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · **Selenium 4.52** · actions atualizadas (checkout 7, codecov v7) · browsers/drivers pré-instalados no runner |
+| Regras do agente | Sempre carregadas: 104 linhas (~2,45 mil tokens; eram 357/~4,5 mil). Escopo de caminho: `.claude/rules/` = `.github/instructions/` (Selenium, Python, workflows, Poetry). `tests/test_agent_rules.py` barra > 200 linhas e divergência entre as cópias |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
-**#35 — condensar as regras carregadas em todo chat**, aplicando o #41. Hoje `.github/copilot-instructions.md` tem 357 linhas (~4,3 mil tokens em toda requisição); a meta oficial é < 200. Critérios e linha de base em `docs/AGENT_TOKEN_SPEND.md` e no comentário do #35.
+**Revisitar a #41 e garantir que funcionou** (pedido do dono em 01/11/2026). A #41 cumpriu seus critérios (fontes, regras, medição) e o #35 aplicou o corte, mas a economia só foi **estimada** (bytes ÷ 4). Pronto quando:
+
+- `/context` no início do chat confirma o tamanho real das regras carregadas (sempre carregadas ~2,45 mil tokens; as de escopo de caminho ausentes até tocar `pages/`, `features/`, `tests/`, `*.py`, workflows ou Poetry).
+- As regras com escopo de caminho carregam nos dois agentes: Claude Code (confirmado no #35: ao editar `tests/*.py` entraram `python.md` e `selenium.md`) e **Copilot** (ainda não verificado).
+- `/usage` de pelo menos uma missão comparado ao das anteriores; registrar o número em `docs/AGENT_TOKEN_SPEND.md`. Se o dono não guardou o `/usage` das missões passadas, esta vira a linha de base.
+- Cada sinal de desperdício da tabela do `AGENT_TOKEN_SPEND.md` checado (inclui o #52: uma edição de `.md` no #35 ainda anexou 11,7 KB de diagnósticos do LTeX+).
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #35 condensar regras (aplica o #41, já concluído)
-2. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo) → #28 ordem de imports (talvez junto, se `ruff`)
-3. #26 `.gitignore` UTF-16 + portão de encoding · #52 ruído residual de ortografia (LTeX+) no contexto do agente
+1. Revisitar a #41 (acima) · #52 ruído do LTeX+ no contexto (mesmo tema, pode entrar junto)
+2. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step) escondido por `continue-on-error`; black usa 88 colunas e flake8 79 → #28 ordem de imports (talvez junto, se `ruff`)
+3. #26 `.gitignore` UTF-16 + portão de encoding
 4. #29 `find_element` com `visibility_of` (risco de flaky)
 5. #34 → #39 validador de métricas + READMEs traduzidos
 6. #30 config/senha hardcoded · #32 fixtures · #31 page objects retornados
@@ -48,7 +54,7 @@ Tudo em GitHub Issues com labels `priority: P0/P1/P2`: `gh issue list`.
 
 ## Decisões e aprendizados que guiam o trabalho
 
-Viraram regras em `.github/copilot-instructions.md`; aqui só o porquê, em uma linha cada:
+Viraram regras em `.github/copilot-instructions.md` (ou nos arquivos com escopo de caminho); aqui só o porquê, em uma linha cada:
 
 - **SPA + Selenium:** a URL muda antes da página renderizar → navegação retorna só após o `PAGE_LOADED` do destino (`wait_until_loaded`, `submit_and_wait_for_outcome`).
 - **Espere o estado ficar pronto antes de agir** — vale também para GitHub (`UNKNOWN`) e checks de CI (SHA da head).
@@ -63,6 +69,7 @@ Viraram regras em `.github/copilot-instructions.md`; aqui só o porquê, em uma 
 - **Check obrigatório pulado conta como aprovado:** gate com `always()` (não `!cancelled()`: workflow cancelado pularia o gate) e lista de permissão. A mutação `!cancelled()` foi a mais sutil do #36.
 - **Gasto de tokens** (#41): todo turno reenvia todo o contexto; regras sempre carregadas < 200 linhas, `@import` não economiza, saídas filtradas na origem, subagente só com motivo. Medição: `/usage` antes do `/clear`. Detalhes e fontes: `docs/AGENT_TOKEN_SPEND.md`.
 - **Diagnóstico do editor entra no contexto:** a extensão do VS Code anexa os avisos do LTeX+ a cada edição; sem `<!-- LTeX: language=pt-BR -->` na 1ª linha, um `.md` em português gera centenas de falsos positivos (462 em uma edição no #41). Todo `.md` novo fora do inglês leva o comentário.
+- **Regra em dois agentes = duas cópias** (#35): Claude e Copilot leem escopo de caminho de pastas e frontmatter diferentes; a divergência é barrada por teste, não por disciplina.
 - **Alterar o ruleset é bloqueado para o agente** (classificador de permissões, "CI Bypass"); só com autorização explícita do dono para aquela alteração. Ordem segura: CI do PR verde com o novo check → ruleset → merge (o merge valida a regra nova).
 
 ## Ambiente local (Windows)

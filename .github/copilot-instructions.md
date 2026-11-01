@@ -1,3 +1,4 @@
+<!-- LTeX: language=pt-BR -->
 # UAT Automation Framework - Coding Guidelines
 
 ## ⚠️ REGRA DE OURO: TDD É OBRIGATÓRIO

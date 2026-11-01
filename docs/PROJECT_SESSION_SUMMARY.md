@@ -1,3 +1,4 @@
+<!-- LTeX: language=pt-BR -->
 # PROJECT_SESSION_SUMMARY.md
 
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).

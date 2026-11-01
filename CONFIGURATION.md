@@ -1,3 +1,4 @@
+<!-- LTeX: language=pt-BR -->
 # Configuração do Framework
 
 Referência rápida para configuração e execução do framework de testes UAT.

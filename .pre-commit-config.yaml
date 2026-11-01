@@ -15,6 +15,15 @@ repos:
         types_or: [python, pyi]
         require_serial: true
 
+      # Rules in [tool.ruff.lint] (pyproject.toml); report only, no --fix,
+      # so the commit fails and the developer sees what changed.
+      - id: ruff
+        name: ruff
+        entry: poetry run ruff check
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+
       - id: flake8
         name: flake8
         entry: poetry run flake8

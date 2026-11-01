@@ -15,6 +15,10 @@ dependencies = [
     "pyyaml (>=6.0.3,<7.0.0)"
 ]
 
+[tool.poetry]
+# Dependabot always locks with the latest Poetry; an older Poetry rejects
+# those lock files with a misleading "pyproject.toml changed" error.
+requires-poetry = ">=2.5.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

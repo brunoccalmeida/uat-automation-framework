@@ -331,6 +331,7 @@ O `master` é protegido (ruleset): só aceita PR com os checks obrigatórios ver
 - **Merge antes do próximo PR**, não PRs empilhados. Empilhar só se justifica quando a revisão demora (equipes), não em fluxo solo.
 - **Dependabot agrupado:** GitHub Actions e Python minor/patch em um PR cada; só versões maiores do Python ficam isoladas, uma por PR.
 - **Merge só com checks verdes no commit mais recente do PR** (SHA da head). Branch atrás do `master`: atualizar e esperar o CI de novo.
+- **Checks obrigatórios com nome estável:** o ruleset exige só `ci-passed` (gate do workflow `Tests`) e `pip-audit`, nunca um job de matriz (o nome muda com a matriz). Job novo que roda em PR entra no `needs` do gate (`tests/test_ci_gate.py` cobra). Check obrigatório pulado conta como aprovado: por isso o gate usa `always()` e lista de permissão.
 - **Nunca usar `--admin`** para furar o ruleset. Se a regra atrapalha, discuta a regra, não a contorne.
 - **Squash merge**, mantendo o histórico do `master` linear.
 - Automação de merge segue lista de permissão: só faz o merge se **cada** check obrigatório estiver explicitamente aprovado; qualquer outro estado (falha, pendente, resposta vazia) interrompe.

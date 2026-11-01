@@ -3,38 +3,7 @@
 Tests CheckoutStepOnePage interactions with actual DOM elements.
 """
 
-import pytest
-
-from pages.cart_page import CartPage
 from pages.checkout_step_one_page import CheckoutStepOnePage
-from pages.inventory_page import InventoryPage
-from pages.login_page import LoginPage
-
-
-@pytest.fixture(scope="function")
-def checkout_step_one(driver, base_url):
-    """Provide driver on checkout step one page.
-
-    Args:
-        driver: WebDriver instance.
-        base_url: Application base URL.
-
-    Yields:
-        WebDriver on checkout step one page.
-    """
-    driver.get(base_url)
-    login_page = LoginPage(driver)
-    login_page.login("standard_user", "secret_sauce")
-
-    # Add product and go to checkout
-    inventory_page = InventoryPage(driver)
-    inventory_page.add_product_to_cart("Sauce Labs Backpack")
-    inventory_page.click_shopping_cart()
-
-    cart_page = CartPage(driver)
-    cart_page.click_checkout()
-
-    yield driver
 
 
 class TestCheckoutStepOneElements:

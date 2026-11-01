@@ -9,6 +9,7 @@ from selenium.webdriver.common.by import By
 
 from pages.checkout_step_one_page import CheckoutStepOnePage
 from pages.checkout_step_two_page import CheckoutStepTwoPage
+from tests.helpers.navigation_contract import assert_clicks_then_returns_loaded
 
 
 class TestCheckoutStepOnePageLocators:
@@ -42,7 +43,7 @@ class TestIsOnCheckoutForm:
     """Test is_on_checkout_form method."""
 
     def test_is_on_checkout_form_returns_true_when_container_present(self):
-        """is_on_checkout_form should return True when checkout info container exists."""
+        """is_on_checkout_form is True when the checkout info container exists."""
         mock_driver = Mock()
         page = CheckoutStepOnePage(mock_driver)
 
@@ -109,7 +110,7 @@ class TestClickContinue:
     """Test click_continue method."""
 
     def test_click_continue_submits_and_waits_for_outcome(self):
-        """click_continue should submit CONTINUE_BUTTON and wait for CheckoutStepTwoPage or error."""
+        """click_continue submits and waits for CheckoutStepTwoPage or an error."""
         page = CheckoutStepOnePage(Mock())
 
         with patch.object(page, "submit_and_wait_for_outcome") as mock_submit:
@@ -127,23 +128,12 @@ class TestClickCancel:
         """click_cancel should click CANCEL_BUTTON and return loaded CartPage."""
         page = CheckoutStepOnePage(Mock())
 
-        with (
-            patch.object(page, "click") as mock_click,
-            patch("pages.cart_page.CartPage") as mock_next,
-        ):
-            calls = Mock()
-            calls.attach_mock(mock_click, "click")
-            calls.attach_mock(mock_next, "destination")
-            result = page.click_cancel()
-
-            mock_click.assert_called_once_with(CheckoutStepOnePage.CANCEL_BUTTON)
-            mock_next.assert_called_once_with(page.driver)
-            assert [c[0] for c in calls.mock_calls] == [
-                "click",
-                "destination",
-                "destination().wait_until_loaded",
-            ]
-            assert result is mock_next.return_value.wait_until_loaded.return_value
+        assert_clicks_then_returns_loaded(
+            page,
+            page.click_cancel,
+            CheckoutStepOnePage.CANCEL_BUTTON,
+            "pages.cart_page.CartPage",
+        )
 
 
 class TestIsErrorDisplayed:

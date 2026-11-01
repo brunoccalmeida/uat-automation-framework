@@ -1,14 +1,6 @@
-import pytest
+"""Integration tests for InventoryPage sorting with a real browser."""
+
 from pages.inventory_page import InventoryPage
-from pages.login_page import LoginPage
-
-
-@pytest.fixture(scope="function")
-def authenticated_driver(driver, base_url):
-    driver.get(base_url)
-    login_page = LoginPage(driver)
-    login_page.login("standard_user", "secret_sauce")
-    yield driver
 
 
 def test_sorting_orders_products_correctly(authenticated_driver):

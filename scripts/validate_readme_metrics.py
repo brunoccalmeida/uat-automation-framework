@@ -87,7 +87,8 @@ def extract_readme_metrics(readme_path: Path) -> dict:
     """Extract metrics from README.md.
 
     Returns:
-        Dict with keys: pytest_count, scenario_count, total_statements, covered_statements
+        Dict with keys: pytest_count, scenario_count, total_statements,
+        covered_statements
     """
     content = readme_path.read_text(encoding="utf-8")
 
@@ -141,38 +142,16 @@ def validate_metrics() -> bool:
     # Validation
     errors = []
 
-    if actual_pytest > 0 and readme_metrics.get("pytest_count") != actual_pytest:
-        errors.append(
-            f"  ERROR: Pytest count: README shows {readme_metrics.get('pytest_count')}, "
-            f"actual is {actual_pytest}"
-        )
-
-    if (
-        actual_scenarios > 0
-        and readme_metrics.get("scenario_count") != actual_scenarios
-    ):
-        errors.append(
-            f"  ERROR: Scenario count: README shows {readme_metrics.get('scenario_count')}, "
-            f"actual is {actual_scenarios}"
-        )
-
-    if (
-        actual_total_stmts > 0
-        and readme_metrics.get("total_statements") != actual_total_stmts
-    ):
-        errors.append(
-            f"  ERROR: Total statements: README shows {readme_metrics.get('total_statements')}, "
-            f"actual is {actual_total_stmts}"
-        )
-
-    if (
-        actual_covered_stmts > 0
-        and readme_metrics.get("covered_statements") != actual_covered_stmts
-    ):
-        errors.append(
-            f"  ERROR: Covered statements: README shows {readme_metrics.get('covered_statements')}, "
-            f"actual is {actual_covered_stmts}"
-        )
+    checks = [
+        ("Pytest count", "pytest_count", actual_pytest),
+        ("Scenario count", "scenario_count", actual_scenarios),
+        ("Total statements", "total_statements", actual_total_stmts),
+        ("Covered statements", "covered_statements", actual_covered_stmts),
+    ]
+    for label, key, actual in checks:
+        shown = readme_metrics.get(key)
+        if actual > 0 and shown != actual:
+            errors.append(f"  ERROR: {label}: README shows {shown}, actual is {actual}")
 
     if errors:
         print("\nERROR: README.md metrics are outdated:\n", file=sys.stderr)

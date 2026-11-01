@@ -8,6 +8,7 @@ from unittest.mock import Mock, patch
 from selenium.webdriver.common.by import By
 
 from pages.checkout_complete_page import CheckoutCompletePage
+from tests.helpers.navigation_contract import assert_clicks_then_returns_loaded
 
 
 class TestCheckoutCompletePageLocators:
@@ -62,7 +63,7 @@ class TestIsOnConfirmationPage:
             assert result is True
 
     def test_is_on_confirmation_page_returns_false_when_container_not_present(self):
-        """is_on_confirmation_page should return False when complete container doesn't exist."""
+        """is_on_confirmation_page is False without the complete container."""
         mock_driver = Mock()
         page = CheckoutCompletePage(mock_driver)
 
@@ -111,26 +112,15 @@ class TestClickBackHome:
     """Test click_back_home method."""
 
     def test_click_back_home_clicks_and_returns_loaded_inventory_page(self):
-        """click_back_home should click BACK_HOME_BUTTON and return loaded InventoryPage."""
+        """click_back_home clicks the button, returns a loaded InventoryPage."""
         page = CheckoutCompletePage(Mock())
 
-        with (
-            patch.object(page, "click") as mock_click,
-            patch("pages.inventory_page.InventoryPage") as mock_next,
-        ):
-            calls = Mock()
-            calls.attach_mock(mock_click, "click")
-            calls.attach_mock(mock_next, "destination")
-            result = page.click_back_home()
-
-            mock_click.assert_called_once_with(CheckoutCompletePage.BACK_HOME_BUTTON)
-            mock_next.assert_called_once_with(page.driver)
-            assert [c[0] for c in calls.mock_calls] == [
-                "click",
-                "destination",
-                "destination().wait_until_loaded",
-            ]
-            assert result is mock_next.return_value.wait_until_loaded.return_value
+        assert_clicks_then_returns_loaded(
+            page,
+            page.click_back_home,
+            CheckoutCompletePage.BACK_HOME_BUTTON,
+            "pages.inventory_page.InventoryPage",
+        )
 
 
 class TestIsPonyExpressDisplayed:

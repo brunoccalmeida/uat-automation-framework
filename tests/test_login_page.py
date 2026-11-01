@@ -67,7 +67,7 @@ class TestClickLogin:
     """Test click_login method."""
 
     def test_click_login_submits_and_waits_for_outcome(self):
-        """click_login should submit LOGIN_BUTTON and wait for InventoryPage or error."""
+        """click_login submits and waits for InventoryPage or an error."""
         page = LoginPage(Mock())
 
         with patch.object(page, "submit_and_wait_for_outcome") as mock_submit:

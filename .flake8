@@ -1,0 +1,8 @@
+# flake8 reads neither pyproject.toml nor a CLI default shared with CI, so its
+# settings live here: the hooks, CI and the editor all read this file.
+[flake8]
+# black compatibility (https://black.readthedocs.io, "Using Black with other
+# tools"): black's line width; E203/E701 conflict with black's formatting.
+max-line-length = 88
+extend-ignore = E203,E701
+extend-exclude = .venv,htmlcov,reports

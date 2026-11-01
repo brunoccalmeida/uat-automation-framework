@@ -3,6 +3,10 @@
 Implements BDD steps for shopping cart scenarios.
 """
 
+# behave replaces these decorator placeholders at import time; pylint only
+# sees the placeholders, which are not callable.
+# pylint: disable=not-callable
+
 from behave import given, when, then
 
 from pages.inventory_page import InventoryPage

@@ -3,6 +3,9 @@
 Tests WebDriver creation and configuration in isolation using mocks.
 """
 
+# White-box unit tests: each private browser factory is tested on its own.
+# pylint: disable=protected-access
+
 from unittest.mock import Mock, patch
 
 import pytest
@@ -119,7 +122,7 @@ class TestCreateChromeDriver:
         browser_config = {"name": "chrome", "headless": True}
         manager = DriverManager(browser_config)
 
-        with patch("core.driver_manager.webdriver.Chrome") as mock_chrome:
+        with patch("core.driver_manager.Chrome") as mock_chrome:
             with patch("core.driver_manager.ChromeOptions") as mock_options_class:
                 mock_options = Mock()
                 mock_options_class.return_value = mock_options
@@ -136,7 +139,7 @@ class TestCreateChromeDriver:
         browser_config = {"name": "chrome", "headless": False}
         manager = DriverManager(browser_config)
 
-        with patch("core.driver_manager.webdriver.Chrome") as mock_chrome:
+        with patch("core.driver_manager.Chrome") as mock_chrome:
             with patch("core.driver_manager.ChromeOptions") as mock_options_class:
                 mock_options = Mock()
                 mock_options_class.return_value = mock_options
@@ -158,7 +161,7 @@ class TestCreateChromeDriver:
         browser_config = {"name": "chrome", "window_size": "1280,720"}
         manager = DriverManager(browser_config)
 
-        with patch("core.driver_manager.webdriver.Chrome") as mock_chrome:
+        with patch("core.driver_manager.Chrome") as mock_chrome:
             with patch("core.driver_manager.ChromeOptions") as mock_options_class:
                 mock_options = Mock()
                 mock_options_class.return_value = mock_options
@@ -174,7 +177,7 @@ class TestCreateChromeDriver:
         browser_config = {"name": "chrome"}
         manager = DriverManager(browser_config)
 
-        with patch("core.driver_manager.webdriver.Chrome") as mock_chrome:
+        with patch("core.driver_manager.Chrome") as mock_chrome:
             with patch("core.driver_manager.ChromeOptions") as mock_options_class:
                 mock_options = Mock()
                 mock_options_class.return_value = mock_options
@@ -194,7 +197,7 @@ class TestCreateFirefoxDriver:
         browser_config = {"name": "firefox", "headless": True}
         manager = DriverManager(browser_config)
 
-        with patch("core.driver_manager.webdriver.Firefox") as mock_firefox:
+        with patch("core.driver_manager.Firefox") as mock_firefox:
             with patch("core.driver_manager.FirefoxOptions") as mock_options_class:
                 mock_options = Mock()
                 mock_options_class.return_value = mock_options
@@ -210,7 +213,7 @@ class TestCreateFirefoxDriver:
         browser_config = {"name": "firefox", "headless": False}
         manager = DriverManager(browser_config)
 
-        with patch("core.driver_manager.webdriver.Firefox") as mock_firefox:
+        with patch("core.driver_manager.Firefox") as mock_firefox:
             with patch("core.driver_manager.FirefoxOptions") as mock_options_class:
                 mock_options = Mock()
                 mock_options_class.return_value = mock_options
@@ -232,7 +235,7 @@ class TestCreateFirefoxDriver:
         browser_config = {"name": "firefox", "window_size": "1280,720"}
         manager = DriverManager(browser_config)
 
-        with patch("core.driver_manager.webdriver.Firefox") as mock_firefox:
+        with patch("core.driver_manager.Firefox") as mock_firefox:
             with patch("core.driver_manager.FirefoxOptions") as mock_options_class:
                 mock_options = Mock()
                 mock_options_class.return_value = mock_options
@@ -249,7 +252,7 @@ class TestCreateFirefoxDriver:
         browser_config = {"name": "firefox"}
         manager = DriverManager(browser_config)
 
-        with patch("core.driver_manager.webdriver.Firefox") as mock_firefox:
+        with patch("core.driver_manager.Firefox") as mock_firefox:
             with patch("core.driver_manager.FirefoxOptions") as mock_options_class:
                 mock_options = Mock()
                 mock_options_class.return_value = mock_options
@@ -266,7 +269,7 @@ class TestCreateFirefoxDriver:
         browser_config = {"name": "firefox"}
         manager = DriverManager(browser_config)
 
-        with patch("core.driver_manager.webdriver.Firefox") as mock_firefox:
+        with patch("core.driver_manager.Firefox") as mock_firefox:
             with patch("core.driver_manager.FirefoxOptions") as mock_options_class:
                 mock_options = Mock()
                 mock_options_class.return_value = mock_options
@@ -284,7 +287,7 @@ class TestCreateFirefoxDriver:
         browser_config = {"name": "firefox"}
         manager = DriverManager(browser_config)
 
-        with patch("core.driver_manager.webdriver.Firefox") as mock_firefox:
+        with patch("core.driver_manager.Firefox") as mock_firefox:
             with patch("core.driver_manager.FirefoxOptions") as mock_options_class:
                 mock_options = Mock()
                 mock_options_class.return_value = mock_options

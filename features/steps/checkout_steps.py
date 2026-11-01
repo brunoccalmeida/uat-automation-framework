@@ -3,13 +3,16 @@
 Implements BDD steps for checkout process scenarios.
 """
 
-from behave import given, when, then
+# behave replaces these decorator placeholders at import time; pylint only
+# sees the placeholders, which are not callable.
+# pylint: disable=not-callable
+
+from behave import when, then
 
 from pages.cart_page import CartPage
 from pages.checkout_step_one_page import CheckoutStepOnePage
 from pages.checkout_step_two_page import CheckoutStepTwoPage
 from pages.checkout_complete_page import CheckoutCompletePage
-from pages.inventory_page import InventoryPage
 
 
 @when("I click the checkout button")

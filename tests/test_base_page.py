@@ -4,10 +4,9 @@ Tests the fundamental Page Object functionality without requiring a browser.
 Uses mocks to isolate the logic from Selenium WebDriver.
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, call, patch
+from unittest.mock import Mock, call, patch
+
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 
 from pages.base_page import BasePage
@@ -24,19 +23,19 @@ class TestBasePageInitialization:
         assert page.driver is mock_driver
 
     def test_base_page_creates_wait_with_default_timeout(self):
-        """BasePage should create WebDriverWait with 10s timeout by default."""
+        """BasePage should wait on its driver with a 10s timeout by default."""
         mock_driver = Mock()
-        page = BasePage(mock_driver)
+        with patch("pages.base_page.WebDriverWait") as mock_wait:
+            BasePage(mock_driver)
 
-        assert isinstance(page.wait, WebDriverWait)
-        assert page.wait._timeout == 10
+        mock_wait.assert_called_once_with(mock_driver, 10)
 
-    def test_base_page_stores_driver_reference_in_wait(self):
-        """WebDriverWait should use the same driver instance."""
-        mock_driver = Mock()
-        page = BasePage(mock_driver)
+    def test_base_page_stores_the_wait(self):
+        """BasePage should expose the WebDriverWait it created."""
+        with patch("pages.base_page.WebDriverWait") as mock_wait:
+            page = BasePage(Mock())
 
-        assert page.wait._driver is mock_driver
+        assert page.wait is mock_wait.return_value
 
 
 class TestFindElement:
@@ -97,8 +96,6 @@ class TestTypeMethod:
 
     def test_type_finds_clickable_element(self):
         """type should find element using find_clickable_element."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_element = Mock()
 
@@ -116,8 +113,6 @@ class TestTypeMethod:
 
     def test_type_scrolls_element_into_view(self):
         """type should scroll element to center of viewport."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_element = Mock()
 
@@ -135,8 +130,6 @@ class TestTypeMethod:
 
     def test_type_re_verifies_element_clickable_after_scroll(self):
         """type should verify element is still clickable after scrolling."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_element = Mock()
 
@@ -155,8 +148,6 @@ class TestTypeMethod:
 
     def test_type_clears_field_before_typing(self):
         """type should clear existing text before typing new text."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_element = Mock()
 
@@ -172,8 +163,6 @@ class TestTypeMethod:
 
     def test_type_sends_text_to_element(self):
         """type should send keys to the element."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_element = Mock()
 
@@ -190,8 +179,6 @@ class TestTypeMethod:
 
     def test_type_method_sequence_is_correct(self):
         """type should execute operations in correct order."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_element = Mock()
 
@@ -213,8 +200,6 @@ class TestClickMethod:
 
     def test_click_finds_clickable_element(self):
         """click should find element using find_clickable_element."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_element = Mock()
 
@@ -230,8 +215,6 @@ class TestClickMethod:
 
     def test_click_calls_element_click(self):
         """click should call click() on the element."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_element = Mock()
 
@@ -249,8 +232,6 @@ class TestGetTextMethod:
 
     def test_get_text_finds_visible_element(self):
         """get_text should find element using find_element."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_element = Mock()
         mock_element.text = "Sample text"
@@ -259,14 +240,12 @@ class TestGetTextMethod:
 
         with patch.object(page, "find_element", return_value=mock_element) as mock_find:
             locator = (By.ID, "label")
-            result = page.get_text(locator)
+            page.get_text(locator)
 
             mock_find.assert_called_once_with(locator)
 
     def test_get_text_returns_element_text(self):
         """get_text should return the text property of element."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_element = Mock()
         expected_text = "Expected text content"
@@ -286,8 +265,6 @@ class TestIsElementPresentMethod:
 
     def test_is_element_present_returns_true_when_found(self):
         """is_element_present should return True when element is found."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_wait = Mock()
         mock_wait.until.return_value = Mock()  # Element found
@@ -304,8 +281,6 @@ class TestIsElementPresentMethod:
 
     def test_is_element_present_returns_false_on_timeout(self):
         """is_element_present should return False if element not found."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
         mock_wait = Mock()
         mock_wait.until.side_effect = TimeoutException("Not found")
@@ -320,8 +295,6 @@ class TestIsElementPresentMethod:
 
     def test_is_element_present_uses_custom_timeout(self):
         """is_element_present should use provided custom timeout."""
-        from unittest.mock import patch
-
         mock_driver = Mock()
 
         page = BasePage(mock_driver)

@@ -13,6 +13,7 @@ See docs/AGENT_TOKEN_SPEND.md.
 """
 
 import json
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -128,3 +129,31 @@ class TestEditorDiagnostics:
     )
     def test_checker_extension_is_recommended(self, extension):
         assert extension in _vscode("extensions")["recommendations"]
+
+
+def _toml(name):
+    """Return a TOML file at the repository root as a dict."""
+    return tomllib.loads((ROOT / name).read_text("utf-8"))
+
+
+class TestCodeIntelligence:
+    """The pyright-lsp plugin reports type errors to the agent after each edit.
+
+    Claude Code spawns ``pyright-langserver`` by name from PATH, so the server
+    is a per-machine tool (``pipx install "pyright[nodejs]"``), not a Poetry
+    dependency. Installed outside the project, pyright only resolves the
+    project's imports (selenium, behave) if pointed at its virtualenv, and that
+    path only exists for every collaborator if Poetry creates it in-project.
+    See docs/AGENT_TOKEN_SPEND.md.
+    """
+
+    def test_plugin_is_enabled_for_the_project(self):
+        settings = json.loads((ROOT / ".claude" / "settings.json").read_text("utf-8"))
+        assert settings["enabledPlugins"]["pyright-lsp@claude-plugins-official"]
+
+    def test_pyright_uses_the_project_virtualenv(self):
+        pyright = _toml("pyproject.toml")["tool"]["pyright"]
+        assert (pyright["venvPath"], pyright["venv"]) == (".", ".venv")
+
+    def test_poetry_creates_the_virtualenv_in_project(self):
+        assert _toml("poetry.toml")["virtualenvs"]["in-project"] is True

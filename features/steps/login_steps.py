@@ -7,11 +7,11 @@ Implements BDD steps for user login scenarios.
 # sees the placeholders, which are not callable.
 # pylint: disable=not-callable
 
-from behave import given, when, then
+from behave import given, then, when
 
 from core.config import get_base_url
-from pages.login_page import LoginPage
 from pages.inventory_page import InventoryPage
+from pages.login_page import LoginPage
 
 
 @given("I am on the Sauce Demo login page")

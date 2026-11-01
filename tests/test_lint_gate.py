@@ -7,6 +7,7 @@ and the hooks call the linters through Poetry, so their versions come from
 ``poetry.lock`` instead of drifting in a second place.
 """
 
+import json
 from pathlib import Path
 
 import pytest
@@ -15,7 +16,8 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 PRE_COMMIT = ROOT / ".pre-commit-config.yaml"
 WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
-LINTERS = ("black", "flake8", "pylint", "pyright")
+LINTERS = ("black", "flake8", "pylint", "pyright", "ruff")
+VSCODE = ROOT / ".vscode"
 RUN_HOOKS = "poetry run pre-commit run --all-files --show-diff-on-failure"
 
 
@@ -55,3 +57,23 @@ class TestCiLintJob:
     def test_no_step_ignores_its_failure(self):
         ignored = [s["name"] for s in LINT_JOB["steps"] if s.get("continue-on-error")]
         assert not ignored, f"steps ignore failures: {ignored}"
+
+
+class TestEditorSortsImportsLikeTheGate:
+    """The editor sorts imports with ruff, the tool the gate runs (#28).
+
+    VS Code's generic ``source.organizeImports`` asks every provider, Pylance
+    included, whose order differs from ruff's: saving would undo the gate.
+    """
+
+    SETTINGS = json.loads((VSCODE / "settings.json").read_text(encoding="utf-8"))
+
+    def test_ruff_extension_is_recommended(self):
+        extensions = json.loads(
+            (VSCODE / "extensions.json").read_text(encoding="utf-8")
+        )
+        assert "charliermarsh.ruff" in extensions["recommendations"]
+
+    def test_save_sorts_imports_with_ruff_only(self):
+        actions = self.SETTINGS["[python]"]["editor.codeActionsOnSave"]
+        assert actions == {"source.organizeImports.ruff": "explicit"}

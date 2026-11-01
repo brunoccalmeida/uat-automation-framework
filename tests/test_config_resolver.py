@@ -6,10 +6,10 @@ Validates configuration hierarchy and value conversion following TDD principles.
 import pytest
 
 from core.config_resolver import (
-    resolve_headless_mode,
-    resolve_browser_name,
     _str_to_bool,
     apply_config_hierarchy,
+    resolve_browser_name,
+    resolve_headless_mode,
 )
 
 

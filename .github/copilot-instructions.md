@@ -9,48 +9,44 @@
 - Havendo mais de um caminho, recomende o indicado pelas melhores práticas e cite o princípio que o sustenta (ex.: dev/prod parity, YAGNI, fail fast).
 - Não escolha atalhos por conveniência (ex.: contornar um problema de ambiente com código novo).
 - Desvios só com justificativa explícita, registrada no commit ou na documentação.
+- Regra deste arquivo que não siga as melhores práticas deve ser substituída, não contornada.
+
+## 🎯 CICLO DE MISSÃO (uma missão por chat)
+Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** (objetivo coeso, normalmente uma GitHub Issue) e **o estado do projeto mora no repositório, não na conversa**. O handoff é parte do trabalho: nunca depende de o usuário pedir.
+
+**Início de cada chat** (automático):
+1. Ler `docs/PROJECT_SESSION_SUMMARY.md` (estado atual e próxima missão recomendada).
+2. Listar issues e PRs abertos (`gh issue list`, `gh pr list`).
+3. Propor a missão de maior prioridade e confirmar com o usuário. Prioridade: bloqueio → segurança → visibilidade → dívida técnica (labels `priority: P0/P1/P2`).
+
+**Fechamento da missão** (Definition of Done, automático):
+1. Fila de PRs vazia: tudo integrado ou explicitamente descartado.
+2. Issues em dia: resolvidas fechadas pelo PR (`Closes #N`); pendências descobertas registradas como novas issues.
+3. `docs/PROJECT_SESSION_SUMMARY.md` atualizado: estado atual, decisões e próxima missão recomendada.
+4. README.md (incluindo métricas) atualizado.
+5. Avisar o usuário que a missão terminou e que o próximo chat pode começar.
 
 ---
 
-## 🔄 TDD/BDD Workflow (FLUXOGRAMA OBRIGATÓRIO)
+## 🔄 TDD/BDD Workflow: duplo ciclo (OBRIGATÓRIO)
 
-### Para QUALQUER nova funcionalidade:
+Double-loop TDD (Freeman & Pryce, *Growing Object-Oriented Software, Guided by Tests*): um ciclo externo de aceitação guia ciclos internos de unidade.
 
-```
-┌─────────────────────────────────────┐
-│ 1. Feature Gherkin existe?          │
-│    └─ NÃO → Escreva AGORA          │
-└──────────┬──────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────┐
-│ 2. Steps definitions existem?       │
-│    └─ NÃO → Escreva AGORA          │
-└──────────┬──────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────┐
-│ 3. 🔴 RED: Execute behave            │
-│    ✓ Deve FALHAR                     │
-│    ✓ Documente o erro esperado       │
-└──────────┬──────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────┐
-│ 4. 🟢 GREEN: Implemente MÍNIMO       │
-│    ✓ Page Object com método básico  │
-│    ✓ Execute behave após CADA método│
-│    ✓ Repita até todos passarem       │
-└──────────┬──────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────┐
-│ 5. 🔵 REFACTOR: Melhore código       │
-│    ✓ Adicione unit tests             │
-│    ✓ Otimize lógica                  │
-│    ✓ Execute tudo novamente          │
-└──────────────────────────────────────┘
-```
+**Ciclo externo (aceitação, Behave):**
+1. Escreva o cenário Gherkin e os steps.
+2. 🔴 Execute `behave`: deve FALHAR pelo motivo esperado. Documente o erro.
+
+**Ciclo interno (unidade, pytest), para cada unidade que o cenário exige:**
+3. 🔴 Escreva o teste unitário e veja-o FALHAR.
+4. 🟢 Implemente o MÍNIMO para passar.
+5. 🔵 Refatore com todos os testes verdes.
+
+**Fechamento:**
+6. 🟢 O cenário externo passa quando as unidades estão prontas.
+7. Testes de integração (driver real) cobrem o contrato do Page Object com o DOM.
+8. Execute todas as camadas.
+
+Todo teste deve ter sido visto falhando (RED) ao menos uma vez. Teste que nunca falhou não prova nada; se o RED não foi observado, confirme com um teste de mutação (desfaça a correção e veja o teste falhar).
 
 ### ❌ ANTI-PATTERNS (O QUE NUNCA FAZER):
 
@@ -74,15 +70,12 @@ def step_impl(context, option):
 
 Antes de implementar QUALQUER funcionalidade:
 
-- [ ] Feature Gherkin escrita?
-- [ ] Steps definitions escritos?
-- [ ] `behave` executado e FALHOU? (RED)
-- [ ] Erro documentado/entendido?
-- [ ] Implementação mínima feita?
-- [ ] `behave` executado e PASSOU? (GREEN)
-- [ ] Código refatorado? (REFACTOR)
-- [ ] Unit tests adicionados?
-- [ ] Testes executados 100% passing?
+- [ ] Feature Gherkin e steps escritos?
+- [ ] `behave` executado e FALHOU pelo motivo esperado? (RED externo)
+- [ ] Para cada unidade: teste unitário visto FALHANDO antes da implementação? (RED interno)
+- [ ] Implementação mínima feita e refatorada com testes verdes?
+- [ ] `behave` executado e PASSOU? (GREEN externo)
+- [ ] Unitários, integração e E2E 100% passando?
 
 ---
 
@@ -105,6 +98,24 @@ element.click()  # Pode falhar se não estiver clickable!
 # ❌ PROIBIDO: Sleep fixo
 time.sleep(5)  # NÃO-DETERMINÍSTICO
 ```
+
+---
+
+## ⚠️ REGRA: ESPERE O ESTADO FICAR PRONTO ANTES DE AGIR
+**Toda ação seguida de uma leitura ou decisão deve esperar o resultado da ação, nunca um estado intermediário.**
+
+Vale para código de teste, scripts e automação de CI. Antes de ler ou decidir, pergunte: *"isto vê o resultado da ação, ou um estado que ainda está mudando?"*
+
+| Contexto | Estado intermediário (armadilha) | Como esperar corretamente |
+|---|---|---|
+| Selenium em SPA | A URL muda antes de a nova página renderizar | Navegação retorna só após o `PAGE_LOADED` do destino (`wait_until_loaded`) |
+| Formulário com erro | Mensagem de erro antiga ainda na tela parece o resultado do novo envio | Remover o estado antigo antes de agir (`submit_and_wait_for_outcome`) |
+| API do GitHub | `mergeStateStatus` = `UNKNOWN` logo após um merge no `master` | Aguardar até o estado deixar de ser `UNKNOWN` antes de decidir |
+| Checks de CI | Logo após atualizar a branch, os checks verdes ainda são do commit anterior | Consultar os checks pelo SHA da head atual |
+
+- **"Ainda não sei" não é "sim".** Estados como `UNKNOWN`, pendente ou resposta vazia significam *esperar*, nunca *seguir*.
+- **Quando o estado final pode ser igual ao inicial**, não há como saber se a ação ocorreu: altere o estado inicial antes de agir (ex.: fechar o erro antigo antes de reenviar).
+- **Espere por condição, nunca por tempo fixo** (`sleep`). Em polling, o intervalo é só o ritmo da checagem; a saída do laço é sempre a condição.
 
 ---
 
@@ -134,7 +145,7 @@ class Page:
 2. **Integration**: Page Objects com driver real
 3. **Unit**: Lógica isolada, mocks para dependencies
 
-**Regra**: Unit tests são escritos DEPOIS (fase REFACTOR), não antes.
+**Regra**: unit tests são escritos ANTES da unidade (ciclo interno do duplo ciclo). Testes de integração de condições de corrida são probabilísticos; a garantia determinística vem dos unitários (ex.: ordem clique → espera).
 
 ---
 
@@ -173,7 +184,7 @@ class Page:
            ▼
 ┌──────────────────────────────────────────┐
 │ 3. INVESTIGUE: Busque padrões similares  │
-│    ✓ grep_search por patterns            │
+│    ✓ Busque padrões no código            │
 │    ✓ Leia arquivos relacionados          │
 │    ✓ Compare com código funcionando      │
 └──────────┬───────────────────────────────┘
@@ -197,7 +208,7 @@ class Page:
            ▼
 ┌──────────────────────────────────────────┐
 │ 6. IMPLEMENTE: Aplique a solução         │
-│    ✓ Multi-replace quando múltiplos      │
+│    ✓ Corrija todos os locais afetados    │
 │    ✓ Mantenha consistência               │
 │    ✓ Documente decisão se não óbvio      │
 └──────────┬───────────────────────────────┘
@@ -221,10 +232,10 @@ def step_impl(context):
     context.cart_page = CartPage(context.driver)  # Fix pontual sem entender padrão
 
 # ✅ CORRETO: Investigar padrão do projeto primeiro
-# 1. grep_search: como outros steps criam pages?
+# 1. Buscar no código: como outros steps criam pages?
 # 2. Descobrir: alguns criam instância local, outros usam context
 # 3. Decisão: padronizar TODOS para instância local (mais testável)
-# 4. multi_replace: aplicar em todos os steps afetados
+# 4. Aplicar a mesma correção em todos os steps afetados
 def step_impl(context):
     page = CartPage(context.driver)  # Consistente com padrão do projeto
     page.do_something()
@@ -238,8 +249,8 @@ def step_impl(context):
 # Fix 3: Repete processo...
 
 # ✅ CORRETO: Diagnosticar causa raiz antes de agir
-# 1. read_file: verificar todos os imports no topo
-# 2. grep_search: buscar padrão de imports no projeto
+# 1. Ler o arquivo: verificar todos os imports no topo
+# 2. Buscar no código: padrão de imports no projeto
 # 3. Verificar: Select deve ser importado no topo ou inline?
 # 4. Decisão baseada em padrão existente + melhores práticas
 # 5. Aplicar consistentemente
@@ -251,7 +262,7 @@ Antes de propor uma solução:
 
 - [ ] Li a mensagem de erro COMPLETA (não apenas a última linha)?
 - [ ] Entendi o contexto (±10 linhas ao redor do erro)?
-- [ ] Busquei padrões similares no código (grep_search)?
+- [ ] Busquei padrões similares no código?
 - [ ] Identifiquei a causa raiz (não apenas o sintoma)?
 - [ ] Verifiquei se há outros locais com mesmo problema?
 - [ ] Planejei solução consistente com arquitetura do projeto?
@@ -297,13 +308,29 @@ Ao reportar um erro ao usuário:
 - Never commit credentials or sensitive data
 - Keep config separate from code
 - Consult official documentation before solving problems
+- **Duas fontes de vulnerabilidades**: Dependabot (GitHub Advisory) e `pip-audit` (PyPI/OSV). Os bancos divergem em conteúdo e momento; "zero alertas" só vale após confirmar que a varredura ocorreu.
+- **Priorize por exposição**: dependências de execução (incluindo transitivas, ex.: `urllib3`) antes das de desenvolvimento.
+- **Versão maior é decisão humana**: leia as notas de cada versão maior intermediária e verifique se cada mudança incompatível afeta este projeto. Meça o impacto (ex.: rodar o formatador novo) antes de concluir.
+- **Arquivos gerados (`poetry.lock`) nunca são editados à mão**: em conflito, regenere.
+- **Versão do Poetry acompanha a do Dependabot** (que sempre usa a mais recente): `requires-poetry` no `pyproject.toml` e versão do CI atualizadas juntas.
 
 ---
 
 ## Git Workflow
-- **Conventional Commits**: `feat:`, `fix:`, `refactor:`, `test:`
+- **Conventional Commits**: `feat`, `fix`, `refactor`, `test`, `docs`, `style`, `perf`, `build`, `ci`, `chore` (escopo opcional, ex.: `build(deps):`)
 - Commits atômicos (uma mudança lógica por commit)
-- Atualizar README.md ao final da sessão
+- README.md (incluindo métricas) atualizado no fechamento de cada missão
+
+### Pull Requests e Merge (limite de trabalho em andamento)
+O `master` é protegido (ruleset): só aceita PR com os checks obrigatórios verdes e **branch atualizada**. Por isso cada merge desatualiza todos os outros PRs abertos, custando um novo ciclo de CI e revisão para cada um.
+
+- **Um PR aberto por vez.** Trabalho pronto espera em commit local até a fila esvaziar; só então abra o próximo PR.
+- **Merge antes do próximo PR**, não PRs empilhados. Empilhar só se justifica quando a revisão demora (equipes), não em fluxo solo.
+- **Dependabot agrupado:** GitHub Actions e Python minor/patch em um PR cada; só versões maiores do Python ficam isoladas, uma por PR.
+- **Merge só com checks verdes no commit mais recente do PR** (SHA da head). Branch atrás do `master`: atualizar e esperar o CI de novo.
+- **Nunca usar `--admin`** para furar o ruleset. Se a regra atrapalha, discuta a regra, não a contorne.
+- **Squash merge**, mantendo o histórico do `master` linear.
+- Automação de merge segue lista de permissão: só faz o merge se **cada** check obrigatório estiver explicitamente aprovado; qualquer outro estado (falha, pendente, resposta vazia) interrompe.
 
 ---
 

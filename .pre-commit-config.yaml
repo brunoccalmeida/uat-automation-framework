@@ -56,6 +56,14 @@ repos:
         files: ^README\.md$
         pass_filenames: false
 
+      # Git reads UTF-16 byte by byte: a UTF-16 .gitignore line matched
+      # nothing (#26).
+      - id: check-text-encoding
+        name: Check text files are UTF-8
+        entry: poetry run python scripts/check_text_encoding.py
+        language: system
+        types: [text]
+
   # Trailing whitespace removal
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

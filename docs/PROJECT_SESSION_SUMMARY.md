@@ -4,7 +4,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "`.gitignore` UTF-16 + portão de encoding" (#26)
+**Última atualização:** 01/11/2026 — fim da missão "`is_element_visible` espera visibilidade" (#82)
 
 ---
 
@@ -13,7 +13,7 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 325 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
+| Testes | 326 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
@@ -29,9 +29,9 @@
 
 ## Próxima missão recomendada
 
-**#82 — `is_element_present` com `visibility_of`** (mesmo risco do #29, agora nas verificações; decidir se o nome muda para `is_element_visible`, 12 chamadores incluindo `smoke_steps.py`).
+**#34 — validador de métricas confere as linhas da tabela, não só o total** (já tem testes de caracterização, `tests/test_validate_readme_metrics.py`); em seguida #39 (READMEs traduzidos, que dependem de métricas confiáveis). No #82 a linha `BasePage` (22 → 23) de novo só foi conferida à mão.
 
-Do #29: o teste `test_find_element_uses_visibility_condition` já existia e **passava com `presence_of`**: só cobrava `wait.until` chamado, não a condição. Nome promete, asserção não cobra: teste que nunca podia falhar. Corrigido no padrão do arquivo (`patch("pages.base_page.EC")` + `assert_called_once_with(locator)`), RED visto ("called 0 times"). Chamadores que poderiam depender de elemento escondido (o `<select>` de ordenação) verificados no navegador real: todas as camadas verdes. `is_element_present` ficou fora por atomicidade (#82).
+Do #29 + #82: toda espera de `BasePage` usa `visibility_of` (`find_element` no #29; `is_element_present` → **`is_element_visible`** no #82). Lição do #29: o teste antigo só cobrava `wait.until` chamado, não a condição (nunca podia falhar); agora os dois cobram a condição (`patch("pages.base_page.EC")` + `assert_called_once_with`), RED visto ("called 0 times"). Rename decidido por nomes que revelam a intenção e menor surpresa (`present` = `presence_of` no vocabulário do Selenium); sem alias, todos os chamadores são do repo (YAGNI). Dois commits (`fix` da condição, `refactor` do rename) para o `bisect` separar comportamento de forma. Mocks `patch.object(page, "nome")` usam string: o pyright não os vê, o rename precisa cobrir strings. Os casos de `False` dos chamadores são elemento **ausente** (badge vazio, erro inexistente), onde presença e visibilidade coincidem: todas as camadas verdes com navegador real.
 
 Do #73 (flake8 → ruff): RED por comportamento, não por lista. Tirar `flake8` de `LINTERS` só reduz testes parametrizados e não falha nada; o RED veio de `TestRuffReplacesFlake8` (ruff seleciona E/W/F; flake8 fora do hook, das dependências e sem `.flake8`). A tradução 1:1 do `.flake8` (`ignore E203,E701`) foi **medida antes de copiada**: o próprio ruff avisa que o E203 "has no effect" (preview), e o E701 dele aceita os corpos `...` do black. As duas exceções seriam config morta, então não entraram. 0 achados com E/W/F/I. O validador de métricas pegou o total (395 → 393) mas não a linha "Lint gate" da tabela (24 → 22), corrigida à mão: é o #34 na prática. Avaliar as regras do ruff que se sobrepõem ao pylint ficou para issue própria (#78).
 
@@ -43,10 +43,9 @@ Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercad
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #82 `is_element_present` com `visibility_of` (risco de flaky)
-2. #34 → #39 validador de métricas (já tem testes de caracterização, `tests/test_validate_readme_metrics.py`) + READMEs traduzidos
-3. #30 config/senha hardcoded · #31 page objects retornados
-4. #78 avaliar regras do ruff que se sobrepõem ao pylint (medido, separado)
+1. #34 → #39 validador de métricas (já tem testes de caracterização, `tests/test_validate_readme_metrics.py`) + READMEs traduzidos
+2. #30 config/senha hardcoded · #31 page objects retornados
+3. #78 avaliar regras do ruff que se sobrepõem ao pylint (medido, separado)
 
 **Antes de trocar a versão do Python na matriz** (3.15 já saiu): resolva o #48 (`build-report` baixa `allure-results-py3.14` por nome fixo; a troca quebra o report, de forma visível). O ruleset já não depende da matriz (#36).
 

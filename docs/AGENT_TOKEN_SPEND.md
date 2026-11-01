@@ -27,6 +27,7 @@ Contexto longo também **piora a resposta**: regra perdida num arquivo grande é
 | Editar `CLAUDE.md` no meio do chat não tem efeito até `/clear`/`/compact`/reinício | As regras são lidas uma vez no início da sessão | [prompt caching][pc] |
 | Filtrar saída na origem: `grep`, `head`, `--jq`, `gh run view --log-failed`, leitura de arquivo por trecho | Saída despejada no contexto é relida em todo turno pelo resto do chat. Ex.: no #38, `grep` por remov/deprecat no `py/CHANGES` do Selenium, não as notas inteiras | [costs][costs] (hooks/pré-processamento) |
 | Documentação web por seção: sumário de títulos e depois só a seção (`curl -s <url>.md \| sed -n '/^### X/,/^### /p'`) | O WebFetch devolve docs em Markdown crus e inteiros (47 mil caracteres na página de custos, ~20 mil tokens relidos em todo turno); sumário + seção = ~2,2 mil (#58) | Medição local (#58, abaixo) |
+| Hook `PreToolUse` reescreve `pytest`/`behave` para a saída compacta do próprio runner (`-q`, `-f progress2`); `.claude/settings.json` + `scripts/filter_test_output.py` | Saída de teste verde é volume sem informação: `behave` pretty 51 KB → 1,1 KB; `pytest -v` 28 KB → ~1,6 KB. Flags nativas, não `\| grep \| head` como no exemplo oficial: o pipe troca o exit code pelo do `head` (suíte vermelha sai 0, visto em teste de mutação) e o `progress` simples esconde a mensagem da falha. Formato exec com `python` e matcher `Bash\|PowerShell` (só `Bash` não dispara no PowerShell) | [costs][costs] (exemplo oficial) · [hooks][hooks] · `tests/test_filter_test_output.py` (#63) |
 | CLI (`gh`) antes de servidor MCP | CLI não acrescenta listagem de ferramentas ao contexto | [costs][costs] |
 | Subagente só para: trabalho paralelo independente, isolar saída volumosa, revisor que não viu o código. Pedir resumo curto; modelo menor para tarefa simples | Cada subagente começa do zero (recoleta contexto que a conversa já tinha) e soma requisições. Delegar não torna a resposta melhor | [best practices][bp] · [costs][costs] |
 | Pedidos específicos (arquivo, função, critério de pronto) | Pedido vago dispara varredura ampla do código | [costs][costs] |
@@ -146,7 +147,7 @@ Fontes primárias: [Anthropic, *Effective context engineering for AI agents*, 29
 | Prefixo estável, cache alto | manus · [pc][pc] | Modelo/esforço fixos no chat | Já feito |
 | Notas fora do contexto (`NOTES.md`) | ce | `PROJECT_SESSION_SUMMARY.md` como handoff | Já feito |
 | Filtrar/pré-processar saída de ferramenta | costs (hooks) | Regra manual; docs web não cobertas | **Adotado**: regra de docs por seção (WebFetch = 21%; ~97% menos por consulta) |
-| Hook que filtra saída de testes (só falhas) | costs (exemplo oficial) | Não há | **Adotar** (#63) |
+| Hook que filtra saída de testes (só falhas) | costs (exemplo oficial) | Hook com flags nativas | **Adotado** (#63; ver Práticas adotadas) |
 | Modelo menor para subagentes de tarefa simples | costs | Herdam o modelo da sessão | **Adotado** (regra); revisor mantém o modelo da sessão: a qualidade da revisão é o propósito dele |
 | Plugin de *code intelligence* (`pyright-lsp`, oficial) | costs · [code intelligence][ci] | Não há | **Adotar** (#63) |
 | Desligar servidores MCP sem uso (`/mcp`) | costs | Conectores da conta claude.ai ativos | **Adotar**: ação do dono no `/mcp`, sem medição sob medida (#61 fechada) |
@@ -163,6 +164,7 @@ Fontes primárias: [Anthropic, *Effective context engineering for AI agents*, 29
 
 [mem]: https://code.claude.com/docs/en/memory
 [costs]: https://code.claude.com/docs/en/costs
+[hooks]: https://code.claude.com/docs/en/hooks
 [bp]: https://code.claude.com/docs/en/best-practices
 [pc]: https://code.claude.com/docs/en/prompt-caching
 [vsc]: https://code.visualstudio.com/docs/copilot/customization/custom-instructions

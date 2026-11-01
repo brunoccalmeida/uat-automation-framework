@@ -13,7 +13,7 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 256 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
+| Testes | 277 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
@@ -21,11 +21,12 @@
 | Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · **Selenium 4.52** · actions atualizadas (checkout 7, codecov v7) · browsers/drivers pré-instalados no runner |
 | Regras do agente | Sempre carregadas: 106 linhas (#58: docs por seção, prática estabelecida por padrão, subagente simples com modelo menor), **4,1 mil tokens medidos no #54** no `/context` (estimativa ÷ 4 dava 2,45 mil; aqui são ~2,4 bytes/token). Escopo de caminho: `.claude/rules/` = `.github/instructions/` (Selenium, Python, workflows, Poetry), carga sob demanda confirmada no Claude Code; Copilot conferido pelo formato oficial + `chat.includeApplyingInstructions`. `tests/test_agent_rules.py` barra > 200 linhas, divergência entre as cópias e regressão da config de diagnósticos |
 | Diagnósticos do editor | Ortografia só no Code Spell Checker (`en,pt_BR,es` + `cSpell.words`); LTeX+ só gramática. Uma edição de doc: 45 → 6 diagnósticos (~11 → ~1,6 KB). `.vscode/settings.json` e `extensions.json` versionados |
+| Hook de saída de testes | `PreToolUse` (`Bash\|PowerShell`) em `.claude/settings.json` reescreve `pytest` → `-q` e `behave` → `-f progress2` (`scripts/filter_test_output.py`, #65): `behave` 51 → 1,1 KB, `pytest -v` 28 → ~1,6 KB. Flags nativas, sem pipe (o pipe troca o exit code pelo do `head`); `behave` com `-f` explícito fica intacto. `tests/test_filter_test_output.py` |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
-**#63 — aplicar as práticas oficiais adotadas no #58**: hook que filtra saída de testes (só falhas, com TDD) e plugin `pyright-lsp`. P1, antes da #27 por efeito composto (barateia toda missão seguinte).
+**#63 (segunda metade) — plugin `pyright-lsp`**: o hook de saída de testes já entrou (#65). Falta: `pyright` como dependência dev no Poetry (confirmar se o pacote do PyPI fornece o `pyright-langserver`), plugin registrado em `.claude/settings.json` (versionado) ou instalado pelo dono no `/plugin` do VS Code, e confirmar que o servidor sobe (erro de tipo proposital → linha `Found N new diagnostic issues`). Passos em https://code.claude.com/docs/en/plugins/code-intelligence. Registrar em `docs/AGENT_TOKEN_SPEND.md` e fechar a #63.
 
 Depois: **#27 — linters como portão real** (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step) escondido por `continue-on-error`; black usa 88 colunas e flake8 79.
 
@@ -33,7 +34,7 @@ Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercad
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #63 práticas oficiais adotadas (acima)
+1. #63 `pyright-lsp` (acima; hook feito no #65)
 2. #27 linters como portão real (acima) → #28 ordem de imports (talvez junto, se `ruff`)
 3. #26 `.gitignore` UTF-16 + portão de encoding (o Git o trata como binário; editar preservando CRLF, como no #54; `docs/PROJECT_SESSION*.*` ignorado mas versionado)
 4. #29 `find_element` com `visibility_of` (risco de flaky)

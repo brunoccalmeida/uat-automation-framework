@@ -29,7 +29,9 @@
 
 ## Próxima missão recomendada
 
-**#29 — `BasePage.find_element` com `visibility_of`** (risco de teste instável; a regra de Selenium exige visibilidade para leitura). O portão de lint já está na forma final (#73), então a refatoração passa por ele uma vez só.
+**#82 — `is_element_present` com `visibility_of`** (mesmo risco do #29, agora nas verificações; decidir se o nome muda para `is_element_visible`, 12 chamadores incluindo `smoke_steps.py`).
+
+Do #29: o teste `test_find_element_uses_visibility_condition` já existia e **passava com `presence_of`**: só cobrava `wait.until` chamado, não a condição. Nome promete, asserção não cobra: teste que nunca podia falhar. Corrigido no padrão do arquivo (`patch("pages.base_page.EC")` + `assert_called_once_with(locator)`), RED visto ("called 0 times"). Chamadores que poderiam depender de elemento escondido (o `<select>` de ordenação) verificados no navegador real: todas as camadas verdes. `is_element_present` ficou fora por atomicidade (#82).
 
 Do #73 (flake8 → ruff): RED por comportamento, não por lista. Tirar `flake8` de `LINTERS` só reduz testes parametrizados e não falha nada; o RED veio de `TestRuffReplacesFlake8` (ruff seleciona E/W/F; flake8 fora do hook, das dependências e sem `.flake8`). A tradução 1:1 do `.flake8` (`ignore E203,E701`) foi **medida antes de copiada**: o próprio ruff avisa que o E203 "has no effect" (preview), e o E701 dele aceita os corpos `...` do black. As duas exceções seriam config morta, então não entraram. 0 achados com E/W/F/I. O validador de métricas pegou o total (395 → 393) mas não a linha "Lint gate" da tabela (24 → 22), corrigida à mão: é o #34 na prática. Avaliar as regras do ruff que se sobrepõem ao pylint ficou para issue própria (#78).
 
@@ -41,7 +43,7 @@ Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercad
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #29 `find_element` com `visibility_of` (risco de flaky)
+1. #82 `is_element_present` com `visibility_of` (risco de flaky)
 2. #34 → #39 validador de métricas (já tem testes de caracterização, `tests/test_validate_readme_metrics.py`) + READMEs traduzidos
 3. #30 config/senha hardcoded · #31 page objects retornados
 4. #78 avaliar regras do ruff que se sobrepõem ao pylint (medido, separado)

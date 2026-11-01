@@ -109,17 +109,17 @@ A recomendação "Trim CLAUDE.md" não apareceu. Este chat inclui ~14 KB das pr�
 
 ### Diagnóstico da #56: de onde vinham os "72% de subagentes"
 
-Medido nos transcripts locais (`~/.claude/projects/<projeto>/*.jsonl`, campo `usage` de cada resposta; subagentes em `<sessão>/subagents/`), custo ponderado pelo preço relativo (leitura de cache 0,1×, escrita 1,25×, saída 5× a entrada):
+Medido nos transcripts locais (`~/.claude/projects/<projeto>/*.jsonl`, campo `usage` de cada resposta; subagentes em `<sessão>/subagents/`). **Estimativa:** custo ponderado com pesos supostos, não conferidos na tabela de preços do modelo (leitura de cache 0,1×, escrita 1,25×, saída 5× a entrada); os percentuais dependem deles:
 
 | Medida | Valor |
 | --- | --- |
 | Gasto real dos subagentes (2, ambos de um `/code-review`) | **1,6%** do total |
 | Sessão d3e6a932 (31/10, várias missões sem `/clear`) | 339 requisições, contexto médio **277 mil**, máximo 469 mil; **61%** do custo |
 | Sessões seguintes (uma missão cada) | 29–62 requisições, contexto médio 52–112 mil (≈ 75 mil) |
-| Fatia da sessão d3e6a932 na janela de 24 h do #54 | **74%** (o diálogo mostrou 72%) |
+| Fatia da sessão d3e6a932 na janela de 24 h do #54 | 74% (o diálogo mostrou 72%; coincidência compatível, não prova) |
 | Piso do 1º turno de toda sessão (prompt do sistema, ferramentas, regras) | ~46–48 mil tokens; regras do projeto = 4,1 mil |
 
-**Causa raiz:** a recomendação atribui a si o uso inteiro das sessões em que se aplica ("*it tells you how much of your usage the row applies to, not how much the change saves*", [costs][costs]). A sessão que lançou os subagentes foi cara por **contexto longo**, que a regra "uma missão por chat" já corrigiu (~3,7× menor). **Remédio:** nenhum para subagentes (modelo menor em 1,6% do custo, num revisor, troca qualidade por quase nada); a leitura correta da fatia entrou na tabela "Sinais de desperdício". **Lição:** métrica agregada diz onde olhar; reproduza o número a partir dos dados brutos antes de agir.
+**Causa raiz:** a recomendação atribui a si o uso inteiro das sessões em que se aplica ("*it tells you how much of your usage the row applies to, not how much the change saves*", [costs][costs]). A sessão que lançou os subagentes teve **contexto longo** (várias missões sem `/clear`); as sessões de uma missão tiveram contexto ~3,7× menor, mas fizeram trabalhos diferentes: é correlação, não prova de causa (a causa é documentada em [costs][costs], "Why usage climbs in a long session"). **Remédio:** a leitura correta da fatia entrou na tabela "Sinais de desperdício"; para subagentes, a prática oficial (modelo menor em tarefa simples) virou regra. **Lição:** métrica agregada diz onde olhar; leia como a fonte a define antes de agir.
 
 ### Onde o contexto cresce (resultados de ferramenta, todas as sessões)
 
@@ -130,33 +130,36 @@ Medido nos transcripts locais (`~/.claude/projects/<projeto>/*.jsonl`, campo `us
 | `cat` via shell | 6% |
 | `gh run view`, `getDiagnostics`, `grep`, demais | ≤ 3% cada |
 
-Saída de testes (pytest, behave) nem aparece: filtrá-la com hook não teria efeito mensurável aqui.
+Amostra pequena (10 sessões): serve para achar desperdício óbvio, não para rejeitar prática oficial.
 
 ### Tabela de lacunas
 
 Fontes primárias: [Anthropic, *Effective context engineering for AI agents*, 29/09/2025][ce] · [Chroma, *Context Rot*, 07/2025][rot] (18 modelos; o desempenho cai com o tamanho da entrada, mais ainda com distratores) · [Manus, *Context Engineering for AI Agents*, 18/07/2025][manus] (taxa de acerto do cache como métrica principal; entrada:saída ≈ 100:1) · [Liu et al., *Lost in the Middle*, 2023][lim] · [Claude Code, *Manage costs*][costs] (consultado em 01/11/2026). Blogs e ferramentas de terceiros com economia autodeclarada (80–99%) foram descartados como evidência.
 
+**Critério:** prática estabelecida é aplicada por padrão; não aplicar exige motivo explícito. Medição sob medida só quando a economia esperada supera claramente o custo de investigar.
+
 | Prática | Fonte | Hoje no projeto | Decisão |
 | --- | --- | --- | --- |
 | Menor conjunto de tokens de alto sinal; contexto longo degrada | ce · rot · lim | Regras < 200 linhas, cobradas por teste (#35) | Já feito |
-| Limpar entre tarefas | costs | Uma missão por chat; contexto médio 277 → ~75 mil | Já feito (medido) |
+| Limpar entre tarefas | costs | Uma missão por chat | Já feito |
 | Recuperação sob demanda / revelação progressiva | ce · costs | Regras por caminho; este doc lido sob demanda | Já feito |
 | Prefixo estável, cache alto | manus · [pc][pc] | Modelo/esforço fixos no chat | Já feito |
 | Notas fora do contexto (`NOTES.md`) | ce | `PROJECT_SESSION_SUMMARY.md` como handoff | Já feito |
 | Filtrar/pré-processar saída de ferramenta | costs (hooks) | Regra manual; docs web não cobertas | **Adotado**: regra de docs por seção (WebFetch = 21%; ~97% menos por consulta) |
-| Hook que filtra saída de testes | costs | Não há | Não adotar: testes fora do ranking (YAGNI) |
-| Modelo menor para subagentes | costs | Herdam o modelo da sessão | Não adotar: 1,6% do custo, usados como revisores |
-| Plugin de *code intelligence* (LSP) | costs | Não há | Não agora: leituras pequenas (~2,5 mil caracteres) |
-| Desligar servidores MCP sem uso (`/mcp`) | costs | Conectores da conta claude.ai ativos (definições adiadas; instruções entram no contexto) | Decisão do dono, por conta: medir com `/context` antes e depois |
+| Hook que filtra saída de testes (só falhas) | costs (exemplo oficial) | Não há | **Adotar** (#63) |
+| Modelo menor para subagentes de tarefa simples | costs | Herdam o modelo da sessão | **Adotado** (regra); revisor mantém o modelo da sessão: a qualidade da revisão é o propósito dele |
+| Plugin de *code intelligence* (`pyright-lsp`, oficial) | costs · [code intelligence][ci] | Não há | **Adotar** (#63) |
+| Desligar servidores MCP sem uso (`/mcp`) | costs | Conectores da conta claude.ai ativos | **Adotar**: ação do dono no `/mcp`, sem medição sob medida (#61 fechada) |
 | Instruções de compactação | costs | Não há | Não se aplica: `/clear` no lugar de `/compact` |
 | Medir antes de otimizar; ler a fatia corretamente | costs | `/usage` no fim da missão | Adotado: leitura da fatia corrigida em "Sinais de desperdício" |
 
-**Antes/depois:** o efeito da regra de docs só aparece em missões que consultem documentação; confira pelo ranking acima (fatia do WebFetch) e pelo `/usage`. O piso de ~47 mil tokens por sessão é o maior custo fixo restante e quase todo do ambiente (prompt do sistema, ferramentas, conectores); `/context` mostra a divisão.
+**Antes/depois:** o `/usage` no fim de cada missão segue como medida; não há medição sob medida planejada.
 
 [ce]: https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
 [rot]: https://www.trychroma.com/research/context-rot
 [manus]: https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus
 [lim]: https://arxiv.org/abs/2307.03172
+[ci]: https://code.claude.com/docs/en/plugins/code-intelligence
 
 [mem]: https://code.claude.com/docs/en/memory
 [costs]: https://code.claude.com/docs/en/costs

@@ -11,6 +11,7 @@ Toda decisão (código, testes, CI, ambiente, processo) segue as melhores práti
 
 - Havendo mais de um caminho, recomende o indicado pelas melhores práticas e cite o princípio que o sustenta (ex.: dev/prod parity, YAGNI, fail fast).
 - Toda pergunta de decisão ao usuário traz antes o que indicam as melhores práticas (princípio ou fonte) e a recomendação; o usuário decide já informado.
+- O padrão é aplicar a prática estabelecida (documentação oficial, consenso da indústria). Investigação ou medição sob medida só quando a economia esperada supera claramente o custo de investigar; estimativa e suposição são rotuladas como tais.
 - Não escolha atalhos por conveniência (ex.: contornar um problema de ambiente com código novo).
 - Desvios só com justificativa explícita, registrada no commit ou na documentação.
 - Regra deste arquivo que não siga as melhores práticas deve ser substituída, não contornada.
@@ -37,7 +38,7 @@ Cada turno reenvia todo o contexto; contexto longo custa mais e piora a aderênc
 - **Não repita o que linter/teste já impõe**; regra sem exceção vira teste ou hook, não ênfase.
 - **Filtre saídas na origem** (`grep`, `head`, `--jq`, `gh run view --log-failed`, leitura por trecho); nunca despeje log de CI ou notas de versão inteiras.
 - **Documentação web por seção, não página inteira:** sumário (`curl -s <url>.md | grep -n '^##'`) e depois só a seção (`sed -n '/^### X/,/^### /p'`). O WebFetch devolve docs em Markdown crus e inteiros.
-- **Subagente só com motivo**: trabalho paralelo independente, isolar saída volumosa ou revisor independente. Ele recomeça do zero e soma requisições.
+- **Subagente só com motivo**: trabalho paralelo independente, isolar saída volumosa ou revisor independente. Ele recomeça do zero e soma requisições. Tarefa simples: modelo menor (`model: haiku`); revisor mantém o modelo da sessão.
 - **Modelo e esforço fixos durante o chat** (trocar invalida o cache). Duas correções sem sucesso: `/clear` e um prompt melhor.
 
 ## TDD/BDD: duplo ciclo

@@ -9,6 +9,8 @@ fails when it changed something, so the fix shows up as a diff to review.
   `pytest --co` and `behave --dry-run`. A file in no row, or in two, fails.
 - Layer summary: the unit/integration/E2E totals.
 - Coverage statements (from coverage.xml): only checked, skipped without it.
+  CI runs `--coverage coverage.xml` in the job that writes the report, where
+  a missing report fails (#87).
 - Translations (#39): the same rewrite, with each language's labels. Each one
   records the fingerprint of the README.md it was translated from (as MDN's
   l10n.sourceCommit) and fails once README.md changes after it.
@@ -17,6 +19,7 @@ Exit code 0 = metrics are accurate and the translations are current
 Exit code 1 = a README was updated, or something needs a human fix
 """
 
+import argparse
 import hashlib
 import json
 import re
@@ -296,7 +299,11 @@ def get_coverage_statements() -> tuple[int, int]:
             file=sys.stderr,
         )
         return (0, 0)
+    return read_coverage(coverage_file)
 
+
+def read_coverage(coverage_file: Path) -> tuple[int, int]:
+    """Read (total_statements, covered_statements) from a coverage.xml."""
     root = ET.parse(coverage_file).getroot()
     # <coverage line-rate="0.99" lines-covered="315" lines-valid="316">
     lines_covered = int(root.attrib.get("lines-covered", 0))
@@ -369,8 +376,46 @@ def _update_readme(
     return text, errors
 
 
-def main() -> int:
+def check_coverage_report(coverage_file: Path) -> list[str]:
+    """Check the coverage lines of every README against a required report.
+
+    For CI (#87): the hook runs where there is no coverage.xml and skips the
+    check, so the job that writes the report checks it, and a missing report
+    fails instead of skipping.
+    """
+    if not coverage_file.exists():
+        return [f"{coverage_file} not found: run the tests with --cov-report=xml"]
+    actual = read_coverage(coverage_file)
+    errors = []
+    for path, locale in ((README, EN), *TRANSLATIONS.items()):
+        text = Path(path).read_text(encoding="utf-8")
+        errors += [f"{path}: {error}" for error in check_coverage(text, actual, locale)]
+    return errors
+
+
+def _report(errors: list[str]) -> int:
+    """Print what needs a look; exit code 1 if anything does."""
+    if errors:
+        print("\nERROR: the README metrics need a look:\n", file=sys.stderr)
+        print("\n".join(f"  {error}" for error in errors), file=sys.stderr)
+    return 1 if errors else 0
+
+
+def main(argv: list[str] | None = None) -> int:
     """Rewrite the README metrics; fail if one changed or needs a human fix."""
+    parser = argparse.ArgumentParser(
+        description="Keep the README metrics in sync with the project state."
+    )
+    parser.add_argument(
+        "--coverage",
+        type=Path,
+        metavar="COVERAGE_XML",
+        help="only check the README coverage against this report (CI)",
+    )
+    args = parser.parse_args(argv)
+    if args.coverage:
+        return _report(check_coverage_report(args.coverage))
+
     try:
         counts = collect_counts()
     except CollectionError as error:
@@ -386,11 +431,7 @@ def main() -> int:
             continue
         text, translation_errors = _update_readme(path, counts, locale, coverage)
         errors += translation_errors + check_translation_source(path, text, fingerprint)
-
-    if errors:
-        print("\nERROR: the README metrics need a look:\n", file=sys.stderr)
-        print("\n".join(f"  {error}" for error in errors), file=sys.stderr)
-    return 1 if errors else 0
+    return _report(errors)
 
 
 if __name__ == "__main__":

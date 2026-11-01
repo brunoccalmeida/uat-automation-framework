@@ -407,7 +407,7 @@ class TestMain:
             patch.object(validator, "collect_counts", return_value=counts or COUNTS),
             patch.object(validator, "get_coverage_statements", return_value=(0, 0)),
         ):
-            return validator.main()
+            return validator.main([])
 
     def test_accurate_readme_passes_untouched(self, readme_path):
         readme_path.write_text(_readme(), encoding="utf-8")
@@ -442,7 +442,7 @@ class TestMain:
             "collect_counts",
             side_effect=validator.CollectionError("pytest --co exited 2"),
         ):
-            assert validator.main() == 1
+            assert validator.main([]) == 1
         assert "pytest --co exited 2" in capsys.readouterr().err
 
     def test_outdated_translation_is_rewritten_and_fails(
@@ -471,6 +471,74 @@ class TestMain:
 
         assert self._main() == 1
         assert "README.pt-BR.md not found" in capsys.readouterr().err
+
+
+COVERAGE_XML = '<coverage lines-valid="{total}" lines-covered="{covered}"/>'
+
+
+class TestCoverageMode:
+    """CI checks the coverage where coverage.xml exists: the test job (#87).
+
+    The hook runs in the lint job, which has no coverage.xml, so there it
+    skips the check; with --coverage a missing report fails instead.
+    """
+
+    EN_COVERAGE = "- **Total statements:** 346\n- **Covered:** 345 (99%)\n"
+    PT_COVERAGE = "- **Total de statements:** 346\n- **Cobertos:** 345 (99%)\n"
+
+    @pytest.fixture(autouse=True)
+    def _readmes(self, readme_path, translation_path):
+        readme_path.write_text(self.EN_COVERAGE, encoding="utf-8")
+        translation_path.write_text(self.PT_COVERAGE, encoding="utf-8")
+
+    @staticmethod
+    def _main(total=346, covered=345):
+        Path("coverage.xml").write_text(
+            COVERAGE_XML.format(total=total, covered=covered), encoding="utf-8"
+        )
+        with patch.object(validator, "collect_counts") as collect:
+            result = validator.main(["--coverage", "coverage.xml"])
+        collect.assert_not_called()
+        return result
+
+    def test_matching_coverage_passes(self):
+        assert self._main() == 0
+
+    def test_outdated_coverage_fails_for_every_readme(self, capsys):
+        assert self._main(total=350, covered=349) == 1
+
+        err = capsys.readouterr().err
+        assert "README.md: Total statements: README shows 346, actual is 350" in err
+        assert "README.pt-BR.md: Covered statements: README shows 345" in err
+
+    def test_outdated_readme_is_not_rewritten(self, readme_path):
+        self._main(total=350, covered=349)
+
+        assert readme_path.read_text(encoding="utf-8") == self.EN_COVERAGE
+
+    def test_missing_report_fails_instead_of_skipping(self, capsys):
+        assert validator.main(["--coverage", "coverage.xml"]) == 1
+        assert "coverage.xml not found" in capsys.readouterr().err
+
+
+class TestCiCoverageStep:
+    """The test job checks the README coverage after it writes coverage.xml."""
+
+    WORKFLOW = PRE_COMMIT.parent / ".github" / "workflows" / "tests.yml"
+
+    def test_check_runs_after_the_coverage_report(self):
+        steps = yaml.safe_load(self.WORKFLOW.read_text(encoding="utf-8"))["jobs"][
+            "test"
+        ]["steps"]
+        runs = [step.get("run", "") for step in steps]
+        report = next(i for i, run in enumerate(runs) if "--cov-report=xml" in run)
+        check = next(
+            i
+            for i, run in enumerate(runs)
+            if "validate_readme_metrics.py --coverage coverage.xml" in run
+        )
+
+        assert check > report
 
 
 class TestPreCommitHook:

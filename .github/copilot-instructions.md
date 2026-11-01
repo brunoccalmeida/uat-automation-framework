@@ -309,6 +309,7 @@ Ao reportar um erro ao usuário:
 - Keep config separate from code
 - Consult official documentation before solving problems
 - **Duas fontes de vulnerabilidades**: Dependabot (GitHub Advisory) e `pip-audit` (PyPI/OSV). Os bancos divergem em conteúdo e momento; "zero alertas" só vale após confirmar que a varredura ocorreu.
+- **`pip-audit` no CI** (`security.yml`, em PRs e diariamente) com `--strict`: qualquer vulnerabilidade falha o check. Exceção só via `--ignore-vuln <ID>` com justificativa e issue de remoção; nunca `continue-on-error`.
 - **Priorize por exposição**: dependências de execução (incluindo transitivas, ex.: `urllib3`) antes das de desenvolvimento.
 - **Versão maior é decisão humana**: leia as notas de cada versão maior intermediária e verifique se cada mudança incompatível afeta este projeto. Meça o impacto (ex.: rodar o formatador novo) antes de concluir.
 - **Arquivos gerados (`poetry.lock`) nunca são editados à mão**: em conflito, regenere.

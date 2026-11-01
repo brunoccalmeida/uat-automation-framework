@@ -1,6 +1,7 @@
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
+[![Security](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/security.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/brunoccalmeida/uat-automation-framework/branch/master/graph/badge.svg)](https://codecov.io/gh/brunoccalmeida/uat-automation-framework)
 [![Python Version](https://img.shields.io/badge/python-3.14-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -276,6 +277,7 @@ The project uses **GitHub Actions** for continuous integration:
 - ✅ **Code quality** checks (Black, Flake8, Pylint)
 - ✅ **Test artifacts** uploaded for review
 - ✅ **Allure reports** published to GitHub Pages with history
+- ✅ **Vulnerability audit** with `pip-audit` (PyPI/OSV) on every pull request and daily, as a second source next to Dependabot (GitHub Advisory Database)
 
 **View Test Reports:** [https://brunoccalmeida.github.io/uat-automation-framework/](https://brunoccalmeida.github.io/uat-automation-framework/)
 
@@ -285,7 +287,16 @@ The reports include:
 - Duration metrics and performance tracking
 - Categorization by features and scenarios
 
-See [.github/workflows/tests.yml](.github/workflows/tests.yml) for pipeline configuration.
+See [.github/workflows/tests.yml](.github/workflows/tests.yml) and [.github/workflows/security.yml](.github/workflows/security.yml) for pipeline configuration.
+
+**Auditing dependencies locally** (same command and locked version as CI):
+
+```bash
+poetry sync --no-root            # make the environment match poetry.lock exactly
+poetry run pip-audit --strict    # fails on any known vulnerability or unauditable package
+```
+
+Any known vulnerability fails the `pip-audit` check. To accept one, add `--ignore-vuln <ID>` in `security.yml` with the justification and the issue that tracks its removal.
 
 ## 🛠️ Technology Stack
 

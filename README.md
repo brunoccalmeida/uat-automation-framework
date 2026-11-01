@@ -312,10 +312,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 164 tests (framework components, 100% Page Objects coverage)
-- **Integration Tests**: 75 tests (Page Objects + real browser, 100% coverage)
+- **Unit Tests**: 185 tests (framework components, 100% Page Objects coverage)
+- **Integration Tests**: 71 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 55 scenarios, 386 steps (complete user journeys)
-- **Total**: 239 unit/integration tests + 55 E2E scenarios
+- **Total**: 256 unit/integration tests + 55 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -340,23 +340,24 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 
 | Module | Tests | Coverage | Status |
 |--------|-------|----------|--------|
-| **BasePage** | 19 | 100% | ✅ Complete |
+| **BasePage** | 22 | 100% | ✅ Complete |
 | **LoginPage** | 14 | 100% | ✅ Complete |
 | **CartPage** | 13 | 100% | ✅ Complete |
-| **InventoryPage** | 12 | 100% | ✅ Complete |
+| **InventoryPage** | 24 | 100% | ✅ Complete |
 | **CheckoutStepOnePage** | 13 | 100% | ✅ Complete |
 | **CheckoutStepTwoPage** | 15 | 100% | ✅ Complete |
 | **CheckoutCompletePage** | 12 | 100% | ✅ Complete |
-| **ConfigResolver** | 30 | 100% | ✅ Complete |
+| **ConfigResolver** | 40 | 100% | ✅ Complete |
 | **DriverManager** | 19 | 100% | ✅ Complete |
+| **Login steps (OR logic)** | 9 | N/A | ✅ Complete |
 | **Smoke Tests** | 4 | N/A | ✅ Complete |
-| **TOTAL** | **164** | **100%** | **Complete** |
+| **TOTAL** | **185** | **100%** | **Complete** |
 
 **Code Coverage:**
-- **Total statements:** 316
-- **Covered:** 315 (99%)
+- **Total statements:** 346
+- **Covered:** 345 (99%)
 - **Pages Module**: 100%
-- **Core Module**: 98%+
+- **Core Module**: 99% (1 uncovered line in `core/config.py`)
 
 ### Integration Tests (Pytest + Real Browser)
 
@@ -365,12 +366,13 @@ Integration tests validate Page Objects with real browser interactions, filling 
 | Module | Tests | Browser | Status |
 |--------|-------|---------|--------|
 | **LoginPage** | 9 | Chrome | ✅ Complete |
-| **InventoryPage** | 9 | Chrome | ✅ Complete |
+| **InventoryPage** | 10 | Chrome | ✅ Complete |
+| **InventoryPage (sorting)** | 1 | Chrome | ✅ Complete |
 | **CartPage** | 10 | Chrome | ✅ Complete |
 | **CheckoutStepOnePage** | 15 | Chrome | ✅ Complete |
 | **CheckoutStepTwoPage** | 13 | Chrome | ✅ Complete |
-| **InventoryPage (extended)** | 16 | Chrome | ✅ Complete |
-| **TOTAL** | **75** | **Real** | **Complete** |
+| **Navigation synchronization** | 13 | Chrome | ✅ Complete |
+| **TOTAL** | **71** | **Real** | **Complete** |
 
 **Key Differences from Unit Tests:**
 - ✅ Real Selenium WebDriver (not mocked)

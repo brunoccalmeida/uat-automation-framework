@@ -24,7 +24,7 @@
 
 ## Próxima missão recomendada
 
-**Revisitar a #41 e garantir que funcionou** (pedido do dono em 01/11/2026). A #41 cumpriu seus critérios (fontes, regras, medição) e o #35 aplicou o corte, mas a economia só foi **estimada** (bytes ÷ 4). Pronto quando:
+**#54 — revisitar a #41 e garantir que funcionou** (pedido do dono em 01/11/2026). A #41 cumpriu seus critérios (fontes, regras, medição) e o #35 aplicou o corte, mas a economia só foi **estimada** (bytes ÷ 4). Pronto quando:
 
 - `/context` no início do chat confirma o tamanho real das regras carregadas (sempre carregadas ~2,45 mil tokens; as de escopo de caminho ausentes até tocar `pages/`, `features/`, `tests/`, `*.py`, workflows ou Poetry).
 - As regras com escopo de caminho carregam nos dois agentes: Claude Code (confirmado no #35: ao editar `tests/*.py` entraram `python.md` e `selenium.md`) e **Copilot** (ainda não verificado).
@@ -33,7 +33,7 @@
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. Revisitar a #41 (acima) · #52 ruído do LTeX+ no contexto (mesmo tema, pode entrar junto)
+1. #54 revisitar a #41 (acima) · #52 ruído do LTeX+ no contexto (mesmo tema, pode entrar junto)
 2. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step) escondido por `continue-on-error`; black usa 88 colunas e flake8 79 → #28 ordem de imports (talvez junto, se `ruff`)
 3. #26 `.gitignore` UTF-16 + portão de encoding
 4. #29 `find_element` com `visibility_of` (risco de flaky)

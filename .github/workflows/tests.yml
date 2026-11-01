@@ -250,3 +250,24 @@ jobs:
       - name: Run Pylint
         run: poetry run pylint **/*.py --exit-zero
         continue-on-error: true
+
+  # The single required check of this workflow (ruleset "Protect master").
+  # Matrix jobs are named after their values ("test (3.14)"): requiring them
+  # by name would block every PR after a version bump, waiting for a check
+  # that never runs. This job's name never changes.
+  # always(): a skipped required check counts as passed, so the gate must run
+  # (and fail) when a dependency fails. New jobs must be added to "needs";
+  # tests/test_ci_gate.py enforces it.
+  ci-passed:
+    runs-on: ubuntu-latest
+    needs: [smoke-matrix, test, build-report, lint]
+    if: ${{ always() }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Require every job to succeed
+        run: python3 scripts/check_needs.py
+        env:
+          NEEDS: ${{ toJSON(needs) }}

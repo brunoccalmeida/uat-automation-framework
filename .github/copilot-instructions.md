@@ -10,7 +10,7 @@ Nunca implemente código de produção sem antes ter um teste falhando.
 Toda decisão (código, testes, CI, ambiente, processo) segue as melhores práticas reconhecidas da indústria.
 
 - Havendo mais de um caminho, recomende o indicado pelas melhores práticas e cite o princípio que o sustenta (ex.: dev/prod parity, YAGNI, fail fast).
-- Toda pergunta de decisão ao usuário traz antes o que indicam as melhores práticas (princípio ou fonte) e a recomendação; o usuário decide já informado.
+- Antes de toda pergunta de decisão ao usuário, **consulte** as melhores práticas do tema (documentação oficial, projetos de referência), sem citar de memória; a pergunta diz explicitamente quais são, com as fontes, e traz a recomendação. O usuário decide já informado.
 - O padrão é aplicar a prática estabelecida (documentação oficial, consenso da indústria). Investigação ou medição sob medida só quando a economia esperada supera claramente o custo de investigar; estimativa e suposição são rotuladas como tais.
 - Não escolha atalhos por conveniência (ex.: contornar um problema de ambiente com código novo).
 - Desvios só com justificativa explícita, registrada no commit ou na documentação.

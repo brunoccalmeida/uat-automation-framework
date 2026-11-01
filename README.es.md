@@ -1,16 +1,18 @@
 <!-- LTeX: language=es -->
+<!-- translation-source: README.md sha256:7c4b138f167a3841cbd52e9956364b6a00eb470351f785edb061833617b1edff -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
+[![Security](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/security.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/brunoccalmeida/uat-automation-framework/branch/master/graph/badge.svg)](https://codecov.io/gh/brunoccalmeida/uat-automation-framework)
 [![Python Version](https://img.shields.io/badge/python-3.14-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **[English](README.md)** | **[Português (Brasil)](README.pt-BR.md)** | **[Español]**
 
-📊 **[Ver Informe de Pruebas](https://brunoccalmeida.github.io/uat-automation-framework/)**
+📊 **[Ver el Informe de Pruebas Más Reciente](https://brunoccalmeida.github.io/uat-automation-framework/)**
 
-Framework completo de automatización UAT utilizando Python, Behave (BDD) y Selenium para probar la aplicación e-commerce **Sauce Demo**.
+Framework completo de automatización UAT con Python, Behave (BDD) y Selenium para probar la aplicación de e-commerce **Sauce Demo**.
 
 ## 📑 Índice
 
@@ -24,29 +26,29 @@ Framework completo de automatización UAT utilizando Python, Behave (BDD) y Sele
 - [Contribuir](#-contribuir)
 - [Licencia](#-licencia)
 
-> **Nota**: Originalmente desarrollado para Parabank (demo bancario), migrado a Sauce Demo debido a problemas de inestabilidad de la instancia pública de Parabank. La arquitectura del framework permanece intacta y demuestra prácticas profesionales de testing.
+> **Nota**: Desarrollado originalmente para Parabank (demo bancaria), se migró a Sauce Demo por la inestabilidad de la instancia pública de Parabank. La arquitectura del framework sigue intacta y demuestra prácticas profesionales de testing.
 
 ## 🎯 Propósito
 
-Este framework demuestra prácticas profesionales de automatización UAT para aplicaciones web, incluyendo:
-- **Aplicación Objetivo**: [Sauce Demo](https://www.saucedemo.com) - demo e-commerce estable de Sauce Labs
+Este framework demuestra prácticas profesionales de automatización UAT para aplicaciones web, con:
+- **Aplicación objetivo**: [Sauce Demo](https://www.saucedemo.com) - demo de e-commerce estable de Sauce Labs
 - Behavior-Driven Development (BDD) con Behave
 - Patrón de diseño Page Object Model
-- Reportes completos con Allure
-- Usuarios de prueba preconfigurados (sin necesidad de gestión de credenciales)
+- Informes completos con Allure
+- Usuarios de prueba preconfigurados (sin gestión de credenciales)
 
 ### Usuarios de Prueba
 
-Sauce Demo proporciona usuarios de prueba preconfigurados (contraseña: `secret_sauce` para todos):
+Sauce Demo ofrece usuarios de prueba preconfigurados (contraseña `secret_sauce` para todos):
 
 - `standard_user` - Usuario normal, sin problemas
 - `locked_out_user` - Usuario bloqueado
 - `problem_user` - Usuario con fallos visuales
 - `performance_glitch_user` - Usuario con problemas de rendimiento
 - `error_user` - Usuario que encuentra errores
-- `visual_user` - Usuario con variaciones de prueba visual
+- `visual_user` - Usuario con variaciones para pruebas visuales
 
-**Seguridad**: No es necesario almacenar credenciales - los usuarios son proporcionados por la aplicación demo.
+**Seguridad**: No hace falta almacenar credenciales - los usuarios los proporciona la propia aplicación de demostración.
 
 ## 🏗️ Arquitectura
 
@@ -54,31 +56,31 @@ Sauce Demo proporciona usuarios de prueba preconfigurados (contraseña: `secret_
 uat-automation-framework/
 ├── core/              # Núcleo del framework (config, drivers, utilidades)
 ├── pages/             # Page Object Models
-├── features/          # Archivos de features BDD y definiciones de steps
+├── features/          # Archivos feature del BDD y step definitions
 ├── tests/             # Pruebas unitarias de los componentes del framework
-└── reports/           # Informes de ejecución de pruebas (gitignored)
+└── reports/           # Informes de ejecución (en .gitignore)
 ```
 
 ### Paradigma de Diseño: Enfoque Híbrido Pragmático
 
-Este framework utiliza un **enfoque híbrido OOP/Funcional**, eligiendo el paradigma correcto para cada componente:
+Este framework usa un **enfoque híbrido de programación OO/funcional**, eligiendo el paradigma adecuado para cada componente:
 
 **Programación Orientada a Objetos (60-70%)**
-- **Page Objects**: Encapsulan estado e interacciones de la página (ajuste natural para automatización de UI)
-- **Driver Manager**: Gestiona ciclo de vida y estado del WebDriver
-- **Clases Base**: Funcionalidad compartida a través de herencia cuando es apropiado
+- **Page Objects**: Encapsulan el estado y las interacciones de la página (encaje natural para automatización de UI)
+- **Driver Manager**: Gestiona el ciclo de vida y el estado del WebDriver
+- **Clases Base**: Funcionalidad compartida por herencia donde tiene sentido
 
 **Programación Funcional (30-40%)**
-- **Utilidades & Helpers**: Funciones puras para transformación y generación de datos
+- **Utilidades y Helpers**: Funciones puras para transformación y generación de datos
 - **Carga de Configuración**: Operaciones sin estado
-- **Definiciones de Steps**: Steps de Behave son naturalmente funcionales
+- **Step Definitions**: Los steps de Behave son naturalmente funcionales
 
 **Justificación:**
-- **Pragmatismo sobre pureza**: Usa OOP donde los patrones Selenium/Page Object encajan naturalmente
-- **Testabilidad**: Funciones puras para lógica de negocio facilitan pruebas unitarias
-- **Estándares de la industria**: Page Object Model es esperado en automatización de pruebas profesional
-- **Mantenibilidad**: Patrones familiares reducen carga cognitiva para colaboradores
-- **Zen de Python**: "La practicidad supera la pureza" - elige lo que funciona mejor para cada caso
+- **Pragmatismo sobre pureza**: OO donde los patrones de Selenium/Page Object encajan de forma natural
+- **Testabilidad**: Las funciones puras para la lógica de negocio facilitan las pruebas unitarias
+- **Estándares de la industria**: El Page Object Model es lo esperado en automatización de pruebas profesional
+- **Mantenibilidad**: Los patrones conocidos reducen la carga cognitiva de quien colabora
+- **Zen of Python**: "Practicality beats purity" - elegir lo que mejor funciona en cada caso
 
 ## 🚀 Primeros Pasos
 
@@ -86,71 +88,146 @@ Este framework utiliza un **enfoque híbrido OOP/Funcional**, eligiendo el parad
 
 - Python 3.14+
 - Poetry (gestión de dependencias)
-- Navegador Chrome
+- Navegador Chrome o Firefox (drivers gestionados automáticamente por Selenium Manager)
 
 ### Instalación
 
 ```bash
-# Instalar dependencias
+# Instalar las dependencias
 poetry install
 
-# Instalar hooks de pre-commit (configuración única)
+# Instalar los hooks de pre-commit (configuración única)
 poetry run pre-commit install
 ```
 
-**Hooks de Pre-commit:**
-El framework usa hooks de pre-commit para mantener calidad de código automáticamente:
-- ✅ **Black**: Formateo de código (88 caracteres por línea)
-- ✅ **Ruff**: Linting y aplicación de guía de estilo
-- ✅ **Pylint**: Análisis de código para errores y code smells
-- ✅ **Seguridad**: Detección de claves privadas, conflictos de merge
-- ✅ **Calidad**: Trailing whitespace, validación YAML
 
-Los hooks se ejecutan automáticamente en `git commit`. Ejecución manual: `pre-commit run --all-files`
+**Hooks de Pre-commit y Configuración de Lint:**
+Los hooks de `.pre-commit-config.yaml` son la puerta de lint: el job `lint` del CI ejecuta los mismos hooks (`pre-commit run --all-files`), sin carpetas excluidas y sin fallos ignorados (`tests/test_lint_gate.py`). Los linters se ejecutan con Poetry, así que sus versiones vienen del `poetry.lock`.
 
-### Ejecutando Pruebas
+- ✅ **Black**: Formato de código (88 columnas)
+- ✅ **Ruff**: Reglas de estilo y de error (`E`, `W`, `F` de flake8) y orden de imports (`I`), configuradas en `[tool.ruff.lint]` (`pyproject.toml`)
+- ✅ **Pylint**: Errores y code smells (`[tool.pylint.*]` en `pyproject.toml`; cada chequeo desactivado tiene su motivo al lado)
+- ✅ **Pyright**: Chequeo estático de tipos (`[tool.pyright]` en `pyproject.toml`; el editor usa el mismo verificador)
+- ✅ **Seguridad**: Detecta claves privadas y conflictos de merge
+- ✅ **Calidad**: Espacios al final de línea, validación de YAML, métricas de los READMEs y sus traducciones
+
+Los hooks se ejecutan automáticamente en `git commit`. Para ejecutarlos todos a mano: `pre-commit run --all-files`
+
+### Ejecutando las Pruebas
 
 **Pruebas BDD/E2E (Behave):**
 ```bash
 # Ejecutar todas las pruebas E2E (headless por defecto)
 poetry run behave
 
-# Ejecutar feature específica
+# Ejecutar una feature específica
 poetry run behave features/smoke.feature
 poetry run behave features/login.feature
 
-# Ejecutar con navegador visible (útil para debugging)
+# Ejecutar con el navegador visible (útil para depurar)
 poetry run behave -Dheadless=false
 
-# Sobrescribir a headless si es necesario
-poetry run behave -Dheadless=true
+# Ejecutar con Firefox (Chrome es el predeterminado)
+poetry run behave -Dbrowser=firefox
 
-# Ejecutar headless vía variable de entorno (útil para CI/CD)
+# Ejecutar Firefox en modo visible
+poetry run behave -Dbrowser=firefox -Dheadless=false
+
+# Ejecutar en modo headless con una variable de entorno (útil en CI/CD)
 $env:HEADLESS="true"; poetry run behave  # PowerShell
 export HEADLESS=true && poetry run behave  # Bash
 
-# Ejecutar con reporte Allure
+# Cambiar el navegador con una variable de entorno
+$env:BROWSER="firefox"; poetry run behave  # PowerShell
+export BROWSER=firefox && poetry run behave  # Bash
+
+# Ejecutar con informe Allure
 poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results
 
-# Generar y visualizar reporte Allure
+# Generar y abrir el informe Allure
 allure serve reports/allure-results
 ```
+
+**Ejecutando Pruebas por Tags:**
+
+El framework usa un sistema jerárquico de tags para filtrar las pruebas con precisión:
+
+```bash
+# Por capa de prueba
+poetry run behave --tags=@e2e              # Todas las pruebas E2E (predeterminado)
+
+# Por tipo de prueba
+poetry run behave --tags=@smoke            # Solo las smoke tests críticas
+poetry run behave --tags=@functional       # Escenarios de camino feliz
+poetry run behave --tags=@negative         # Casos negativos/límite
+poetry run behave --tags=@user_journey     # Flujos completos de usuario
+
+# Por dominio/feature
+poetry run behave --tags=@login            # Todas las pruebas de login (funcionales + negativas)
+poetry run behave --tags=@cart             # Todas las pruebas de carrito
+poetry run behave --tags=@checkout         # Todas las pruebas de checkout
+poetry run behave --tags=@sorting          # Todas las pruebas de ordenación
+
+# Por prioridad/casos especiales
+poetry run behave --tags=@critical         # Jornadas críticas de usuario
+poetry run behave --tags=@edgecase         # Bugs conocidos/casos límite
+poetry run behave --tags=@problem_user     # Escenarios del problem_user
+
+# Combinar tags (lógica Y)
+poetry run behave --tags=@cart --tags=@negative    # Solo las pruebas negativas de carrito
+poetry run behave --tags=@functional --tags=@cart  # Solo las pruebas funcionales de carrito
+
+# Excluir tags (lógica NO)
+poetry run behave --tags=~@edgecase        # Todo, menos los casos límite
+poetry run behave --tags=@e2e --tags=~@smoke  # E2E sin las smoke tests
+```
+
+**Jerarquía de Tags:**
+- **Capa**: `@e2e` (todas las features la usan)
+- **Tipo**: `@functional` | `@negative` | `@user_journey` | `@smoke` | `@edgecase`
+- **Dominio**: `@login` | `@cart` | `@checkout` | `@sorting`
+- **Prioridad**: `@critical` | `@problem_user`
+
+**Pruebas Cross-Browser:**
+
+El framework soporta los navegadores Chrome y Firefox. Usa los flags `-D` para sobrescribir la configuración predeterminada:
+
+```bash
+# Smoke tests con Firefox (headless)
+poetry run behave --tags=@smoke -Dbrowser=firefox -Dheadless=true
+
+# Smoke tests con Firefox (navegador visible)
+poetry run behave --tags=@smoke -Dbrowser=firefox -Dheadless=false
+
+# Todas las pruebas con Chrome (predeterminado)
+poetry run behave -Dbrowser=chrome
+
+# Sobrescribir varios valores de configuración
+poetry run behave -Dbrowser=firefox -Dheadless=false -Dtimeout=15
+```
+
+**Navegadores soportados:**
+- `chrome` (predeterminado) - Google Chrome con ChromeDriver
+- `firefox` - Mozilla Firefox con GeckoDriver
+
+**Nota**: Selenium Manager descarga y gestiona los drivers de los navegadores automáticamente - no hace falta instalar nada a mano.
+
 
 **Pruebas Unitarias (Pytest):**
 ```bash
 # Ejecutar todas las pruebas unitarias (ejecución paralela)
 poetry run pytest tests/ -n auto -v
 
-# Ejecutar con reporte de cobertura (paralelo)
+# Ejecutar con informe de cobertura (paralelo)
 poetry run pytest tests/ -n auto --cov=core --cov=pages --cov-report=term-missing
 
-# Ejecutar módulo de prueba específico
+# Ejecutar un módulo de prueba específico
 poetry run pytest tests/test_login_page.py -v
 
-# Ejecutar secuencialmente (para debugging)
+# Ejecutar secuencialmente (para depurar)
 poetry run pytest tests/ -n 0 -v
 
-# Ejecutar todas las pruebas (unit + integration + E2E)
+# Ejecutar todas las pruebas (unit + integración + E2E)
 poetry run pytest tests/ -n auto && poetry run pytest tests/integration/ -n auto && poetry run behave
 ```
 
@@ -159,7 +236,7 @@ poetry run pytest tests/ -n auto && poetry run pytest tests/integration/ -n auto
 # Ejecutar todas las pruebas de integración (ejecución paralela)
 poetry run pytest tests/integration/ -n auto -v
 
-# Ejecutar prueba de integración específica
+# Ejecutar una prueba de integración específica
 poetry run pytest tests/integration/test_login_page_integration.py -v
 
 # Ejecutar en modo headless (paralelo)
@@ -169,164 +246,57 @@ export HEADLESS=true && poetry run pytest tests/integration/ -n auto -v  # Bash
 
 **Ejecución Paralela:**
 
-Este framework soporta ejecución paralela de pruebas usando `pytest-xdist`:
-- **Rendimiento**: 88% más rápido (188 pruebas en ~37s vs ~305s)
-- **Seguridad**: Todas las pruebas son independientes (fixtures function-scoped)
-- **Automático**: Use `-n auto` para detectar núcleos de CPU automáticamente
-- **Debugging**: Use `-n 0` para deshabilitar paralelización
+Este framework soporta la ejecución paralela de pruebas con `pytest-xdist`:
+- **Rendimiento**: 88% más rápido (188 pruebas en ~37s frente a ~305s)
+- **Seguridad**: Todas las pruebas son independientes (fixtures con alcance de función)
+- **Automático**: Usa `-n auto` para detectar los núcleos de CPU automáticamente
+- **Depuración**: Usa `-n 0` para desactivar la paralelización
 
-Ver [docs/PARALLEL_TESTING.md](docs/PARALLEL_TESTING.md) para documentación detallada.
+Consulta [docs/PARALLEL_TESTING.md](docs/PARALLEL_TESTING.md) para la documentación detallada.
 
 **Configuración del Modo Headless:**
 
-El framework se ejecuta en **modo headless por defecto** (mejor práctica: más rápido, menos recursos, consistente con CI/CD).
+El framework se ejecuta en **modo headless por defecto** (buena práctica: más rápido, usa menos recursos, coherente con el CI/CD).
 
-Prioridad de configuración:
-1. **Parámetro CLI** (mayor): `-Dheadless=true/false`
+Prioridad de la configuración:
+1. **Parámetro de CLI** (mayor): `-Dheadless=true/false`
 2. **Variable de Entorno**: `HEADLESS=true/false`
-3. **Archivo de Config** (menor): `config.yaml` (predeterminado: `true`)
+3. **Archivo de Configuración** (menor): `config.yaml` (predeterminado: `true`)
 
-Usa `-Dheadless=false` para debugging con navegador visible.
+Usa `-Dheadless=false` para depurar con el navegador visible.
 
-Ver [CONFIGURATION.md](CONFIGURATION.md) para opciones detalladas de configuración.
+Consulta [CONFIGURATION.md](CONFIGURATION.md) para las opciones de configuración detalladas.
 
-## 🧪 Estrategia de Pruebas
+## 🔄 CI/CD
 
-Este framework implementa la arquitectura completa de la **Pirámide de Pruebas** con tres capas distintas:
-
-```
-        Pruebas E2E (BDD)         ← Lentas, Flujos Completos de Usuario
-      /-------------------\
-     / Pruebas Integración \      ← Medio, Página+Navegador
-    /-----------------------\
-   /   Pruebas Unitarias    \    ← Rápidas, Lógica de Componentes
-  /---------------------------\
-```
-
-**Distribución por Capa:**
-- **Pruebas Unitarias**: 132 pruebas (componentes del framework, 98% de cobertura)
-- **Pruebas de Integración**: 56 pruebas (Page Objects + navegador real, 100% de cobertura)
-- **Pruebas E2E**: 120 steps, 20 escenarios (jornadas completas de usuario)
-- **Total**: 308 pruebas en todas las capas
-
-**Cuándo Usar Cada Capa:**
-| Tipo de Prueba | Propósito | Velocidad | Navegador | Ejemplo |
-|----------------|-----------|-----------|-----------|---------|
-| **Unitaria** | Lógica de componente | Rápida | Mockeado | "¿El método `login()` llama los métodos correctos?" |
-| **Integración** | Página + DOM real | Media | Real | "¿Los campos de login existen y funcionan?" |
-| **E2E** | Flujos completos de usuario | Lenta | Real | "¿El usuario puede completar login→comprar→checkout?" |
-
-### Pruebas BDD/E2E (Behave)
-
-| Feature | Escenarios | Steps | Estado |
-|---------|------------|-------|--------|
-| **Pruebas de Smoke** | 4/4 ✅ | 14/14 ✅ | Completo |
-| **Login de Usuario** | 4/4 ✅ | 18/18 ✅ | Completo |
-| **Carrito de Compras** | 6/6 ✅ | 35/35 ✅ | Completo |
-| **Checkout** | 6/6 ✅ | 52/52 ✅ | Completo |
-| **TOTAL** | **20** | **120** | **100%** |
-
-### Pruebas Unitarias (Pytest)
-
-| Módulo | Pruebas | Cobertura | Estado |
-|--------|---------|-----------|--------|
-| **BasePage** | 19 | 100% | ✅ Completo |
-| **LoginPage** | 14 | 100% | ✅ Completo |
-| **CartPage** | 13 | 100% | ✅ Completo |
-| **InventoryPage** | 12 | 100% | ✅ Completo |
-| **CheckoutStepOnePage** | 13 | 100% | ✅ Completo |
-| **CheckoutStepTwoPage** | 15 | 100% | ✅ Completo |
-| **CheckoutCompletePage** | 12 | 100% | ✅ Completo |
-| **ConfigResolver** | 30 | 100% | ✅ Completo |
-| **Pruebas de Smoke** | 4 | N/A | ✅ Completo |
-| **TOTAL** | **132** | **98%** | **Completo** |
-
-**Cobertura de Código:**
-- **Módulo Pages**: 100% (194/194 statements)
-- **Módulo Core**: 95% (62/65 statements)
-- **Framework General**: 98%+
-
-### Pruebas de Integración (Pytest + Navegador Real)
-
-Las pruebas de integración validan Page Objects con interacciones reales de navegador, llenando el vacío entre pruebas unitarias (mockeadas) y pruebas E2E (flujos completos de usuario).
-
-| Módulo | Pruebas | Navegador | Estado |
-|--------|---------|-----------|--------|
-| **LoginPage** | 9 | Chrome | ✅ Completo |
-| **InventoryPage** | 9 | Chrome | ✅ Completo |
-| **CartPage** | 10 | Chrome | ✅ Completo |
-| **CheckoutStepOnePage** | 15 | Chrome | ✅ Completo |
-| **CheckoutStepTwoPage** | 13 | Chrome | ✅ Completo |
-| **TOTAL** | **56** | **Real** | **Completo** |
-
-**Principales Diferencias de las Pruebas Unitarias:**
-- ✅ Selenium WebDriver Real (no mockeado)
-- ✅ Validación de elementos DOM reales
-- ✅ Verificación verdadera de locators
-- ✅ Pruebas de interacción con navegador
-- ✅ Más rápido que E2E (sin flujos completos)
-- ✅ Cobertura completa de Page Objects (100%)
-
-### Escenarios de Prueba
-
-**Pruebas de Smoke**
-- ✅ Homepage carga y muestra correctamente
-- ✅ Elementos de formulario de login presentes y funcionales
-- ✅ Autenticación de usuario válido
-- ✅ Rechazo de credenciales inválidas
-
-**Login de Usuario**
-- ✅ Autenticación de usuario válido (standard_user)
-- ✅ Rechazo de credenciales inválidas
-- ✅ Detección de usuario bloqueado (locked_out_user)
-- ✅ Flujo de logout exitoso
-
-**Carrito de Compras**
-- ✅ Agregar producto único al carrito
-- ✅ Agregar múltiples productos al carrito
-- ✅ Visualizar contenido del carrito
-- ✅ Remover producto del carrito
-- ✅ Continuar comprando desde el carrito
-- ✅ Persistencia del carrito a través de navegación
-
-**Checkout**
-- ✅ Completar checkout con información válida
-- ✅ Validación para campos obligatorios
-- ✅ Resumen del pedido con detalles de precio
-- ✅ Cancelar checkout y retornar al carrito
-- ✅ Mensaje de confirmación del pedido
-- ✅ Limpieza del carrito post-compra
-
-## 📊 Informes de Prueba
-
-Los informes se generan en el directorio `reports/` y se excluyen automáticamente del control de versiones.
-
-```bash
-# Generar informe Allure
-poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results
-allure serve reports/allure-results
-```
-
-## 🔧 CI/CD
-
-El proyecto usa **GitHub Actions** para integración continua:
+El proyecto usa **GitHub Actions** para la integración continua:
 
 - ✅ **Pruebas automatizadas** en cada push y pull request
-- ✅ **Python 3.14** versión estable más reciente
-- ✅ **Ejecución headless** de navegador en ambiente CI
-- ✅ **Verificaciones de calidad de código** (Black, Ruff, Pylint, Pyright)
+- ✅ **Python 3.14**, la versión estable más reciente
+- ✅ Ejecución con **navegador headless** en el entorno de CI
+- ✅ Chequeos de **calidad de código** (Black, Ruff, Pylint, Pyright)
 - ✅ **Artefactos de prueba** subidos para revisión
 - ✅ **Informes Allure** publicados en GitHub Pages con historial
+- ✅ **Auditoría de vulnerabilidades** con `pip-audit` (PyPI/OSV) en cada pull request y a diario, como segunda fuente junto a Dependabot (GitHub Advisory Database)
 
-**Ver Informes de Prueba:** [https://brunoccalmeida.github.io/uat-automation-framework/](https://brunoccalmeida.github.io/uat-automation-framework/)
+**Ver los Informes de Prueba:** [https://brunoccalmeida.github.io/uat-automation-framework/](https://brunoccalmeida.github.io/uat-automation-framework/)
 
 Los informes incluyen:
-- Tendencias e historial de ejecución de pruebas (últimas 20 ejecuciones)
-- Resultados detallados de pruebas con screenshots en caso de fallo
-- Métricas de duración y seguimiento de rendimiento
-- Categorización por features y escenarios
+- Tendencias e historial de ejecución (últimas 20 ejecuciones)
+- Resultados detallados con capturas de pantalla en los fallos
+- Métricas de duración y seguimiento del rendimiento
+- Organización por features y escenarios
 
-Ver [.github/workflows/tests.yml](.github/workflows/tests.yml) para configuración del pipeline.
+Consulta [.github/workflows/tests.yml](.github/workflows/tests.yml) y [.github/workflows/security.yml](.github/workflows/security.yml) para la configuración del pipeline.
+
+**Auditando las dependencias en local** (mismo comando y misma versión fijada que el CI):
+
+```bash
+poetry sync --no-root            # deja el entorno idéntico al poetry.lock
+poetry run pip-audit --strict    # falla con cualquier vulnerabilidad conocida o paquete no auditable
+```
+
+Cualquier vulnerabilidad conocida hace fallar el check `pip-audit`. Para aceptar una, añade `--ignore-vuln <ID>` en `security.yml` con la justificación y la issue que sigue su eliminación.
 
 ## 🛠️ Stack Tecnológico
 
@@ -337,39 +307,188 @@ Ver [.github/workflows/tests.yml](.github/workflows/tests.yml) para configuraci�
 - **Allure**: Informes de prueba con historial y tendencias
 - **Poetry**: Gestión de dependencias
 - **GitHub Actions**: Pipeline de CI/CD
-- **GitHub Pages**: Hosting de informes de prueba en vivo
+- **GitHub Pages**: Alojamiento del informe de pruebas en vivo
+
+## 🧪 Estrategia de Pruebas
+
+Este framework implementa la arquitectura completa de la **Pirámide de Pruebas**, con tres capas distintas:
+
+```
+      Pruebas E2E (BDD)           ← Lentas, flujos completos de usuario
+      /-------------------\
+     / Pruebas Integración \      ← Medias, página + navegador
+    /-----------------------\
+   /    Pruebas Unitarias    \    ← Rápidas, lógica de componente
+  /---------------------------\
+```
+
+**Distribución por Capa:**
+- **Pruebas Unitarias**: 364 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
+- **Pruebas de Integración**: 71 pruebas (Page Objects + navegador real, incluida la sincronización de la navegación)
+- **Pruebas E2E**: 55 escenarios, 386 steps (jornadas completas de usuario)
+- **Total**: 435 pruebas unitarias/de integración + 55 escenarios E2E
+
+**Cuándo Usar Cada Capa:**
+| Tipo de Prueba | Propósito | Velocidad | Navegador | Ejemplo |
+|----------------|-----------|-----------|-----------|---------|
+| **Unitaria** | Lógica de componente | Rápida | Mockeado | "¿`login()` llama a los métodos correctos?" |
+| **Integración** | Página + DOM real | Media | Real | "¿Los campos de login existen y funcionan?" |
+| **E2E** | Flujos completos de usuario | Lenta | Real | "¿El usuario puede completar login→compra→checkout?" |
+
+### Pruebas BDD/E2E (Behave)
+
+| Feature | Fuente | Escenarios | Steps | Estado |
+|---------|--------|------------|-------|--------|
+| **Smoke Tests** | `features/smoke.feature` | 4 | 14 | ✅ Completo |
+| **Login de Usuario** | `features/login.feature`, `features/login_negative.feature` | 9 | 42 | ✅ Completo |
+| **Carrito de Compras** | `features/cart.feature`, `features/cart_negative.feature` | 11 | 65 | ✅ Completo |
+| **Checkout** | `features/checkout.feature`, `features/checkout_negative.feature` | 12 | 95 | ✅ Completo |
+| **Ordenación de Productos** | `features/product_sorting.feature`, `features/product_sorting_negative.feature`, `features/product_sorting_problem_user.feature` | 14 | 92 | ✅ Completo |
+| **Jornada del Usuario** | `features/user_journey_purchase.feature`, `features/user_journey_variations.feature`, `features/problem_user_journey.feature` | 5 | 78 | ✅ Completo |
+| **TOTAL** | | **55** | **386** | **100%** |
+
+### Pruebas Unitarias (Pytest)
+
+| Módulo | Fuente | Pruebas | Cobertura | Estado |
+|--------|--------|---------|-----------|--------|
+| **BasePage** | `tests/test_base_page.py` | 23 | 100% | ✅ Completo |
+| **LoginPage** | `tests/test_login_page.py` | 14 | 100% | ✅ Completo |
+| **CartPage** | `tests/test_cart_page.py` | 13 | 100% | ✅ Completo |
+| **InventoryPage** | `tests/test_inventory_page.py` | 26 | 100% | ✅ Completo |
+| **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 13 | 100% | ✅ Completo |
+| **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 15 | 100% | ✅ Completo |
+| **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 12 | 100% | ✅ Completo |
+| **ConfigResolver** | `tests/test_config_resolver.py` | 40 | 100% | ✅ Completo |
+| **DriverManager** | `tests/test_driver_manager.py` | 19 | 100% | ✅ Completo |
+| **Steps de login (lógica O)** | `tests/test_login_steps.py` | 9 | N/A | ✅ Completo |
+| **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Completo |
+| **Fijación de las actions (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Completo |
+| **Puerta del CI (check obligatorio)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Completo |
+| **Subida a Codecov (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Completo |
+| **Reglas del agente (tamaño, sincronía, diagnósticos del editor, code intelligence)** | `tests/test_agent_rules.py` | 28 | N/A | ✅ Completo |
+| **Hook de salida de pruebas del agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
+| **Puerta de lint (pre-commit + CI + orden de imports en el editor, ruff en lugar de flake8)** | `tests/test_lint_gate.py` | 22 | N/A | ✅ Completo |
+| **Métricas de los READMEs (sincronía por fila desde la columna Fuente, traducciones)** | `tests/test_validate_readme_metrics.py` | 44 | N/A | ✅ Completo |
+| **Puerta de codificación (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
+| **Clave de caché del venv (CI, versión exacta de Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
+| **TOTAL** | | **364** | **100%** | **Completo** |
+
+**Cobertura de Código:**
+- **Total de statements:** 346
+- **Cubiertos:** 345 (99%)
+- **Módulo Pages**: 100%
+- **Módulo Core**: 99% (1 línea sin cubrir en `core/config.py`)
+
+### Pruebas de Integración (Pytest + Navegador Real)
+
+Las pruebas de integración validan los Page Objects con interacciones reales en el navegador, cubriendo el hueco entre las pruebas unitarias (mockeadas) y las E2E (flujos completos).
+
+| Módulo | Fuente | Pruebas | Navegador | Estado |
+|--------|--------|---------|-----------|--------|
+| **LoginPage** | `tests/integration/test_login_page_integration.py` | 9 | Chrome | ✅ Completo |
+| **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 10 | Chrome | ✅ Completo |
+| **InventoryPage (ordenación)** | `tests/integration/test_inventory_sorting_integration.py` | 1 | Chrome | ✅ Completo |
+| **CartPage** | `tests/integration/test_cart_page_integration.py` | 10 | Chrome | ✅ Completo |
+| **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 15 | Chrome | ✅ Completo |
+| **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 13 | Chrome | ✅ Completo |
+| **Sincronización de la navegación** | `tests/integration/test_navigation_integration.py` | 13 | Chrome | ✅ Completo |
+| **TOTAL** | | **71** | **Real** | **Completo** |
+
+**Diferencias con las Pruebas Unitarias:**
+- ✅ Selenium WebDriver real (no mockeado)
+- ✅ Validación de elementos reales del DOM
+- ✅ Verificación real de los locators
+- ✅ Pruebas de las interacciones con el navegador
+- ✅ Más rápidas que las E2E (sin flujos completos)
+- ✅ Cobertura completa de los Page Objects (100%)
+
+### Escenarios de Prueba
+
+**Smoke Tests**
+- ✅ La página de inicio carga y se muestra correctamente
+- ✅ Elementos del formulario de login presentes y funcionando
+- ✅ Autenticación de usuario válido
+- ✅ Rechazo de credenciales inválidas
+
+**Login de Usuario**
+- ✅ Autenticación de usuario válido (standard_user)
+- ✅ Rechazo de credenciales inválidas
+- ✅ Detección de usuario bloqueado (locked_out_user)
+- ✅ Flujo de logout correcto
+
+**Carrito de Compras**
+- ✅ Añadir un producto al carrito
+- ✅ Añadir varios productos al carrito
+- ✅ Ver el contenido del carrito
+- ✅ Eliminar un producto del carrito
+- ✅ Seguir comprando desde el carrito
+- ✅ Carrito conservado durante la navegación
+
+**Checkout**
+- ✅ Checkout completo con información válida
+- ✅ Validación de los campos obligatorios
+- ✅ Resumen del pedido con detalle de precios
+- ✅ Cancelar el checkout y volver al carrito
+- ✅ Mensaje de confirmación del pedido
+- ✅ Carrito vacío después de la compra
+
+### Casos Límite y Bugs Conocidos
+
+Algunos usuarios de Sauce Demo (sobre todo `problem_user`) están diseñados a propósito para mostrar bugs o comportamientos no estándar, como fallos de ordenación o defectos visuales. Para mantener la suite clara y fácil de mantener:
+
+- **Los escenarios de usuario normal** están en sus respectivos archivos feature (p. ej., `product_sorting.feature`).
+- **Los casos límite y bugs conocidos** (como el bug de ordenación de `problem_user`) están aislados en archivos feature dedicados (p. ej., [`product_sorting_problem_user.feature`](features/product_sorting_problem_user.feature)), con el tag `@edgecase`.
+
+¿Por qué esta separación?
+- Mantiene los requisitos de negocio y las pruebas de regresión limpios y enfocados
+- Facilita ejecutar solo los escenarios de casos límite: `poetry run behave --tags=edgecase`
+- Simplifica el mantenimiento cuando se corrigen bugs o aparecen nuevos casos límite
+- Mejora los informes y la comunicación con las partes interesadas
+
+> Si el comportamiento de la aplicación cambia (p. ej., se corrige un bug), actualiza o elimina el escenario de caso límite correspondiente.
+
+## 📊 Informes de Prueba
+
+Los informes se generan en la carpeta `reports/` y quedan fuera del control de versiones automáticamente.
+
+```bash
+# Generar el informe Allure
+poetry run behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results
+allure serve reports/allure-results
+```
 
 ## 🎯 Roadmap
 
 Mejoras futuras siguiendo las mejores prácticas de la industria:
 
-- [x] **Ejecución Paralela** - pytest-xdist implementado (88% más rápido, ~37s para 188 pruebas)
-- [ ] **Pruebas Cross-browser** - Soporte para Firefox y Edge
-- [ ] **Containerización Docker** - Ambientes de ejecución consistentes
-- [ ] **Pruebas de Regresión Visual** - Integración Percy/Applitools
+- [x] **Ejecución Paralela** - pytest-xdist implementado (88% más rápido)
+- [x] **Pruebas Cross-browser** - Soporte de Chrome + Firefox con jerarquía CLI/ENV/config
+- [x] **Matriz en el CI** - Las smoke tests se ejecutan en los dos navegadores automáticamente
+- [ ] **Contenerización con Docker** - Entornos de ejecución coherentes
+- [ ] **Pruebas de Regresión Visual** - Integración con Percy/Applitools
 - [ ] **Pruebas de API** - Feedback más rápido con pruebas a nivel de API
 
 ## 🤝 Contribuir
 
-Este es un proyecto de portafolio demostrando prácticas profesionales de automatización UAT siguiendo:
-- **Pirámide de Pruebas**: Pruebas Unit → Integration → E2E (separación apropiada de capas)
-- **TDD/BDD Outside-in**: Ciclo Red-Green-Refactor para todo código de producción
-- **Page Object Model**: Separación limpia de lógica de prueba de interacciones de página
-- **Esperas Explícitas**: Sin `time.sleep()` - estrategias apropiadas de espera de Selenium
-- **Commits Atómicos**: Formato Conventional Commits para historial claro
-- **Código Auto-documentado**: Docstrings completos y type hints
-- **Integración CI/CD**: Pruebas automatizadas en cada push
-- **Informes en Vivo**: Hosting en GitHub Pages con informes Allure e historial
+Este es un proyecto de portafolio que demuestra prácticas profesionales de automatización UAT, siguiendo:
+- **Pirámide de Pruebas**: Pruebas unitarias → integración → E2E (separación correcta de las capas)
+- **TDD/BDD de fuera hacia dentro**: Ciclo Red-Green-Refactor para todo el código de producción
+- **Page Object Model**: Separación clara entre la lógica de prueba y las interacciones con la página
+- **Esperas Explícitas**: Nada de `time.sleep()` - estrategias de espera adecuadas de Selenium
+- **Commits Atómicos**: Formato Conventional Commits para un historial claro
+- **Código Autodocumentado**: Docstrings completas y type hints
+- **Integración con CI/CD**: Pruebas automatizadas en cada push
+- **Informes en Vivo**: Alojamiento en GitHub Pages con informes Allure e historial
 
 ## 📚 Historia del Proyecto
 
-**Nota de Migración**: Este framework fue originalmente desarrollado para Parabank (demo bancario) y migrado exitosamente a Sauce Demo en <1 hora, probando la robustez de su arquitectura. Todos los patrones de diseño principales (BDD, POM, mejores prácticas Selenium) permanecieron sin cambios, demostrando verdadera portabilidad de framework.
+**Nota de Migración**: Este framework se desarrolló originalmente para Parabank (demo bancaria) y se migró con éxito a Sauce Demo en menos de 1 hora, lo que demuestra la robustez de su arquitectura. Todos los patrones de diseño centrales (BDD, POM, buenas prácticas de Selenium) se mantuvieron, demostrando la portabilidad real del framework.
 
 ## 📄 Licencia
 
-Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+Licencia MIT - consulta el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
-**Autor**: Bruno Almeida
+**Autor**: Bruno Almeida, QA Automation Engineer / SDET · [LinkedIn](https://www.linkedin.com/in/brunoccalmeida/)
 **Propósito**: Portafolio profesional y demostración de automatización UAT

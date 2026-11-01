@@ -29,7 +29,7 @@ Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** 
 2. Issues em dia: resolvidas fechadas pelo PR (`Closes #N`); pendências descobertas registradas como novas issues.
 3. `docs/PROJECT_SESSION_SUMMARY.md` atualizado: estado atual, decisões e próxima missão recomendada.
 4. README.md (incluindo métricas) atualizado.
-5. Avisar o usuário que a missão terminou e que o próximo chat pode começar, pedindo que rode `/usage` antes do `/clear` para medir o gasto (ver `docs/AGENT_TOKEN_SPEND.md`).
+5. Avisar o usuário que a missão terminou e que o próximo chat pode começar.
 
 ## Gasto de tokens (contexto)
 Cada turno reenvia todo o contexto; contexto longo custa mais e piora a aderência às regras. Fontes, porquês e medição: `docs/AGENT_TOKEN_SPEND.md`.
@@ -39,6 +39,7 @@ Cada turno reenvia todo o contexto; contexto longo custa mais e piora a aderênc
 - **Filtre saídas na origem** (`grep`, `head`, `--jq`, `gh run view --log-failed`, leitura por trecho); nunca despeje log de CI ou notas de versão inteiras.
 - **Documentação web por seção, não página inteira:** sumário (`curl -s <url>.md | grep -n '^##'`) e depois só a seção (`sed -n '/^### X/,/^### /p'`). O WebFetch devolve docs em Markdown crus e inteiros.
 - **Subagente só com motivo**: trabalho paralelo independente, isolar saída volumosa ou revisor independente. Ele recomeça do zero e soma requisições. Tarefa simples: modelo menor (`model: haiku`); revisor mantém o modelo da sessão.
+- **Medir antes e depois de cada mudança que promete economia** (`/context`, tamanho da saída), não por rotina: o `/usage` por missão não distinguia o sinal do arredondamento.
 - **Modelo e esforço fixos durante o chat** (trocar invalida o cache). Duas correções sem sucesso: `/clear` e um prompt melhor.
 
 ## TDD/BDD: duplo ciclo

@@ -116,7 +116,9 @@ Ortografia ficou só com o Code Spell Checker (`cSpell.language: "en,pt_BR,es"`,
 
 A recomendação "Trim CLAUDE.md" não apareceu. Este chat inclui ~14 KB das próprias consultas de diagnóstico.
 
-### Registro por missão (`/usage` antes do `/clear`)
+### Registro por missão (`/usage` antes do `/clear`): encerrado
+
+**Encerrado em 01/11/2026, após três registros, por decisão do dono.** Critério: métrica só se paga se puder mudar uma decisão e se resolver o efeito que se quer ver. Aqui, a semana andou ~1 p.p. por missão, o mesmo tamanho do arredondamento do diálogo; a sessão de 5 h não é comparável sem saber quando a janela reiniciou; as fatias ficaram paradas (52–55) com ou sem subagente, porque somam as sessões das 24 h. Nenhuma decisão saiu desses registros, e cada um custava um PR com ciclo de CI (o do #26 ficou aberto e travou o início do chat seguinte). No lugar: medição **antes/depois de cada mudança que promete economia** (`/context`, tamanho da saída), como no #65; o % semanal fica como alarme, sem registro.
 
 Mesma fonte e mesma ressalva: % do limite e fatias de 24 h somando as sessões da máquina; a missão não fica isolada.
 
@@ -172,9 +174,9 @@ Fontes primárias: [Anthropic, *Effective context engineering for AI agents*, 29
 | Plugin de *code intelligence* (`pyright-lsp`, oficial) | costs · [code intelligence][ci] | `pipx` + plugin no escopo do projeto | **Adotado** (#63; ver Práticas adotadas) |
 | Desligar servidores MCP sem uso (`/mcp`) | costs | Conectores da conta claude.ai ativos | **Adotar**: ação do dono no `/mcp`, sem medição sob medida (#61 fechada) |
 | Instruções de compactação | costs | Não há | Não se aplica: `/clear` no lugar de `/compact` |
-| Medir antes de otimizar; ler a fatia corretamente | costs | `/usage` no fim da missão | Adotado: leitura da fatia corrigida em "Sinais de desperdício" |
+| Medir antes de otimizar; ler a fatia corretamente | costs | Antes/depois de cada mudança que promete economia | Adotado: leitura da fatia corrigida em "Sinais de desperdício"; registro por missão encerrado (ver "Registro por missão") |
 
-**Antes/depois:** o `/usage` no fim de cada missão segue como medida; não há medição sob medida planejada.
+**Antes/depois:** medido a cada mudança que promete economia (`/context`, tamanho da saída); o registro de `/usage` por missão foi encerrado (ver "Registro por missão").
 
 [ce]: https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
 [rot]: https://www.trychroma.com/research/context-rot

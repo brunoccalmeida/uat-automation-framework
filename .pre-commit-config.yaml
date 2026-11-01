@@ -46,7 +46,8 @@ repos:
         name: Validate README.md metrics
         entry: poetry run python scripts/validate_readme_metrics.py
         language: system
-        files: ^README\.md$
+        # The counts change with the tests, not only with README.md (#34).
+        files: ^(README\.md|tests/.*\.py|features/.*\.feature)$
         pass_filenames: false
 
       # Git reads UTF-16 byte by byte: a UTF-16 .gitignore line matched

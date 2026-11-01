@@ -322,10 +322,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 326 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 348 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 71 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 55 scenarios, 386 steps (complete user journeys)
-- **Total**: 397 unit/integration tests + 55 E2E scenarios
+- **Total**: 419 unit/integration tests + 55 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -336,41 +336,41 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 
 ### BDD/E2E Tests (Behave)
 
-| Feature | Scenarios | Steps | Status |
-|---------|-----------|-------|--------|
-| **Smoke Tests** | 8/8 ✅ | 33/33 ✅ | Complete |
-| **User Login** | 6/6 ✅ | 26/26 ✅ | Complete |
-| **Shopping Cart** | 8/8 ✅ | 59/59 ✅ | Complete |
-| **Checkout** | 8/8 ✅ | 73/73 ✅ | Complete |
-| **Product Sorting** | 12/12 ✅ | 86/86 ✅ | Complete |
-| **User Journey** | 13/13 ✅ | 109/109 ✅ | Complete |
-| **TOTAL** | **55** | **386** | **100%** |
+| Feature | Source | Scenarios | Steps | Status |
+|---------|--------|-----------|-------|--------|
+| **Smoke Tests** | `features/smoke.feature` | 4 | 14 | ✅ Complete |
+| **User Login** | `features/login.feature`, `features/login_negative.feature` | 9 | 42 | ✅ Complete |
+| **Shopping Cart** | `features/cart.feature`, `features/cart_negative.feature` | 11 | 65 | ✅ Complete |
+| **Checkout** | `features/checkout.feature`, `features/checkout_negative.feature` | 12 | 95 | ✅ Complete |
+| **Product Sorting** | `features/product_sorting.feature`, `features/product_sorting_negative.feature`, `features/product_sorting_problem_user.feature` | 14 | 92 | ✅ Complete |
+| **User Journey** | `features/user_journey_purchase.feature`, `features/user_journey_variations.feature`, `features/problem_user_journey.feature` | 5 | 78 | ✅ Complete |
+| **TOTAL** | | **55** | **386** | **100%** |
 
 ### Unit Tests (Pytest)
 
-| Module | Tests | Coverage | Status |
-|--------|-------|----------|--------|
-| **BasePage** | 23 | 100% | ✅ Complete |
-| **LoginPage** | 14 | 100% | ✅ Complete |
-| **CartPage** | 13 | 100% | ✅ Complete |
-| **InventoryPage** | 26 | 100% | ✅ Complete |
-| **CheckoutStepOnePage** | 13 | 100% | ✅ Complete |
-| **CheckoutStepTwoPage** | 15 | 100% | ✅ Complete |
-| **CheckoutCompletePage** | 12 | 100% | ✅ Complete |
-| **ConfigResolver** | 40 | 100% | ✅ Complete |
-| **DriverManager** | 19 | 100% | ✅ Complete |
-| **Login steps (OR logic)** | 9 | N/A | ✅ Complete |
-| **Smoke Tests** | 4 | N/A | ✅ Complete |
-| **Workflow pinning (CI)** | 24 | N/A | ✅ Complete |
-| **CI gate (required check)** | 16 | N/A | ✅ Complete |
-| **Codecov upload (CI)** | 6 | N/A | ✅ Complete |
-| **Agent rules (size, sync, editor diagnostics, code intelligence)** | 28 | N/A | ✅ Complete |
-| **Agent test-output hook** | 21 | N/A | ✅ Complete |
-| **Lint gate (pre-commit + CI + editor import order, ruff replaces flake8)** | 22 | N/A | ✅ Complete |
-| **README metrics validator** | 6 | N/A | ✅ Complete |
-| **Text encoding gate (pre-commit, `.gitattributes`)** | 12 | N/A | ✅ Complete |
-| **Venv cache key (CI, exact Python version)** | 3 | N/A | ✅ Complete |
-| **TOTAL** | **326** | **100%** | **Complete** |
+| Module | Source | Tests | Coverage | Status |
+|--------|--------|-------|----------|--------|
+| **BasePage** | `tests/test_base_page.py` | 23 | 100% | ✅ Complete |
+| **LoginPage** | `tests/test_login_page.py` | 14 | 100% | ✅ Complete |
+| **CartPage** | `tests/test_cart_page.py` | 13 | 100% | ✅ Complete |
+| **InventoryPage** | `tests/test_inventory_page.py` | 26 | 100% | ✅ Complete |
+| **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 13 | 100% | ✅ Complete |
+| **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 15 | 100% | ✅ Complete |
+| **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 12 | 100% | ✅ Complete |
+| **ConfigResolver** | `tests/test_config_resolver.py` | 40 | 100% | ✅ Complete |
+| **DriverManager** | `tests/test_driver_manager.py` | 19 | 100% | ✅ Complete |
+| **Login steps (OR logic)** | `tests/test_login_steps.py` | 9 | N/A | ✅ Complete |
+| **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Complete |
+| **Workflow pinning (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Complete |
+| **CI gate (required check)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Complete |
+| **Codecov upload (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Complete |
+| **Agent rules (size, sync, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 28 | N/A | ✅ Complete |
+| **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
+| **Lint gate (pre-commit + CI + editor import order, ruff replaces flake8)** | `tests/test_lint_gate.py` | 22 | N/A | ✅ Complete |
+| **README metrics (per-row sync from the Source column)** | `tests/test_validate_readme_metrics.py` | 28 | N/A | ✅ Complete |
+| **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
+| **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Complete |
+| **TOTAL** | | **348** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 346
@@ -382,16 +382,16 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 
 Integration tests validate Page Objects with real browser interactions, filling the gap between unit tests (mocked) and E2E tests (full user flows).
 
-| Module | Tests | Browser | Status |
-|--------|-------|---------|--------|
-| **LoginPage** | 9 | Chrome | ✅ Complete |
-| **InventoryPage** | 10 | Chrome | ✅ Complete |
-| **InventoryPage (sorting)** | 1 | Chrome | ✅ Complete |
-| **CartPage** | 10 | Chrome | ✅ Complete |
-| **CheckoutStepOnePage** | 15 | Chrome | ✅ Complete |
-| **CheckoutStepTwoPage** | 13 | Chrome | ✅ Complete |
-| **Navigation synchronization** | 13 | Chrome | ✅ Complete |
-| **TOTAL** | **71** | **Real** | **Complete** |
+| Module | Source | Tests | Browser | Status |
+|--------|--------|-------|---------|--------|
+| **LoginPage** | `tests/integration/test_login_page_integration.py` | 9 | Chrome | ✅ Complete |
+| **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 10 | Chrome | ✅ Complete |
+| **InventoryPage (sorting)** | `tests/integration/test_inventory_sorting_integration.py` | 1 | Chrome | ✅ Complete |
+| **CartPage** | `tests/integration/test_cart_page_integration.py` | 10 | Chrome | ✅ Complete |
+| **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 15 | Chrome | ✅ Complete |
+| **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 13 | Chrome | ✅ Complete |
+| **Navigation synchronization** | `tests/integration/test_navigation_integration.py` | 13 | Chrome | ✅ Complete |
+| **TOTAL** | | **71** | **Real** | **Complete** |
 
 **Key Differences from Unit Tests:**
 - ✅ Real Selenium WebDriver (not mocked)

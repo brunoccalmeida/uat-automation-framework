@@ -7,7 +7,7 @@ Feature: Complete Purchase - Multiple User Journeys
   @e2e @user_journey @multiple_items
   Scenario: Customer buys multiple products
     Given I am on the Sauce Demo login page
-    When I login with username "standard_user" and password "secret_sauce"
+    When I log in as "standard_user"
     Then I should be on the inventory page
     When I add "Sauce Labs Backpack" to the cart
     And I add "Sauce Labs Bike Light" to the cart
@@ -35,7 +35,7 @@ Feature: Complete Purchase - Multiple User Journeys
   @e2e @user_journey @price_conscious
   Scenario: Price-conscious shopper compares before buying
     Given I am on the Sauce Demo login page
-    When I login with username "standard_user" and password "secret_sauce"
+    When I log in as "standard_user"
     Then I should be on the inventory page
     When I sort products by price low to high
     And I add the first product to cart
@@ -56,7 +56,7 @@ Feature: Complete Purchase - Multiple User Journeys
   @e2e @user_journey @cart_management
   Scenario: Customer adds multiple items then removes some
     Given I am on the Sauce Demo login page
-    When I login with username "standard_user" and password "secret_sauce"
+    When I log in as "standard_user"
     Then I should be on the inventory page
     When I add "Sauce Labs Backpack" to the cart
     And I add "Sauce Labs Bike Light" to the cart

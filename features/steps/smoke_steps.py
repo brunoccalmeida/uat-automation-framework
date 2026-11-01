@@ -9,7 +9,7 @@ Basic validation steps to ensure application is operational.
 
 from behave import given, then, when
 
-from core.config import get_base_url
+from core.config import get_base_url, get_default_password
 from pages.inventory_page import InventoryPage
 from pages.login_page import LoginPage
 
@@ -66,7 +66,7 @@ def step_verify_login_button(context):
 @when("I enter valid credentials")
 def step_enter_valid_credentials(context):
     """Enter valid test credentials (standard_user)."""
-    context.login_page.login("standard_user", "secret_sauce")
+    context.login_page.login("standard_user", get_default_password(context.config_data))
 
 
 @when("I enter invalid credentials")

@@ -5,7 +5,7 @@ Provides shared fixtures for integration testing with real browsers.
 
 import pytest
 
-from core.config import get_base_url, load_config
+from core.config import get_base_url, get_default_password, load_config
 from tests.helpers.driver_setup import make_driver_manager
 from tests.helpers.navigation import (
     go_to_cart,
@@ -38,6 +38,12 @@ def fixture_base_url():
     """
     config = load_config()
     return get_base_url(config)
+
+
+@pytest.fixture(name="password")
+def fixture_password():
+    """Get the test users' password from configuration."""
+    return get_default_password(load_config())
 
 
 @pytest.fixture(name="authenticated_driver")

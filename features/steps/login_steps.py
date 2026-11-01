@@ -9,7 +9,7 @@ Implements BDD steps for user login scenarios.
 
 from behave import given, then, when
 
-from core.config import get_base_url
+from core.config import get_base_url, get_default_password
 from pages.inventory_page import InventoryPage
 from pages.login_page import LoginPage
 
@@ -28,7 +28,7 @@ def step_logged_in_as_user(context, username):
     base_url = get_base_url(context.config_data)
     context.driver.get(base_url)
     context.login_page = LoginPage(context.driver)
-    context.login_page.login(username, "secret_sauce")
+    context.login_page.login(username, get_default_password(context.config_data))
     context.inventory_page = InventoryPage(context.driver)
 
 
@@ -36,6 +36,12 @@ def step_logged_in_as_user(context, username):
 def step_enter_username(context, username):
     """Enter username into login form."""
     context.login_page.enter_username(username)
+
+
+@when('I log in as "{username}"')
+def step_log_in_as(context, username):
+    """Log in as a pre-configured test user with the configured password."""
+    context.login_page.login(username, get_default_password(context.config_data))
 
 
 @when('I login with username "{username}" and password "{password}"')

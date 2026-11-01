@@ -3,7 +3,8 @@
 Each table row names its test files in a Source column; the hook rewrites the
 counts of every row, the TOTAL rows and the layer summary from the collected
 counts, and fails when it changed something (#34: a check of the total alone
-accepted any split that summed right).
+accepted any split that summed right). The translations (#39) get the same
+rewrite with their own labels, and fail when README.md changed after them.
 """
 
 import re
@@ -64,6 +65,56 @@ def _readme(base=23, total=37, scenarios=11, steps=65, unit=37):
             SUMMARY.format(unit=unit),
         ]
     )
+
+
+PT_TABLE = """\
+| Módulo | Fonte | Testes | Cobertura |
+|--------|-------|--------|-----------|
+| **BasePage** | `tests/test_base_page.py` | {base} | 100% |
+| **LoginPage** | `tests/test_login_page.py` | 14 | 100% |
+| **TOTAL** | | **{total}** | **100%** |
+"""
+
+PT_INTEGRATION_TABLE = """\
+| Módulo | Fonte | Testes | Navegador |
+|--------|-------|--------|-----------|
+| **CartPage** | `tests/integration/test_cart_page_integration.py` | 10 | Chrome |
+| **TOTAL** | | **10** | **Real** |
+"""
+
+PT_BEHAVE_TABLE = """\
+| Feature | Fonte | Cenários | Steps |
+|---------|-------|----------|-------|
+| **Carrinho** | `features/cart.feature`, `features/cart_neg.feature` | 11 | 65 |
+| **TOTAL** | | **11** | **65** |
+"""
+
+PT_SUMMARY = """\
+- **Testes Unitários**: {unit} testes (componentes do framework)
+- **Testes de Integração**: 10 testes (Page Objects + navegador real)
+- **Testes E2E**: 11 cenários, 65 steps (jornadas completas de usuário)
+- **Total**: 47 testes unitários/de integração + 11 cenários E2E
+"""
+
+
+def _translation(marker, base=23, total=37, unit=37):
+    return "\n".join(
+        [
+            marker,
+            PT_TABLE.format(base=base, total=total),
+            PT_INTEGRATION_TABLE,
+            PT_BEHAVE_TABLE,
+            PT_SUMMARY.format(unit=unit),
+        ]
+    )
+
+
+def _fingerprint(readme=None):
+    return validator.source_fingerprint(readme or _readme(), COUNTS)
+
+
+def _marker(readme=None):
+    return f"<!-- translation-source: README.md sha256:{_fingerprint(readme)} -->"
 
 
 class TestParsePytestCounts:
@@ -181,6 +232,23 @@ class TestUpdateTables:
         assert "LoginPage: features/cart.feature has no Tests count" in errors
 
 
+class TestLocalizedTables:
+    """A translation names the Source and metric columns in its own language."""
+
+    def test_accurate_translated_tables_are_unchanged(self):
+        readme = _translation("")
+
+        assert validator.update_tables(readme, COUNTS, validator.PT_BR) == (readme, [])
+
+    def test_outdated_translated_row_and_total_are_fixed(self):
+        readme = _translation("", base=19, total=33)
+
+        updated, errors = validator.update_tables(readme, COUNTS, validator.PT_BR)
+
+        assert not errors
+        assert updated == _translation("")
+
+
 class TestUpdateSummary:
     """The layer summary splits unit/integration by folder, as the CI does."""
 
@@ -206,6 +274,26 @@ class TestUpdateSummary:
         assert errors == ["Summary line not found: E2E Tests"]
 
 
+class TestLocalizedSummary:
+    """The summary lines of a translation are found by its own wording."""
+
+    def test_outdated_translated_summary_is_fixed(self):
+        readme = _translation("", unit=132)
+
+        updated, errors = validator.update_summary(readme, COUNTS, validator.PT_BR)
+
+        assert not errors
+        assert updated == _translation("")
+
+    @pytest.mark.parametrize("locale", [validator.PT_BR, validator.ES])
+    def test_templates_keep_the_number_slots_of_english(self, locale):
+        english = dict(validator.EN.summary)
+
+        assert {label for label, _ in locale.summary} == set(english)
+        for label, template in locale.summary:
+            assert template.count("{n}") == english[label].count("{n}")
+
+
 class TestCheckCoverage:
     """Coverage is only checked (it needs a coverage.xml), never rewritten."""
 
@@ -227,11 +315,87 @@ class TestCheckCoverage:
         assert not validator.check_coverage(self.README, (0, 0))
 
 
+class TestLocalizedCoverage:
+    """A translation shows the coverage under its own labels."""
+
+    def test_outdated_translated_coverage_fails(self):
+        readme = "- **Total de statements:** 346\n- **Cobertos:** 345 (99%)\n"
+
+        errors = validator.check_coverage(readme, (350, 349), validator.PT_BR)
+
+        assert errors == [
+            "Total statements: README shows 346, actual is 350",
+            "Covered statements: README shows 345, actual is 349",
+        ]
+
+
+class TestSourceFingerprint:
+    """The hash of the README.md a translation was made from.
+
+    The numbers the hook writes are masked: they reach the translations through
+    the hook itself, so a new test must not mark every translation as stale.
+    """
+
+    COVERAGE = "- **Total statements:** {total}\n- **Covered:** {covered} ({pct}%)\n"
+
+    def test_new_counts_keep_the_fingerprint(self):
+        stale = _readme(base=30, total=44, scenarios=8, steps=59, unit=44)
+        stale += self.COVERAGE.format(total=300, covered=290, pct=97)
+        fresh = _readme() + self.COVERAGE.format(total=346, covered=345, pct=99)
+
+        assert validator.source_fingerprint(stale, COUNTS) == (
+            validator.source_fingerprint(fresh, COUNTS)
+        )
+
+    def test_new_text_changes_the_fingerprint(self):
+        edited = _readme().replace("framework components", "framework parts")
+
+        assert validator.source_fingerprint(edited, COUNTS) != (
+            validator.source_fingerprint(_readme(), COUNTS)
+        )
+
+
+class TestCheckTranslationSource:
+    """A translation fails when README.md changed after it was translated."""
+
+    def test_translation_of_the_current_readme_passes(self):
+        assert not validator.check_translation_source(
+            "README.pt-BR.md", _translation(_marker()), _fingerprint()
+        )
+
+    def test_translation_of_an_older_readme_fails_with_the_new_marker(self):
+        older = _marker(_readme().replace("framework components", "old text"))
+
+        errors = validator.check_translation_source(
+            "README.pt-BR.md", _translation(older), _fingerprint()
+        )
+
+        assert len(errors) == 1
+        assert "README.pt-BR.md was translated from an older README.md" in errors[0]
+        assert _marker() in errors[0]
+
+    def test_translation_without_marker_fails(self):
+        errors = validator.check_translation_source(
+            "README.pt-BR.md", _translation(""), _fingerprint()
+        )
+
+        assert len(errors) == 1
+        assert "README.pt-BR.md has no translation-source marker" in errors[0]
+
+
 @pytest.fixture(name="readme_path")
 def fixture_readme_path(tmp_path, monkeypatch):
-    """Run from a folder with a README.md, as the hook does."""
+    """Run from a folder with a README.md and one translation, as the hook does."""
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(validator, "TRANSLATIONS", {"README.pt-BR.md": validator.PT_BR})
+    (tmp_path / "README.pt-BR.md").write_text(_translation(_marker()), encoding="utf-8")
     return tmp_path / "README.md"
+
+
+@pytest.fixture(name="translation_path")
+def fixture_translation_path(readme_path):
+    """The translation next to the README.md of readme_path."""
+    return readme_path.parent / "README.pt-BR.md"
 
 
 class TestMain:
@@ -281,6 +445,33 @@ class TestMain:
             assert validator.main() == 1
         assert "pytest --co exited 2" in capsys.readouterr().err
 
+    def test_outdated_translation_is_rewritten_and_fails(
+        self, readme_path, translation_path, capsys
+    ):
+        readme_path.write_text(_readme(), encoding="utf-8")
+        translation_path.write_text(
+            _translation(_marker(), base=19, total=33, unit=132), encoding="utf-8"
+        )
+
+        assert self._main() == 1
+        assert translation_path.read_text(encoding="utf-8") == _translation(_marker())
+        assert "README.pt-BR.md metrics updated" in capsys.readouterr().err
+
+    def test_readme_edited_after_the_translation_fails(self, readme_path, capsys):
+        readme_path.write_text(
+            _readme().replace("framework components", "new text"), encoding="utf-8"
+        )
+
+        assert self._main() == 1
+        assert "translated from an older README.md" in capsys.readouterr().err
+
+    def test_missing_translation_fails(self, readme_path, translation_path, capsys):
+        readme_path.write_text(_readme(), encoding="utf-8")
+        translation_path.unlink()
+
+        assert self._main() == 1
+        assert "README.pt-BR.md not found" in capsys.readouterr().err
+
 
 class TestPreCommitHook:
     """A metric goes stale when a test changes, not only when README.md does."""
@@ -289,6 +480,8 @@ class TestPreCommitHook:
         "path",
         [
             "README.md",
+            "README.pt-BR.md",
+            "README.es.md",
             "tests/test_base_page.py",
             "tests/integration/test_cart_page_integration.py",
             "features/cart.feature",

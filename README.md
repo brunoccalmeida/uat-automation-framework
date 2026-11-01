@@ -107,7 +107,7 @@ The hooks in `.pre-commit-config.yaml` are the lint gate: the CI `lint` job runs
 - ✅ **Pylint**: Errors and code smells (`[tool.pylint.*]` in `pyproject.toml`; each disabled check has its reason next to it)
 - ✅ **Pyright**: Static type checking (`[tool.pyright]` in `pyproject.toml`; the editor runs the same checker)
 - ✅ **Security**: Detect private keys, merge conflicts
-- ✅ **Quality**: Trailing whitespace, YAML validation, README metrics
+- ✅ **Quality**: Trailing whitespace, YAML validation, README metrics and translations
 
 Hooks run automatically on `git commit`. To run all hooks manually: `pre-commit run --all-files`
 
@@ -210,7 +210,6 @@ poetry run behave -Dbrowser=firefox -Dheadless=false -Dtimeout=15
 
 **Note**: Selenium Manager automatically downloads and manages browser drivers - no manual installation required.
 
-```
 
 **Unit Tests (Pytest):**
 ```bash
@@ -322,10 +321,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 348 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 364 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 71 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 55 scenarios, 386 steps (complete user journeys)
-- **Total**: 419 unit/integration tests + 55 E2E scenarios
+- **Total**: 435 unit/integration tests + 55 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -367,10 +366,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Agent rules (size, sync, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 28 | N/A | ✅ Complete |
 | **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
 | **Lint gate (pre-commit + CI + editor import order, ruff replaces flake8)** | `tests/test_lint_gate.py` | 22 | N/A | ✅ Complete |
-| **README metrics (per-row sync from the Source column)** | `tests/test_validate_readme_metrics.py` | 28 | N/A | ✅ Complete |
+| **README metrics (per-row sync from the Source column, translations)** | `tests/test_validate_readme_metrics.py` | 44 | N/A | ✅ Complete |
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Complete |
-| **TOTAL** | | **348** | **100%** | **Complete** |
+| **TOTAL** | | **364** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 346

@@ -43,11 +43,12 @@ repos:
         require_serial: true
 
       - id: validate-readme-metrics
-        name: Validate README.md metrics
+        name: Validate README metrics and translations
         entry: poetry run python scripts/validate_readme_metrics.py
         language: system
-        # The counts change with the tests, not only with README.md (#34).
-        files: ^(README\.md|tests/.*\.py|features/.*\.feature)$
+        # The counts change with the tests, not only with README.md (#34);
+        # the translations are rewritten too and checked against it (#39).
+        files: ^(README(\.pt-BR|\.es)?\.md|tests/.*\.py|features/.*\.feature)$
         pass_filenames: false
 
       # Git reads UTF-16 byte by byte: a UTF-16 .gitignore line matched

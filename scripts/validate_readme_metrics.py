@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep README.md metrics in sync with the actual project state.
+"""Keep the README metrics in sync with the actual project state.
 
 A pre-commit hook in the style of black: it rewrites what it can derive and
 fails when it changed something, so the fix shows up as a diff to review.
@@ -9,32 +9,91 @@ fails when it changed something, so the fix shows up as a diff to review.
   `pytest --co` and `behave --dry-run`. A file in no row, or in two, fails.
 - Layer summary: the unit/integration/E2E totals.
 - Coverage statements (from coverage.xml): only checked, skipped without it.
+- Translations (#39): the same rewrite, with each language's labels. Each one
+  records the fingerprint of the README.md it was translated from (as MDN's
+  l10n.sourceCommit) and fails once README.md changes after it.
 
-Exit code 0 = metrics are accurate
-Exit code 1 = README.md was updated, or a metric needs a human fix
+Exit code 0 = metrics are accurate and the translations are current
+Exit code 1 = a README was updated, or something needs a human fix
 """
 
+import hashlib
 import json
 import re
 import subprocess
 import sys
 import tempfile
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 from pathlib import Path
 
 # The CI runs the unit and integration layers apart by this folder
 # (.github/workflows/tests.yml); the summary splits the counts the same way.
 INTEGRATION_DIR = "tests/integration/"
 
-METRIC_COLUMNS = ("Tests", "Scenarios", "Steps")
+README = "README.md"
 
-# "{n}" marks each number the hook rewrites, in the order of the values.
-SUMMARY_TEMPLATES = (
-    ("Unit Tests", "**Unit Tests**: {n} tests"),
-    ("Integration Tests", "**Integration Tests**: {n} tests"),
-    ("E2E Tests", "**E2E Tests**: {n} scenarios, {n} steps"),
-    ("Total", "**Total**: {n} unit/integration tests + {n} E2E scenarios"),
+
+@dataclass(frozen=True)
+class Locale:
+    """The words a README uses for what the hook reads and writes.
+
+    columns maps each metric column header to its English name. In summary,
+    "{n}" marks each number the hook rewrites, in the order of the values.
+    """
+
+    source: str
+    columns: dict[str, str]
+    summary: tuple[tuple[str, str], ...]
+    statements: str
+    covered: str
+
+
+EN = Locale(
+    source="Source",
+    columns={"Tests": "Tests", "Scenarios": "Scenarios", "Steps": "Steps"},
+    summary=(
+        ("Unit Tests", "**Unit Tests**: {n} tests"),
+        ("Integration Tests", "**Integration Tests**: {n} tests"),
+        ("E2E Tests", "**E2E Tests**: {n} scenarios, {n} steps"),
+        ("Total", "**Total**: {n} unit/integration tests + {n} E2E scenarios"),
+    ),
+    statements="**Total statements:**",
+    covered="**Covered:**",
 )
+
+PT_BR = Locale(
+    source="Fonte",
+    columns={"Testes": "Tests", "Cenários": "Scenarios", "Steps": "Steps"},
+    summary=(
+        ("Unit Tests", "**Testes Unitários**: {n} testes"),
+        ("Integration Tests", "**Testes de Integração**: {n} testes"),
+        ("E2E Tests", "**Testes E2E**: {n} cenários, {n} steps"),
+        ("Total", "**Total**: {n} testes unitários/de integração + {n} cenários E2E"),
+    ),
+    statements="**Total de statements:**",
+    covered="**Cobertos:**",
+)
+
+ES = Locale(
+    source="Fuente",
+    columns={"Pruebas": "Tests", "Escenarios": "Scenarios", "Steps": "Steps"},
+    summary=(
+        ("Unit Tests", "**Pruebas Unitarias**: {n} pruebas"),
+        ("Integration Tests", "**Pruebas de Integración**: {n} pruebas"),
+        ("E2E Tests", "**Pruebas E2E**: {n} escenarios, {n} steps"),
+        (
+            "Total",
+            "**Total**: {n} pruebas unitarias/de integración + {n} escenarios E2E",
+        ),
+    ),
+    statements="**Total de statements:**",
+    covered="**Cubiertos:**",
+)
+
+TRANSLATIONS = {"README.pt-BR.md": PT_BR, "README.es.md": ES}
+
+MARKER = re.compile(r"<!-- translation-source: README\.md sha256:([0-9a-f]{64}) -->")
 
 Counts = dict[str, dict[str, int]]
 
@@ -109,8 +168,9 @@ def _set_cells(line: str, values: dict[int, str]) -> str:
 class _TableUpdater:
     """Rewrites the metric cells of the tables that have a Source column."""
 
-    def __init__(self, counts: Counts):
+    def __init__(self, counts: Counts, locale: Locale):
         self.counts = counts
+        self.locale = locale
         self.used: set[str] = set()
         self.errors: list[str] = []
         self.columns: dict[str, int] = {}
@@ -119,9 +179,11 @@ class _TableUpdater:
 
     def start_table(self, header: list[str]) -> None:
         """Remember where the Source and metric columns of this table are."""
-        self.source = header.index("Source")
+        self.source = header.index(self.locale.source)
         self.columns = {
-            name: index for index, name in enumerate(header) if name in METRIC_COLUMNS
+            self.locale.columns[name]: index
+            for index, name in enumerate(header)
+            if name in self.locale.columns
         }
         self.totals = dict.fromkeys(self.columns, 0)
 
@@ -165,15 +227,17 @@ class _TableUpdater:
         return sums
 
 
-def update_tables(text: str, counts: Counts) -> tuple[str, list[str]]:
+def update_tables(
+    text: str, counts: Counts, locale: Locale = EN
+) -> tuple[str, list[str]]:
     """Rewrite each Source-table row from the counts of its source files."""
-    updater = _TableUpdater(counts)
+    updater = _TableUpdater(counts, locale)
     lines = text.split("\n")
     in_table = False
     for number, line in enumerate(lines):
         if not line.startswith("|"):
             in_table = False
-        elif "Source" in _cells(line):
+        elif locale.source in _cells(line):
             updater.start_table(_cells(line))
             in_table = True
         elif in_table and not set(line) <= set("|-: "):
@@ -193,7 +257,9 @@ def _sub_numbers(text: str, template: str, values: tuple[int, ...]) -> tuple[str
     return re.subn(pattern, lambda _: replacement, text, count=1)
 
 
-def update_summary(text: str, counts: Counts) -> tuple[str, list[str]]:
+def update_summary(
+    text: str, counts: Counts, locale: Locale = EN
+) -> tuple[str, list[str]]:
     """Rewrite the layer summary lines from the totals of the counts."""
 
     def total(name: str, integration: bool | None = None) -> int:
@@ -210,7 +276,7 @@ def update_summary(text: str, counts: Counts) -> tuple[str, list[str]]:
         "Total": (total("Tests"), total("Scenarios")),
     }
     errors = []
-    for label, template in SUMMARY_TEMPLATES:
+    for label, template in locale.summary:
         text, found = _sub_numbers(text, template, values[label])
         if not found:
             errors.append(f"Summary line not found: {label}")
@@ -238,47 +304,93 @@ def get_coverage_statements() -> tuple[int, int]:
     return (lines_valid, lines_covered)
 
 
-def check_coverage(text: str, actual: tuple[int, int]) -> list[str]:
+def check_coverage(
+    text: str, actual: tuple[int, int], locale: Locale = EN
+) -> list[str]:
     """Compare the README coverage statements with coverage.xml."""
     if actual == (0, 0):
         return []
     errors = []
     checks = (
-        ("Total statements", r"\*\*Total statements:\*\*\s*(\d+)", actual[0]),
-        ("Covered statements", r"\*\*Covered:\*\*\s*(\d+)", actual[1]),
+        ("Total statements", locale.statements, actual[0]),
+        ("Covered statements", locale.covered, actual[1]),
     )
-    for label, pattern, value in checks:
-        match = re.search(pattern, text)
+    for label, words, value in checks:
+        match = re.search(re.escape(words) + r"\s*(\d+)", text)
         shown = int(match.group(1)) if match else None
         if shown != value:
             errors.append(f"{label}: README shows {shown}, actual is {value}")
     return errors
 
 
-def main() -> int:
-    """Rewrite README.md metrics; fail if it changed or needs a human fix."""
-    readme_path = Path("README.md")
+def source_fingerprint(readme: str, counts: Counts) -> str:
+    """Hash README.md with the numbers the hook owns masked.
+
+    Those numbers reach the translations through the hook itself; any other
+    change to README.md is text a human has to translate.
+    """
+    zeros = {path: dict.fromkeys(metrics, 0) for path, metrics in counts.items()}
+    text, _ = update_tables(readme, zeros)
+    text, _ = update_summary(text, zeros)
+    for words in (EN.statements, EN.covered):
+        text = re.sub(re.escape(words) + r".*", words, text)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def check_translation_source(path: str, text: str, fingerprint: str) -> list[str]:
+    """Fail a translation made from another version of README.md."""
+    marker = f"<!-- translation-source: README.md sha256:{fingerprint} -->"
+    match = MARKER.search(text)
+    if match is None:
+        return [f"{path} has no translation-source marker; add {marker}"]
+    if match.group(1) != fingerprint:
+        return [
+            f"{path} was translated from an older README.md: translate what "
+            f"changed (git log -p -- README.md), then set its marker to {marker}"
+        ]
+    return []
+
+
+def _update_readme(
+    path: str, counts: Counts, locale: Locale, coverage: tuple[int, int]
+) -> tuple[str, list[str]]:
+    """Rewrite one README file; return its new text and what needs a human."""
+    readme_path = Path(path)
     original = readme_path.read_text(encoding="utf-8")
+    text, errors = update_tables(original, counts, locale)
+    text, summary_errors = update_summary(text, counts, locale)
+    errors += summary_errors + check_coverage(text, coverage, locale)
+    errors = [f"{path}: {error}" for error in errors]
+    if text != original:
+        readme_path.write_text(text, encoding="utf-8")
+        errors.append(
+            f"{path} metrics updated from the collected tests: review and stage it."
+        )
+    return text, errors
+
+
+def main() -> int:
+    """Rewrite the README metrics; fail if one changed or needs a human fix."""
     try:
         counts = collect_counts()
     except CollectionError as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1
 
-    text, errors = update_tables(original, counts)
-    text, summary_errors = update_summary(text, counts)
-    errors += summary_errors + check_coverage(text, get_coverage_statements())
+    coverage = get_coverage_statements()
+    readme, errors = _update_readme(README, counts, EN, coverage)
+    fingerprint = source_fingerprint(readme, counts)
+    for path, locale in TRANSLATIONS.items():
+        if not Path(path).exists():
+            errors.append(f"{path} not found")
+            continue
+        text, translation_errors = _update_readme(path, counts, locale, coverage)
+        errors += translation_errors + check_translation_source(path, text, fingerprint)
 
-    if text != original:
-        readme_path.write_text(text, encoding="utf-8")
-        print(
-            "README.md metrics updated from the collected tests: review and stage it.",
-            file=sys.stderr,
-        )
     if errors:
-        print("\nERROR: README.md metrics need a fix:\n", file=sys.stderr)
+        print("\nERROR: the README metrics need a look:\n", file=sys.stderr)
         print("\n".join(f"  {error}" for error in errors), file=sys.stderr)
-    return 1 if errors or text != original else 0
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":

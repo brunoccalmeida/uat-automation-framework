@@ -3,7 +3,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "Retomada do projeto após 10 meses parado"
+**Última atualização:** 01/11/2026 — fim da missão "Integrar PRs pendentes do Dependabot" (#20, #38)
 
 ---
 
@@ -16,19 +16,17 @@
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, 5 checks obrigatórios, branch atualizada, histórico linear, sem force push, sem bypass |
 | Segurança | Dependabot alerts + security updates ligados; vulnerabilidades altas corrigidas; `pip-audit` usado manualmente como 2ª fonte (CI: issue #23) |
-| Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · browsers/drivers pré-instalados no runner |
+| Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · **Selenium 4.52** · actions atualizadas (checkout 7, codecov v7) · browsers/drivers pré-instalados no runner |
+| Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
-**Integrar os PRs pendentes do Dependabot** (fila precisa ficar vazia antes de novas missões):
+**#23 — `pip-audit` no CI** (P1, segurança): segunda fonte de vulnerabilidades, hoje só manual.
 
-1. **#20** — GitHub Actions agrupadas (checkout 7, setup-python 7, cache 6, upload-artifact 7, download-artifact 8, codecov-action 7).
-   Triagem das notas de versão já feita (comentário no PR). Ajuste já commitado: `file:` → `files:` do codecov v7.
-   Tem commit manual, então o Dependabot não faz mais rebase: use "Update branch".
-2. **#22** — Python minor/patch agrupado (inclui **Selenium 4.39 → 4.52**, allure-behave, pylint 4.1, pre-commit 4.7).
-   Rodar **todas as camadas localmente** antes do merge (salto grande do Selenium). Pode precisar de `@dependabot recreate` se o lock conflitar.
+Depois, issues **P1** na ordem da regra (bloqueio → segurança → visibilidade → dívida):
+issue #24 (SHA pins das actions) → #25 (token Codecov; requer ação do dono no codecov.io) → #41 (boas práticas de gasto de tokens dos agentes, pedida pelo dono como alta prioridade).
 
-Depois: issues **P1** em ordem — #23 (pip-audit no CI), #24 (SHA pins), #25 (token Codecov — requer ação do dono no codecov.io).
+**Ao abrir PR que atualize Selenium (ou outra dependência de execução):** triagem por `grep` no `py/CHANGES` oficial (remov/deprecat) + busca no código pelas APIs citadas, e todas as camadas localmente antes do merge. Assim foi feito no #38 (4.39 → 4.52: nenhuma API removida era usada).
 
 ## Backlog
 

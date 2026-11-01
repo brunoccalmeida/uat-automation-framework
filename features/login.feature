@@ -8,7 +8,7 @@ Feature: User Login
     Given I am on the Sauce Demo login page
 
   Scenario: Successful login with standard user
-    When I login with username "standard_user" and password "secret_sauce"
+    When I log in as "standard_user"
     Then I should be logged in successfully
     And I should see the products page
     And the page title should be "Products"
@@ -19,7 +19,7 @@ Feature: User Login
     And I should remain on the login page
 
   Scenario: Failed login with locked out user
-    When I login with username "locked_out_user" and password "secret_sauce"
+    When I log in as "locked_out_user"
     Then I should see login error message
     And the error should mention "locked out"
 

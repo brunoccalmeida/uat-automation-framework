@@ -88,7 +88,7 @@ class TestLoginMethod:
             with patch.object(page, "enter_password"):
                 with patch.object(page, "click_login"):
                     username = "standard_user"
-                    password = "secret_sauce"
+                    password = "any_password"
                     page.login(username, password)
 
                     mock_enter_user.assert_called_once_with(username)
@@ -102,7 +102,7 @@ class TestLoginMethod:
             with patch.object(page, "enter_password") as mock_enter_pass:
                 with patch.object(page, "click_login"):
                     username = "standard_user"
-                    password = "secret_sauce"
+                    password = "any_password"
                     page.login(username, password)
 
                     mock_enter_pass.assert_called_once_with(password)
@@ -116,7 +116,7 @@ class TestLoginMethod:
             with patch.object(page, "enter_password"):
                 with patch.object(page, "click_login") as mock_click:
                     username = "standard_user"
-                    password = "secret_sauce"
+                    password = "any_password"
                     page.login(username, password)
 
                     mock_click.assert_called_once()

@@ -4,7 +4,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "cobertura do README conferida no CI" (#87)
+**Última atualização:** 01/11/2026 — fim da missão "config sem chaves mortas e senha só na config" (#30)
 
 ---
 
@@ -13,7 +13,7 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 369 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (350 statements) |
+| Testes | 374 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (352 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
@@ -26,11 +26,14 @@
 | Hook de saída de testes | `PreToolUse` (`Bash\|PowerShell`) em `.claude/settings.json` reescreve `pytest` → `-q` e `behave` → `-f progress2` (`scripts/filter_test_output.py`, #65): `behave` 51 → 1,1 KB, `pytest -v` 28 → ~1,6 KB. Flags nativas, sem pipe (o pipe troca o exit code pelo do `head`); `behave` com `-f` explícito fica intacto. `tests/test_filter_test_output.py` |
 | Code intelligence | Plugin oficial `pyright-lsp` ligado no escopo do projeto (`enabledPlugins` em `.claude/settings.json`); servidor por máquina via `pipx install "pyright[nodejs]"` (precisa estar no PATH; o `.venv` não está no PATH da extensão). `[tool.pyright] venv = ".venv"` + `poetry.toml` (`in-project`) para resolver os imports do projeto. Verificado: erro proposital → diagnóstico `reportAssignmentType`, assíncrono (chega logo após a edição). Passo a passo por máquina em `docs/AGENT_TOKEN_SPEND.md`. `tests/test_agent_rules.py` |
 | Métricas do README | Hook `validate-readme-metrics` **corrige e reprova** (padrão do black; DRY, como `terraform-docs`/`cog --check`): cada linha das tabelas de testes cita seus arquivos na coluna `Source`; o hook reescreve contagens por linha, TOTAL e resumo por camada (`pytest --co -qq` + `behave --dry-run -f json`), e reprova arquivo sem linha, em duas linhas ou desconhecido. Roda quando README, `tests/` ou `features/` mudam; no CI pelo `--all-files`. Falha de coleta reprova (antes era pulada). Cobertura só conferida, nunca reescrita: o hook pula sem `coverage.xml` (lint, local); o job `test` roda `validate_readme_metrics.py --coverage coverage.xml` logo após gerar o relatório, e ali relatório ausente reprova (#87). **Traduções (#39)**: `README.pt-BR.md` e `README.es.md` têm os mesmos números (rótulos por idioma, `Locale`) e uma marca `translation-source` com o hash do `README.md` de origem (números do hook mascarados); mudou o texto do inglês, o hook reprova até atualizar as traduções e diz a marca nova. `tests/test_validate_readme_metrics.py` |
+| Config e credenciais | `config.yaml` só com chaves lidas pelo código (#30). Senha dos usuários de teste em um lugar (`environment.remote.default_password`, `get_default_password`); logins válidos pelo step declarativo `When I log in as "<user>"`; senha literal só onde ela é o dado sob teste (`login_negative.feature`). `tests/test_config.py` barra a senha literal em `.py`/`.feature`. Sem *implicit wait*, de propósito (aviso do Selenium) |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
-**#30 — remover chaves de config sem uso e credenciais hardcoded.** Com os portões de métricas fechados (#34, #39, #87), a fila passa à dívida técnica: primeiro #30 (toca config e credenciais), depois #31 (steps usando os page objects retornados pela navegação).
+**#31 — steps devem usar os page objects retornados pela navegação.** Com a config arrumada (#30), segue a dívida técnica nos steps. Atenção à regra de escopo (`.claude/rules/selenium.md`): steps usam page objects em variável local, não em atributos de `context`; os steps de login ainda usam `context.login_page` (o #30 não mexeu nisso, para manter o escopo).
+
+Do #30: a issue listava 4 chaves mortas; conferir **todas** achou uma quinta, a seção `logging` inteira (nada emite log; o Behave já tem `--logging-level`). Decisões após **consulta**: `implicit_wait` removida, não ligada (doc do Selenium: "Do not mix implicit and explicit waits"); `timeout` e `test_users` removidas (YAGNI); senha **usada** como fonte única (12-factor III). O dono perguntou o que indicam as práticas para as features: Cucumber "Writing better Gherkin" (estilo declarativo, credenciais nas step definitions) → step `I log in as` nos 10 logins válidos; o imperativo fica onde a doc o admite, quando a senha é o dado sob teste. O portão lê a senha da config (assim não contém o literal e acompanha uma troca de senha); docs ficam fora (a demo exibe a senha na tela de login). RED: externo `21 undefined`; smoke `Actual: login('standard_user', 'secret_sauce')` (comportamento); os de login e o acessor eram `ImportError`, confirmados com mutação (cada step morto pelo seu teste; acessor com `KeyError`). Achado: `sed` com regex de assinatura multilinha casou 3 funções; tirei o parâmetro das que não o usam (AST conferiu).
 
 Do #87: conferir a cobertura **onde o dado nasce** (job `test`), não no `lint` via artifact. Decisão do dono após consulta: pytest-cov `--cov-fail-under` cobra no mesmo processo que mede; a doc do GitHub ("Passing data between jobs") exige artifact + `needs` em sequência, o que faria o lint esperar a suíte inteira (feedback lento, acoplamento). A primeira execução real já pegou o README defasado (346/345 → 350/349 desde #83/#86): o bug existia. RED era `TypeError` (API ausente): 4 mutações, todas mortas (relatório ausente calado, traduções não conferidas, modo caindo no hook completo, erros descartados). Achado: com `argparse`, `main()` sem argumento lê o `sys.argv` do pytest; os testes injetam `main([])`. O texto livre de cobertura ("Pages 100%", "1 linha em `core/config.py`") não é conferido pelo hook; verificado à mão, segue certo.
 
@@ -50,7 +53,7 @@ Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercad
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #30 config/senha hardcoded · #31 page objects retornados
+1. #31 page objects retornados
 2. #78 avaliar regras do ruff que se sobrepõem ao pylint (medido, separado)
 
 **Antes de trocar a versão do Python na matriz** (3.15 já saiu): resolva o #48 (`build-report` baixa `allure-results-py3.14` por nome fixo; a troca quebra o report, de forma visível). O ruleset já não depende da matriz (#36).

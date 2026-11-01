@@ -46,6 +46,18 @@ def get_base_url(config: dict[str, Any]) -> str:
     return config["environment"]["remote"]["base_url"]
 
 
+def get_default_password(config: dict[str, Any]) -> str:
+    """Extract the password shared by the application's test users.
+
+    Args:
+        config: Configuration dictionary.
+
+    Returns:
+        Password for the pre-configured test users.
+    """
+    return config["environment"]["remote"]["default_password"]
+
+
 def get_browser_config(config: dict[str, Any]) -> dict[str, Any]:
     """Extract browser configuration.
 

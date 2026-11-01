@@ -7,7 +7,7 @@ Feature: Complete Purchase Journey
 
   Scenario: Customer finds and buys cheapest product successfully
     Given I am on the Sauce Demo login page
-    When I login with username "standard_user" and password "secret_sauce"
+    When I log in as "standard_user"
     Then I should be on the inventory page
     When I sort products by price low to high
     And I add the first product to cart

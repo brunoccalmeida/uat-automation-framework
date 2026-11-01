@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:7c4b138f167a3841cbd52e9956364b6a00eb470351f785edb061833617b1edff -->
+<!-- translation-source: README.md sha256:7d3620305cc092040ab7e5c40779d355f6a865bf0c10dd1a8f2cda92538003e7 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -323,10 +323,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 369 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes Unitários**: 374 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
 - **Testes de Integração**: 71 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 55 cenários, 386 steps (jornadas completas de usuário)
-- **Total**: 440 testes unitários/de integração + 55 cenários E2E
+- **Total**: 445 testes unitários/de integração + 55 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -358,9 +358,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 13 | 100% | ✅ Completo |
 | **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 15 | 100% | ✅ Completo |
 | **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 12 | 100% | ✅ Completo |
+| **Config** | `tests/test_config.py` | 2 | 94% | ✅ Completo |
 | **ConfigResolver** | `tests/test_config_resolver.py` | 40 | 100% | ✅ Completo |
 | **DriverManager** | `tests/test_driver_manager.py` | 19 | 100% | ✅ Completo |
-| **Steps de login (lógica OU)** | `tests/test_login_steps.py` | 9 | N/A | ✅ Completo |
+| **Step definitions (lógica OU, senha da config)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py` | 12 | N/A | ✅ Completo |
 | **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Completo |
 | **Fixação das actions (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Completo |
 | **Portão do CI (check obrigatório)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Completo |
@@ -371,11 +372,11 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Métricas dos READMEs (sincronia por linha pela coluna Fonte, traduções)** | `tests/test_validate_readme_metrics.py` | 49 | N/A | ✅ Completo |
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
-| **TOTAL** | | **369** | **100%** | **Completo** |
+| **TOTAL** | | **374** | **100%** | **Completo** |
 
 **Cobertura de Código:**
-- **Total de statements:** 350
-- **Cobertos:** 349 (99%)
+- **Total de statements:** 352
+- **Cobertos:** 351 (99%)
 - **Módulo Pages**: 100%
 - **Módulo Core**: 99% (1 linha sem cobertura em `core/config.py`)
 

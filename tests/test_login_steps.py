@@ -4,14 +4,22 @@ Tests the step definition logic in isolation, particularly the error message
 verification with OR logic support.
 """
 
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
 # Import the step functions we want to test
 from features.steps.login_steps import (
+    step_log_in_as,
+    step_logged_in_as_user,
     step_verify_error_contains,
 )
+
+CONFIG = {
+    "environment": {
+        "remote": {"base_url": "https://example.test", "default_password": "pw"}
+    }
+}
 
 
 class TestStepVerifyErrorContains:
@@ -115,3 +123,24 @@ class TestStepVerifyErrorContains:
 
         # Should not raise assertion ("do not match" is substring)
         step_verify_error_contains(context, 'invalid" or "do not match')
+
+
+class TestLoginStepsUseConfiguredPassword:
+    """Login steps take the password from config, not from a literal."""
+
+    def test_log_in_as_uses_configured_password(self):
+        """Should log in with the scenario's user and the configured password."""
+        context = Mock(config_data=CONFIG)
+
+        step_log_in_as(context, "standard_user")
+
+        context.login_page.login.assert_called_once_with("standard_user", "pw")
+
+    def test_logged_in_as_uses_configured_password(self):
+        """Should open the app and log in with the configured password."""
+        context = Mock(config_data=CONFIG)
+
+        with patch("features.steps.login_steps.LoginPage") as login_page_cls:
+            step_logged_in_as_user(context, "problem_user")
+
+        login_page_cls.return_value.login.assert_called_once_with("problem_user", "pw")

@@ -7,7 +7,7 @@ Feature: Product Sorting - Problem User
   # Note: "problem_user" has intentional sorting bug (sorting does not work)
   Scenario: Sorting does not work for problem_user
     Given I am on the Sauce Demo login page
-    When I login with username "problem_user" and password "secret_sauce"
+    When I log in as "problem_user"
     Then I should be on the inventory page
     And I select sort option "za"
     Then products should NOT be sorted by name Z to A

@@ -28,11 +28,13 @@ from tests.helpers.navigation import (
 class TestLoginNavigation:
     """Test login waits for its outcome."""
 
-    def test_valid_login_returns_after_inventory_renders(self, driver, base_url):
+    def test_valid_login_returns_after_inventory_renders(
+        self, driver, base_url, password
+    ):
         """Valid login should return only after inventory page renders."""
         driver.get(base_url)
 
-        LoginPage(driver).login("standard_user", "secret_sauce")
+        LoginPage(driver).login("standard_user", password)
 
         assert driver.find_elements(*InventoryPage.INVENTORY_CONTAINER)
 
@@ -45,14 +47,14 @@ class TestLoginNavigation:
         assert driver.find_elements(*LoginPage.ERROR_MESSAGE)
 
     def test_valid_login_after_failed_one_returns_after_inventory_renders(
-        self, driver, base_url
+        self, driver, base_url, password
     ):
         """A leftover error banner must not count as the new login's outcome."""
         driver.get(base_url)
         login_page = LoginPage(driver)
         login_page.login("invalid_user", "wrong_password")
 
-        login_page.login("standard_user", "secret_sauce")
+        login_page.login("standard_user", password)
 
         assert driver.find_elements(*InventoryPage.INVENTORY_CONTAINER)
 

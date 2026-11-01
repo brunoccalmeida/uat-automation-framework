@@ -6,7 +6,7 @@ Feature: Problem User Journey
 
   Scenario: Problem user logs in and navigates to inventory
     Given I am on the Sauce Demo login page
-    When I login with username "problem_user" and password "secret_sauce"
+    When I log in as "problem_user"
     Then I should be on the inventory page
     And the product images should be broken
     And the product names should be visible

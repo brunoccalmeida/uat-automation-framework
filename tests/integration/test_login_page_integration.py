@@ -52,19 +52,19 @@ class TestLoginPageInteractions:
         driver.get(base_url)
         page = LoginPage(driver)
 
-        test_password = "secret_sauce"
+        test_password = "any_password"
         page.enter_password(test_password)
 
         # Verify text was entered
         password_field = driver.find_element(*page.PASSWORD_INPUT)
         assert password_field.get_attribute("value") == test_password
 
-    def test_login_with_valid_credentials_succeeds(self, driver, base_url):
+    def test_login_with_valid_credentials_succeeds(self, driver, base_url, password):
         """login with valid credentials should navigate to inventory page."""
         driver.get(base_url)
         page = LoginPage(driver)
 
-        page.login("standard_user", "secret_sauce")
+        page.login("standard_user", password)
 
         # Should navigate away from login page
         assert "/inventory.html" in driver.current_url
@@ -94,12 +94,12 @@ class TestLoginPageErrorHandling:
         error = page.get_error_message()
         assert error is None
 
-    def test_locked_user_shows_error(self, driver, base_url):
+    def test_locked_user_shows_error(self, driver, base_url, password):
         """Locked user should display appropriate error message."""
         driver.get(base_url)
         page = LoginPage(driver)
 
-        page.login("locked_out_user", "secret_sauce")
+        page.login("locked_out_user", password)
 
         error = page.get_error_message()
         assert error is not None

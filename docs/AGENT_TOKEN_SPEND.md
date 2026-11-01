@@ -59,7 +59,16 @@ Contexto do projeto carregado em todo chat (estimativa por bytes ÷ 4):
 
 `docs/PROJECT_SESSION_SUMMARY.md` (69 linhas, ~1.600) não é `@import`: só entra no contexto quando lido no início do chat (Ciclo de Missão), e por isso também se beneficia de ser curto.
 
-Meta do #35: arquivo de regras com menos de 200 linhas, sem perder regra que mude comportamento.
+### Depois do #35 (01/11/2026)
+
+| Arquivo | Linhas | ~Tokens |
+| --- | ---: | ---: |
+| `.github/copilot-instructions.md` (sempre carregado) | 104 (era 357) | ~2.450 (era ~4.500) |
+| 4 arquivos com escopo de caminho (`.claude/rules/` e `.github/instructions/`, idênticos) | 46 | ~600, só quando o caminho é tocado |
+
+Como: fluxogramas ASCII e checklists que repetiam o fluxo viraram listas curtas; Selenium, Python, workflows e Poetry foram para arquivos com escopo de caminho; a ênfase (CAIXA ALTA, emojis) saiu. Linhas caíram 71%, tokens 46%: o que sobrou é denso (tabelas, comandos). `tests/test_agent_rules.py` barra o retorno acima de 200 linhas e a divergência entre as cópias Claude/Copilot.
+
+A economia real se confirma pelo `/usage` das próximas missões, não por esta estimativa.
 
 [mem]: https://code.claude.com/docs/en/memory
 [costs]: https://code.claude.com/docs/en/costs

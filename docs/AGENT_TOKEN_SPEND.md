@@ -123,6 +123,7 @@ Mesma fonte e mesma ressalva: % do limite e fatias de 24 h somando as sessões d
 | Missão | Sessão 5 h | Semana | `/clear` | Subagentes | `/context` | Leitura |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | #28 (01/11/2026) | 25% | 22% | 55 | 54 | 25 | Chat sem subagentes, e a fatia de subagentes segue em 54%: vem de outras sessões das 24 h, como diagnosticado no #56. Semana +6 p.p. desde o #54 somando #58 e #28 |
+| #26 (01/11/2026) | 31% | 22% | 53 | 53 | 26 | Semana igual à do #28: a missão custou < 1 p.p. (estimativa limitada pelo arredondamento do diálogo). Sessão de 5 h não comparável com a do #28 (janela pode ter reiniciado). Chat sem subagentes de novo e fatia em 53%: segue vindo de outras sessões das 24 h |
 
 ## Levantamento de mercado e lacunas (#58, 01/11/2026)
 

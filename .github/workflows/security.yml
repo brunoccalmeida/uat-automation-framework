@@ -1,0 +1,52 @@
+name: Security
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  # Advisories are published without any change to our code: an unchanged
+  # poetry.lock can become vulnerable overnight, so audit it daily too.
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Second vulnerability source next to Dependabot: pip-audit queries the
+  # PyPI/OSV advisory database, which differs from GitHub's in content and
+  # timing. Its version is locked in poetry.lock (dev group), so CI runs the
+  # same tool as "poetry run pip-audit --strict" locally.
+  #
+  # Policy: any known vulnerability fails the job. To accept one, add
+  # "--ignore-vuln <ID>" below with a comment stating why and the issue that
+  # tracks its removal. Never use continue-on-error here.
+  pip-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.5.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      # Fresh install from the lock: audit exactly what the project runs
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      # --strict: a package that cannot be audited fails the job instead of
+      # being skipped with a warning ("unknown" is not "safe")
+      - name: Audit dependencies
+        run: poetry run pip-audit --strict

@@ -5,6 +5,8 @@ Tests the InventoryPage Page Object in isolation using mocks.
 
 from unittest.mock import Mock, call, patch
 
+import pytest
+
 from selenium.webdriver.common.by import By
 
 from pages.inventory_page import InventoryPage
@@ -252,6 +254,17 @@ class TestGetCurrentSortOption:
                 mock_option.get_attribute.assert_called_once_with("value")
                 assert result == "lohi"
 
+    def test_get_current_sort_option_fails_clearly_without_a_value(self):
+        """A selected option without value breaks the str contract: fail fast."""
+        page = InventoryPage(Mock())
+        mock_select = Mock()
+        mock_select.first_selected_option.get_attribute.return_value = None
+
+        with patch.object(page, "find_element"):
+            with patch("pages.inventory_page.Select", return_value=mock_select):
+                with pytest.raises(ValueError, match="no value"):
+                    page.get_current_sort_option()
+
 
 class TestRemoveProductFromCart:
     """Test remove_product_from_cart method."""
@@ -293,6 +306,20 @@ class TestAreProductImagesBroken:
         mock_img1.get_attribute.return_value = "/static/media/sl-404.png"
         mock_img2 = Mock()
         mock_img2.get_attribute.return_value = "/static/media/backpack.jpg"
+        mock_driver.find_elements.return_value = [mock_img1, mock_img2]
+
+        page = InventoryPage(mock_driver)
+        result = page.are_product_images_broken()
+
+        assert result is False
+
+    def test_are_product_images_broken_returns_false_when_an_image_has_no_src(self):
+        """An image without src is not the sl-404 placeholder."""
+        mock_driver = Mock()
+        mock_img1 = Mock()
+        mock_img1.get_attribute.return_value = "/static/media/sl-404.png"
+        mock_img2 = Mock()
+        mock_img2.get_attribute.return_value = None
         mock_driver.find_elements.return_value = [mock_img1, mock_img2]
 
         page = InventoryPage(mock_driver)

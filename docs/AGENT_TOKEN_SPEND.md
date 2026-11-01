@@ -26,6 +26,7 @@ Contexto longo também **piora a resposta**: regra perdida num arquivo grande é
 | Escolher modelo e esforço no início do chat, sem trocar no meio | Trocar de modelo invalida o cache inteiro (o próximo turno relê tudo sem desconto) | [prompt caching][pc] |
 | Editar `CLAUDE.md` no meio do chat não tem efeito até `/clear`/`/compact`/reinício | As regras são lidas uma vez no início da sessão | [prompt caching][pc] |
 | Filtrar saída na origem: `grep`, `head`, `--jq`, `gh run view --log-failed`, leitura de arquivo por trecho | Saída despejada no contexto é relida em todo turno pelo resto do chat. Ex.: no #38, `grep` por remov/deprecat no `py/CHANGES` do Selenium, não as notas inteiras | [costs][costs] (hooks/pré-processamento) |
+| Documentação web por seção: sumário de títulos e depois só a seção (`curl -s <url>.md \| sed -n '/^### X/,/^### /p'`) | O WebFetch devolve docs em Markdown crus e inteiros (47 mil caracteres na página de custos, ~20 mil tokens relidos em todo turno); sumário + seção = ~2,2 mil (#58) | Medição local (#58, abaixo) |
 | CLI (`gh`) antes de servidor MCP | CLI não acrescenta listagem de ferramentas ao contexto | [costs][costs] |
 | Subagente só para: trabalho paralelo independente, isolar saída volumosa, revisor que não viu o código. Pedir resumo curto; modelo menor para tarefa simples | Cada subagente começa do zero (recoleta contexto que a conversa já tinha) e soma requisições. Delegar não torna a resposta melhor | [best practices][bp] · [costs][costs] |
 | Pedidos específicos (arquivo, função, critério de pronto) | Pedido vago dispara varredura ampla do código | [costs][costs] |
@@ -44,7 +45,7 @@ Sinais de desperdício e o que fazer:
 | --- | --- | --- |
 | Recomendação "Trim CLAUDE.md" no `/usage` | Regras sempre carregadas grandes | Cortar ou mover para arquivo com escopo de caminho (#35) |
 | Muitos *misses* de cache | Troca de modelo/esforço no meio, pausa maior que o TTL | Fixar modelo no início; retomar sabendo que o 1º turno é caro |
-| Subagentes com fatia alta | Delegação sem um dos três motivos acima | Fazer na conversa principal |
+| Recomendação de subagentes com fatia alta | A fatia é do uso **ao qual a recomendação se aplica**, não do gasto dos subagentes: uma sessão longa que lançou um subagente conta inteira (#56) | Medir o gasto real dos subagentes nos transcripts antes de agir; só então, se alto, fazer na conversa principal |
 | Chat longo com custo crescente | Missão acumulou tarefas não relacionadas | Encerrar a missão; handoff; chat novo |
 | Cada edição de `.md` traz centenas de diagnósticos de ortografia | O verificador (LTeX+) checa pt-BR/es como `en-US`; a extensão do Claude Code anexa os diagnósticos do editor ao contexto | Comentário mágico na 1ª linha do arquivo: `<!-- LTeX: language=pt-BR -->` (no #41: 462 diagnósticos, ~115 KB, em uma edição); ortografia só no Code Spell Checker, com termos do projeto em `cSpell.words` (#52: 45 → 6) |
 
@@ -98,11 +99,64 @@ Ortografia ficou só com o Code Spell Checker (`cSpell.language: "en,pt_BR,es"`,
 
 | Recomendação | % do uso (24 h) | Leitura |
 | --- | ---: | --- |
-| *Give simple subagents a cheaper model* | 72 | Subagentes de missões anteriores (o #54 não usou nenhum; `/code-review` só 2%): a regra existe e não bastou → issue própria |
+| *Give simple subagents a cheaper model* | 72 | Leitura corrigida no #58: não é o gasto dos subagentes (1,6%), e sim o uso da sessão que os lançou (ver "Diagnóstico da #56") |
 | *Start fresh when you switch tasks* (`/clear`) | 65 | Confirma "uma missão por chat" |
 | *See what fills your context* (`/context`) | 22 | Medido neste chat (acima) |
 
 A recomendação "Trim CLAUDE.md" não apareceu. Este chat inclui ~14 KB das próprias consultas de diagnóstico.
+
+## Levantamento de mercado e lacunas (#58, 01/11/2026)
+
+### Diagnóstico da #56: de onde vinham os "72% de subagentes"
+
+Medido nos transcripts locais (`~/.claude/projects/<projeto>/*.jsonl`, campo `usage` de cada resposta; subagentes em `<sessão>/subagents/`), custo ponderado pelo preço relativo (leitura de cache 0,1×, escrita 1,25×, saída 5× a entrada):
+
+| Medida | Valor |
+| --- | --- |
+| Gasto real dos subagentes (2, ambos de um `/code-review`) | **1,6%** do total |
+| Sessão d3e6a932 (31/10, várias missões sem `/clear`) | 339 requisições, contexto médio **277 mil**, máximo 469 mil; **61%** do custo |
+| Sessões seguintes (uma missão cada) | 29–62 requisições, contexto médio 52–112 mil (≈ 75 mil) |
+| Fatia da sessão d3e6a932 na janela de 24 h do #54 | **74%** (o diálogo mostrou 72%) |
+| Piso do 1º turno de toda sessão (prompt do sistema, ferramentas, regras) | ~46–48 mil tokens; regras do projeto = 4,1 mil |
+
+**Causa raiz:** a recomendação atribui a si o uso inteiro das sessões em que se aplica ("*it tells you how much of your usage the row applies to, not how much the change saves*", [costs][costs]). A sessão que lançou os subagentes foi cara por **contexto longo**, que a regra "uma missão por chat" já corrigiu (~3,7× menor). **Remédio:** nenhum para subagentes (modelo menor em 1,6% do custo, num revisor, troca qualidade por quase nada); a leitura correta da fatia entrou na tabela "Sinais de desperdício". **Lição:** métrica agregada diz onde olhar; reproduza o número a partir dos dados brutos antes de agir.
+
+### Onde o contexto cresce (resultados de ferramenta, todas as sessões)
+
+| Origem | % do texto devolvido por ferramentas |
+| --- | ---: |
+| WebFetch | **21%** (a página de custos, 47 mil caracteres, entrou inteira 3 vezes) |
+| Read | 10% (média de ~2,5 mil caracteres por leitura) |
+| `cat` via shell | 6% |
+| `gh run view`, `getDiagnostics`, `grep`, demais | ≤ 3% cada |
+
+Saída de testes (pytest, behave) nem aparece: filtrá-la com hook não teria efeito mensurável aqui.
+
+### Tabela de lacunas
+
+Fontes primárias: [Anthropic, *Effective context engineering for AI agents*, 29/09/2025][ce] · [Chroma, *Context Rot*, 07/2025][rot] (18 modelos; o desempenho cai com o tamanho da entrada, mais ainda com distratores) · [Manus, *Context Engineering for AI Agents*, 18/07/2025][manus] (taxa de acerto do cache como métrica principal; entrada:saída ≈ 100:1) · [Liu et al., *Lost in the Middle*, 2023][lim] · [Claude Code, *Manage costs*][costs] (consultado em 01/11/2026). Blogs e ferramentas de terceiros com economia autodeclarada (80–99%) foram descartados como evidência.
+
+| Prática | Fonte | Hoje no projeto | Decisão |
+| --- | --- | --- | --- |
+| Menor conjunto de tokens de alto sinal; contexto longo degrada | ce · rot · lim | Regras < 200 linhas, cobradas por teste (#35) | Já feito |
+| Limpar entre tarefas | costs | Uma missão por chat; contexto médio 277 → ~75 mil | Já feito (medido) |
+| Recuperação sob demanda / revelação progressiva | ce · costs | Regras por caminho; este doc lido sob demanda | Já feito |
+| Prefixo estável, cache alto | manus · [pc][pc] | Modelo/esforço fixos no chat | Já feito |
+| Notas fora do contexto (`NOTES.md`) | ce | `PROJECT_SESSION_SUMMARY.md` como handoff | Já feito |
+| Filtrar/pré-processar saída de ferramenta | costs (hooks) | Regra manual; docs web não cobertas | **Adotado**: regra de docs por seção (WebFetch = 21%; ~97% menos por consulta) |
+| Hook que filtra saída de testes | costs | Não há | Não adotar: testes fora do ranking (YAGNI) |
+| Modelo menor para subagentes | costs | Herdam o modelo da sessão | Não adotar: 1,6% do custo, usados como revisores |
+| Plugin de *code intelligence* (LSP) | costs | Não há | Não agora: leituras pequenas (~2,5 mil caracteres) |
+| Desligar servidores MCP sem uso (`/mcp`) | costs | Conectores da conta claude.ai ativos (definições adiadas; instruções entram no contexto) | Decisão do dono, por conta: medir com `/context` antes e depois |
+| Instruções de compactação | costs | Não há | Não se aplica: `/clear` no lugar de `/compact` |
+| Medir antes de otimizar; ler a fatia corretamente | costs | `/usage` no fim da missão | Adotado: leitura da fatia corrigida em "Sinais de desperdício" |
+
+**Antes/depois:** o efeito da regra de docs só aparece em missões que consultem documentação; confira pelo ranking acima (fatia do WebFetch) e pelo `/usage`. O piso de ~47 mil tokens por sessão é o maior custo fixo restante e quase todo do ambiente (prompt do sistema, ferramentas, conectores); `/context` mostra a divisão.
+
+[ce]: https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
+[rot]: https://www.trychroma.com/research/context-rot
+[manus]: https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus
+[lim]: https://arxiv.org/abs/2307.03172
 
 [mem]: https://code.claude.com/docs/en/memory
 [costs]: https://code.claude.com/docs/en/costs

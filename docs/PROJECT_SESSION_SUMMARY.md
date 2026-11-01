@@ -4,7 +4,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "verificar a economia de tokens" (#54, com #52)
+**Última atualização:** 01/11/2026 — fim da missão "práticas de mercado para gasto de tokens" (#58, com #56)
 
 ---
 
@@ -19,24 +19,23 @@
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
 | Segurança | **Toda action fixada por SHA de commit** (inclusive `actions/*`), barrada por `tests/test_workflow_pinning.py` · Duas fontes: Dependabot (alerts + security updates) e `pip-audit --strict` no workflow `Security` (PRs, push no `master` e diário); versão travada no `poetry.lock` (grupo dev) |
 | Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · **Selenium 4.52** · actions atualizadas (checkout 7, codecov v7) · browsers/drivers pré-instalados no runner |
-| Regras do agente | Sempre carregadas: 104 linhas, **4,1 mil tokens medidos** no `/context` (estimativa ÷ 4 dava 2,45 mil; aqui são ~2,4 bytes/token). Escopo de caminho: `.claude/rules/` = `.github/instructions/` (Selenium, Python, workflows, Poetry), carga sob demanda confirmada no Claude Code; Copilot conferido pelo formato oficial + `chat.includeApplyingInstructions`. `tests/test_agent_rules.py` barra > 200 linhas, divergência entre as cópias e regressão da config de diagnósticos |
+| Regras do agente | Sempre carregadas: 105 linhas (#58: +1, docs por seção), **4,1 mil tokens medidos no #54** no `/context` (estimativa ÷ 4 dava 2,45 mil; aqui são ~2,4 bytes/token). Escopo de caminho: `.claude/rules/` = `.github/instructions/` (Selenium, Python, workflows, Poetry), carga sob demanda confirmada no Claude Code; Copilot conferido pelo formato oficial + `chat.includeApplyingInstructions`. `tests/test_agent_rules.py` barra > 200 linhas, divergência entre as cópias e regressão da config de diagnósticos |
 | Diagnósticos do editor | Ortografia só no Code Spell Checker (`en,pt_BR,es` + `cSpell.words`); LTeX+ só gramática. Uma edição de doc: 45 → 6 diagnósticos (~11 → ~1,6 KB). `.vscode/settings.json` e `extensions.json` versionados |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
-**#58 — levantar as melhores práticas de mercado para economizar tokens/créditos de IA e aplicá-las** (P1, escolha do dono em 01/11/2026). A #41 se baseou quase só na documentação dos fornecedores e a #54 só mediu; falta um levantamento amplo (fontes primárias datadas além do fornecedor), uma tabela de lacunas com decisão por prática e a aplicação, com medição antes/depois. Inclui a #56 (subagentes = 72% do uso). Escolhida antes da #27 por efeito composto: o desperdício encarece toda missão, inclusive a #27.
+**#27 — linters como portão real** (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step) escondido por `continue-on-error`; black usa 88 colunas e flake8 79.
 
-Do #54 (medições em `docs/AGENT_TOKEN_SPEND.md`, seção "Verificação"): o diálogo *Account & usage* da extensão mostra % do limite do plano em 24 h somando sessões, não tokens por missão; o maior sinal é **subagentes = 72% do uso** (#56), não o tamanho das regras ("Trim CLAUDE.md" não apareceu). Diagnósticos só existem para arquivos abertos no editor: `getDiagnostics` vazio pode ser "não checado".
+Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercado e lacunas"): os "72% de subagentes" (#56) eram leitura errada da métrica: a fatia de uma recomendação é o uso **ao qual ela se aplica**, não o que custou. Subagentes reais = 1,6%; o custo veio de uma sessão com várias missões (contexto médio 277 mil), já corrigido por "uma missão por chat" (~75 mil). O maior consumo por ferramenta é o **WebFetch (21%)**, que traz docs em Markdown inteiros: nova regra, documentação por seção. Pendente do dono: avaliar desligar conectores MCP sem uso (`/mcp`), medindo com `/context` (piso de ~47 mil tokens por sessão).
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #58 práticas de mercado para gasto de tokens (acima), com #56 dentro
-2. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step) escondido por `continue-on-error`; black usa 88 colunas e flake8 79 → #28 ordem de imports (talvez junto, se `ruff`)
-3. #26 `.gitignore` UTF-16 + portão de encoding (o Git o trata como binário; editar preservando CRLF, como no #54; `docs/PROJECT_SESSION*.*` ignorado mas versionado)
-4. #29 `find_element` com `visibility_of` (risco de flaky)
-5. #34 → #39 validador de métricas + READMEs traduzidos
-6. #30 config/senha hardcoded · #32 fixtures · #31 page objects retornados
+1. #27 linters como portão real (acima) → #28 ordem de imports (talvez junto, se `ruff`)
+2. #26 `.gitignore` UTF-16 + portão de encoding (o Git o trata como binário; editar preservando CRLF, como no #54; `docs/PROJECT_SESSION*.*` ignorado mas versionado)
+3. #29 `find_element` com `visibility_of` (risco de flaky)
+4. #34 → #39 validador de métricas + READMEs traduzidos
+5. #30 config/senha hardcoded · #32 fixtures · #31 page objects retornados
 
 **Antes de trocar a versão do Python na matriz** (3.15 já saiu): resolva o #48 (`build-report` baixa `allure-results-py3.14` por nome fixo; a troca quebra o report, de forma visível). O ruleset já não depende da matriz (#36).
 
@@ -65,7 +64,7 @@ Viraram regras em `.github/copilot-instructions.md` (ou nos arquivos com escopo 
 - **Credencial de curta duração (OIDC) > segredo fixo:** no #25 o Codecov dispensou token. Dependabot e PRs de fork não recebem `id-token: write` (nem secrets): falha ruidosa exige pular o passo exatamente ali, senão todo PR do Dependabot fica vermelho.
 - **Pergunta ao dono vem com as melhores práticas antes** (princípio/fonte + recomendação), para decidir informado.
 - **Check obrigatório pulado conta como aprovado:** gate com `always()` (não `!cancelled()`: workflow cancelado pularia o gate) e lista de permissão. A mutação `!cancelled()` foi a mais sutil do #36.
-- **Gasto de tokens** (#41): todo turno reenvia todo o contexto; regras sempre carregadas < 200 linhas, `@import` não economiza, saídas filtradas na origem, subagente só com motivo. Medição: `/usage` antes do `/clear`. Detalhes e fontes: `docs/AGENT_TOKEN_SPEND.md`.
+- **Gasto de tokens** (#41): todo turno reenvia todo o contexto; regras sempre carregadas < 200 linhas, `@import` não economiza, saídas filtradas na origem (docs web por seção, #58), subagente só com motivo; fatia de recomendação do `/usage` ≠ gasto (#56). Medição: `/usage` antes do `/clear`. Detalhes e fontes: `docs/AGENT_TOKEN_SPEND.md`.
 - **Diagnóstico do editor entra no contexto:** a extensão do VS Code anexa os avisos do LTeX+ a cada edição; sem `<!-- LTeX: language=pt-BR -->` na 1ª linha, um `.md` em português gera centenas de falsos positivos (462 em uma edição no #41). Todo `.md` novo fora do inglês leva o comentário.
 - **Regra em dois agentes = duas cópias** (#35): Claude e Copilot leem escopo de caminho de pastas e frontmatter diferentes; a divergência é barrada por teste, não por disciplina.
 - **Alterar o ruleset é bloqueado para o agente** (classificador de permissões, "CI Bypass"); só com autorização explícita do dono para aquela alteração. Ordem segura: CI do PR verde com o novo check → ruleset → merge (o merge valida a regra nova).

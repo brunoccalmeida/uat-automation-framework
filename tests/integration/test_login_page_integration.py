@@ -4,8 +4,6 @@ Tests LoginPage interactions with actual DOM elements,
 validating that locators work and methods interact correctly with Selenium.
 """
 
-import pytest
-
 from pages.login_page import LoginPage
 
 

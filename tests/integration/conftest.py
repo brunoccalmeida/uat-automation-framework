@@ -3,46 +3,34 @@
 Provides shared fixtures for integration testing with real browsers.
 """
 
-import os
-
 import pytest
 
-from core.config import get_base_url, get_browser_config, load_config
-from core.config_resolver import apply_config_hierarchy
-from core.driver_manager import DriverManager
+from core.config import get_base_url, load_config
+from tests.helpers.driver_setup import make_driver_manager
+from tests.helpers.navigation import (
+    go_to_cart,
+    go_to_inventory,
+    go_to_step_one,
+    go_to_step_two,
+)
 
 
-@pytest.fixture(scope="function")
-def driver():
+@pytest.fixture(name="driver", scope="function")
+def fixture_driver():
     """Create WebDriver instance for integration tests.
 
     Yields:
         WebDriver instance configured for integration testing.
     """
-    # Load configuration
-    config = load_config()
-    browser_config = get_browser_config(config)
-
-    # Apply headless mode hierarchy (respects HEADLESS env var for CI)
-    apply_config_hierarchy(
-        config=browser_config,
-        key="headless",
-        cli_value=None,
-        env_value=os.getenv("HEADLESS"),
-    )
-
-    # Create driver
-    dm = DriverManager(browser_config)
-    driver = dm.get_driver()
-
-    yield driver
+    dm = make_driver_manager()
+    yield dm.get_driver()
 
     # Teardown
     dm.quit()
 
 
-@pytest.fixture(scope="function")
-def base_url():
+@pytest.fixture(name="base_url", scope="function")
+def fixture_base_url():
     """Get base URL from configuration.
 
     Returns:
@@ -50,3 +38,31 @@ def base_url():
     """
     config = load_config()
     return get_base_url(config)
+
+
+@pytest.fixture(name="authenticated_driver")
+def fixture_authenticated_driver(driver, base_url):
+    """Driver logged in as standard_user, on the inventory page."""
+    go_to_inventory(driver, base_url)
+    return driver
+
+
+@pytest.fixture(name="cart_with_products")
+def fixture_cart_with_products(driver, base_url):
+    """Driver on the cart page with 2 products."""
+    go_to_cart(driver, base_url, ("Sauce Labs Backpack", "Sauce Labs Bike Light"))
+    return driver
+
+
+@pytest.fixture(name="checkout_step_one")
+def fixture_checkout_step_one(driver, base_url):
+    """Driver on checkout step one with a product in the cart."""
+    go_to_step_one(driver, base_url)
+    return driver
+
+
+@pytest.fixture(name="checkout_step_two")
+def fixture_checkout_step_two(driver, base_url):
+    """Driver on checkout step two (overview) with valid customer info."""
+    go_to_step_two(driver, base_url)
+    return driver

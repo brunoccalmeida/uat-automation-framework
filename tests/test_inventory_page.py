@@ -8,6 +8,7 @@ from unittest.mock import Mock, call, patch
 from selenium.webdriver.common.by import By
 
 from pages.inventory_page import InventoryPage
+from tests.helpers.navigation_contract import assert_clicks_then_returns_loaded
 
 
 class TestInventoryPageLocators:
@@ -133,26 +134,15 @@ class TestClickShoppingCart:
     """Test click_shopping_cart method."""
 
     def test_click_shopping_cart_clicks_and_returns_loaded_cart_page(self):
-        """click_shopping_cart should click SHOPPING_CART_LINK and return loaded CartPage."""
+        """click_shopping_cart clicks the cart link, returns a loaded CartPage."""
         page = InventoryPage(Mock())
 
-        with (
-            patch.object(page, "click") as mock_click,
-            patch("pages.cart_page.CartPage") as mock_next,
-        ):
-            calls = Mock()
-            calls.attach_mock(mock_click, "click")
-            calls.attach_mock(mock_next, "destination")
-            result = page.click_shopping_cart()
-
-            mock_click.assert_called_once_with(InventoryPage.SHOPPING_CART_LINK)
-            mock_next.assert_called_once_with(page.driver)
-            assert [c[0] for c in calls.mock_calls] == [
-                "click",
-                "destination",
-                "destination().wait_until_loaded",
-            ]
-            assert result is mock_next.return_value.wait_until_loaded.return_value
+        assert_clicks_then_returns_loaded(
+            page,
+            page.click_shopping_cart,
+            InventoryPage.SHOPPING_CART_LINK,
+            "pages.cart_page.CartPage",
+        )
 
 
 class TestLogout:
@@ -283,7 +273,7 @@ class TestAreProductImagesBroken:
     """Test are_product_images_broken method."""
 
     def test_are_product_images_broken_returns_true_when_all_broken(self):
-        """are_product_images_broken should return True when all images have sl-404 src."""
+        """are_product_images_broken is True when every image has the sl-404 src."""
         mock_driver = Mock()
         mock_img1 = Mock()
         mock_img1.get_attribute.return_value = "/static/media/sl-404.png"
@@ -297,7 +287,7 @@ class TestAreProductImagesBroken:
         assert result is True
 
     def test_are_product_images_broken_returns_false_when_some_valid(self):
-        """are_product_images_broken should return False when at least one image is valid."""
+        """are_product_images_broken is False when at least one image is valid."""
         mock_driver = Mock()
         mock_img1 = Mock()
         mock_img1.get_attribute.return_value = "/static/media/sl-404.png"
@@ -360,7 +350,7 @@ class TestSortDropdownContainsOption:
             assert result is True
 
     def test_sort_dropdown_contains_option_returns_false_when_absent(self):
-        """sort_dropdown_contains_option should return False when option doesn't exist."""
+        """sort_dropdown_contains_option is False for a missing option."""
         mock_driver = Mock()
         page = InventoryPage(mock_driver)
 

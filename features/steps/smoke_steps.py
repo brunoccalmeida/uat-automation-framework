@@ -3,8 +3,11 @@
 Basic validation steps to ensure application is operational.
 """
 
+# behave replaces these decorator placeholders at import time; pylint only
+# sees the placeholders, which are not callable.
+# pylint: disable=not-callable
+
 from behave import given, when, then
-from selenium.webdriver.common.by import By
 
 from core.config import get_base_url
 from pages.login_page import LoginPage

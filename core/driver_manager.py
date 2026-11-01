@@ -6,9 +6,10 @@ Handles browser initialization, configuration, and cleanup.
 
 from typing import Any
 
-from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.chrome.webdriver import WebDriver as Chrome
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.webdriver import WebDriver as Firefox
 from selenium.webdriver.remote.webdriver import WebDriver
 
 
@@ -54,10 +55,9 @@ class DriverManager:
 
         if browser_name == "chrome":
             return self._create_chrome_driver()
-        elif browser_name == "firefox":
+        if browser_name == "firefox":
             return self._create_firefox_driver()
-        else:
-            raise ValueError(f"Unsupported browser: {browser_name}")
+        raise ValueError(f"Unsupported browser: {browser_name}")
 
     def _create_chrome_driver(self) -> WebDriver:
         """Create Chrome WebDriver with configuration.
@@ -104,7 +104,7 @@ class DriverManager:
         options.add_argument("--disable-notifications")
 
         # Create driver (Selenium Manager will handle driver binary)
-        driver = webdriver.Chrome(options=options)
+        driver = Chrome(options=options)
 
         # Maximize window for better visibility
         driver.maximize_window()
@@ -135,7 +135,7 @@ class DriverManager:
         options.set_preference("signon.autofillForms", False)
 
         # Create driver (Selenium Manager will handle geckodriver binary)
-        driver = webdriver.Firefox(options=options)
+        driver = Firefox(options=options)
 
         # Maximize window for better visibility
         driver.maximize_window()

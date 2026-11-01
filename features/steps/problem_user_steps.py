@@ -1,15 +1,20 @@
 """Step definitions for Problem User Journey feature."""
 
+# behave replaces these decorator placeholders at import time; pylint only
+# sees the placeholders, which are not callable.
+# pylint: disable=not-callable
+
 from behave import then
+
 from pages.inventory_page import InventoryPage
 
 
 @then("the product images should be broken")
 def step_then_product_images_broken(context):
-    """Valida que as imagens dos produtos estão quebradas (src = /static/media/sl-404.168b1cce.jpg)."""
+    """Verify product images are broken (src = /static/media/sl-404.168b1cce.jpg)."""
     page = InventoryPage(context.driver)
     broken = page.are_product_images_broken()
-    assert broken, "Esperado que as imagens estejam quebradas para o problem_user"
+    assert broken, "Expected broken product images for problem_user"
 
 
 @then("the product names should be visible")

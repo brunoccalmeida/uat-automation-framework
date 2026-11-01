@@ -1,5 +1,9 @@
 """Step definitions for product sorting edge cases."""
 
+# behave replaces these decorator placeholders at import time; pylint only
+# sees the placeholders, which are not callable.
+# pylint: disable=not-callable
+
 from behave import when, then
 
 from pages.cart_page import CartPage

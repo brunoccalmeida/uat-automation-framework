@@ -8,6 +8,7 @@ from unittest.mock import Mock, patch
 from selenium.webdriver.common.by import By
 
 from pages.checkout_step_two_page import CheckoutStepTwoPage
+from tests.helpers.navigation_contract import assert_clicks_then_returns_loaded
 
 
 class TestCheckoutStepTwoPageLocators:
@@ -44,7 +45,7 @@ class TestIsOnCheckoutOverviewPage:
     """Test is_on_checkout_overview_page method."""
 
     def test_is_on_checkout_overview_page_returns_true_when_container_present(self):
-        """is_on_checkout_overview_page should return True when summary container exists."""
+        """is_on_checkout_overview_page is True when the summary container exists."""
         mock_driver = Mock()
         page = CheckoutStepTwoPage(mock_driver)
 
@@ -161,26 +162,15 @@ class TestClickFinish:
     """Test click_finish method."""
 
     def test_click_finish_clicks_and_returns_loaded_checkout_complete_page(self):
-        """click_finish should click FINISH_BUTTON and return loaded CheckoutCompletePage."""
+        """click_finish clicks the button, returns a loaded CheckoutCompletePage."""
         page = CheckoutStepTwoPage(Mock())
 
-        with (
-            patch.object(page, "click") as mock_click,
-            patch("pages.checkout_complete_page.CheckoutCompletePage") as mock_next,
-        ):
-            calls = Mock()
-            calls.attach_mock(mock_click, "click")
-            calls.attach_mock(mock_next, "destination")
-            result = page.click_finish()
-
-            mock_click.assert_called_once_with(CheckoutStepTwoPage.FINISH_BUTTON)
-            mock_next.assert_called_once_with(page.driver)
-            assert [c[0] for c in calls.mock_calls] == [
-                "click",
-                "destination",
-                "destination().wait_until_loaded",
-            ]
-            assert result is mock_next.return_value.wait_until_loaded.return_value
+        assert_clicks_then_returns_loaded(
+            page,
+            page.click_finish,
+            CheckoutStepTwoPage.FINISH_BUTTON,
+            "pages.checkout_complete_page.CheckoutCompletePage",
+        )
 
 
 class TestClickCancel:
@@ -190,20 +180,9 @@ class TestClickCancel:
         """click_cancel should click CANCEL_BUTTON and return loaded InventoryPage."""
         page = CheckoutStepTwoPage(Mock())
 
-        with (
-            patch.object(page, "click") as mock_click,
-            patch("pages.inventory_page.InventoryPage") as mock_next,
-        ):
-            calls = Mock()
-            calls.attach_mock(mock_click, "click")
-            calls.attach_mock(mock_next, "destination")
-            result = page.click_cancel()
-
-            mock_click.assert_called_once_with(CheckoutStepTwoPage.CANCEL_BUTTON)
-            mock_next.assert_called_once_with(page.driver)
-            assert [c[0] for c in calls.mock_calls] == [
-                "click",
-                "destination",
-                "destination().wait_until_loaded",
-            ]
-            assert result is mock_next.return_value.wait_until_loaded.return_value
+        assert_clicks_then_returns_loaded(
+            page,
+            page.click_cancel,
+            CheckoutStepTwoPage.CANCEL_BUTTON,
+            "pages.inventory_page.InventoryPage",
+        )

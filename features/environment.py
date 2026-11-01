@@ -20,7 +20,7 @@ def before_all(context):
     context.config_data = load_config("config.yaml")
 
 
-def before_scenario(context, scenario):
+def before_scenario(context, _scenario):
     """Initialize WebDriver before each scenario.
 
     Configuration hierarchy (highest to lowest priority):
@@ -35,7 +35,7 @@ def before_scenario(context, scenario):
 
     Args:
         context: Behave context object.
-        scenario: Current scenario being executed.
+        _scenario: Current scenario being executed (unused).
     """
     browser_config = get_browser_config(context.config_data)
 
@@ -59,12 +59,12 @@ def before_scenario(context, scenario):
     context.driver = context.driver_manager.get_driver()
 
 
-def after_scenario(context, scenario):
+def after_scenario(context, _scenario):
     """Clean up WebDriver after each scenario.
 
     Args:
         context: Behave context object.
-        scenario: Scenario that was executed.
+        _scenario: Scenario that was executed (unused).
     """
     if hasattr(context, "driver_manager"):
         context.driver_manager.quit()

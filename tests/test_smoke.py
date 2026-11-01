@@ -4,35 +4,22 @@ These tests verify that the core infrastructure (config loading,
 WebDriver initialization, basic navigation) works correctly.
 """
 
-import os
-
 import pytest
 
-from core.config import get_base_url, get_browser_config, load_config
-from core.config_resolver import apply_config_hierarchy
-from core.driver_manager import DriverManager
+from core.config import get_base_url, load_config
+from tests.helpers.driver_setup import make_driver_manager
 
 
-@pytest.fixture
-def config():
+@pytest.fixture(name="config")
+def fixture_config():
     """Load configuration for tests."""
     return load_config("config.yaml")
 
 
-@pytest.fixture
-def driver_manager(config):
+@pytest.fixture(name="driver_manager")
+def fixture_driver_manager():
     """Create driver manager instance with CI-friendly configuration."""
-    browser_config = get_browser_config(config)
-
-    # Apply headless configuration for CI environments
-    apply_config_hierarchy(
-        config=browser_config,
-        key="headless",
-        cli_value=None,
-        env_value=os.getenv("HEADLESS"),
-    )
-
-    manager = DriverManager(browser_config)
+    manager = make_driver_manager()
     yield manager
     manager.quit()
 

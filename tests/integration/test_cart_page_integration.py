@@ -3,37 +3,8 @@
 Tests CartPage interactions with actual DOM elements.
 """
 
-import pytest
-
 from pages.cart_page import CartPage
-from pages.inventory_page import InventoryPage
-from pages.login_page import LoginPage
-
-
-@pytest.fixture(scope="function")
-def cart_with_products(driver, base_url):
-    """Provide authenticated driver with products in cart.
-
-    Args:
-        driver: WebDriver instance.
-        base_url: Application base URL.
-
-    Yields:
-        WebDriver on cart page with 2 products.
-    """
-    driver.get(base_url)
-    login_page = LoginPage(driver)
-    login_page.login("standard_user", "secret_sauce")
-
-    # Add products to cart
-    inventory_page = InventoryPage(driver)
-    inventory_page.add_product_to_cart("Sauce Labs Backpack")
-    inventory_page.add_product_to_cart("Sauce Labs Bike Light")
-
-    # Navigate to cart
-    inventory_page.click_shopping_cart()
-
-    yield driver
+from tests.helpers.navigation import go_to_cart
 
 
 class TestCartPageElements:
@@ -109,12 +80,7 @@ class TestCartPageProductValidation:
 
     def test_empty_cart_has_zero_items(self, driver, base_url):
         """Empty cart should have zero items."""
-        driver.get(base_url)
-        login_page = LoginPage(driver)
-        login_page.login("standard_user", "secret_sauce")
-
-        inventory_page = InventoryPage(driver)
-        inventory_page.click_shopping_cart()
+        go_to_cart(driver, base_url, products=())
 
         page = CartPage(driver)
         assert page.get_cart_item_count() == 0

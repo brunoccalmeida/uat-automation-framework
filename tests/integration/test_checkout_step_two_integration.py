@@ -3,45 +3,8 @@
 Tests CheckoutStepTwoPage interactions with actual DOM elements.
 """
 
-import pytest
-
-from pages.cart_page import CartPage
-from pages.checkout_step_one_page import CheckoutStepOnePage
 from pages.checkout_step_two_page import CheckoutStepTwoPage
-from pages.inventory_page import InventoryPage
-from pages.login_page import LoginPage
-
-
-@pytest.fixture(scope="function")
-def checkout_step_two(driver, base_url):
-    """Provide driver on checkout step two page.
-
-    Args:
-        driver: WebDriver instance.
-        base_url: Application base URL.
-
-    Yields:
-        WebDriver on checkout step two (overview) page.
-    """
-    driver.get(base_url)
-    login_page = LoginPage(driver)
-    login_page.login("standard_user", "secret_sauce")
-
-    # Add product and complete step one
-    inventory_page = InventoryPage(driver)
-    inventory_page.add_product_to_cart("Sauce Labs Backpack")
-    inventory_page.click_shopping_cart()
-
-    cart_page = CartPage(driver)
-    cart_page.click_checkout()
-
-    step_one_page = CheckoutStepOnePage(driver)
-    step_one_page.enter_first_name("John")
-    step_one_page.enter_last_name("Doe")
-    step_one_page.enter_zip_code("12345")
-    step_one_page.click_continue()
-
-    yield driver
+from tests.helpers.navigation import go_to_step_two
 
 
 class TestCheckoutStepTwoElements:
@@ -143,29 +106,16 @@ class TestCheckoutStepTwoInteractions:
         assert "/inventory.html" in checkout_step_two.current_url
 
 
+BACKPACK = "Sauce Labs Backpack"
+BIKE_LIGHT = "Sauce Labs Bike Light"
+
+
 class TestCheckoutStepTwoMultipleProducts:
     """Test checkout with multiple products."""
 
     def test_multiple_products_in_summary(self, driver, base_url):
         """Multiple products should appear in order summary."""
-        driver.get(base_url)
-        login_page = LoginPage(driver)
-        login_page.login("standard_user", "secret_sauce")
-
-        # Add multiple products
-        inventory_page = InventoryPage(driver)
-        inventory_page.add_product_to_cart("Sauce Labs Backpack")
-        inventory_page.add_product_to_cart("Sauce Labs Bike Light")
-        inventory_page.click_shopping_cart()
-
-        cart_page = CartPage(driver)
-        cart_page.click_checkout()
-
-        step_one_page = CheckoutStepOnePage(driver)
-        step_one_page.enter_first_name("John")
-        step_one_page.enter_last_name("Doe")
-        step_one_page.enter_zip_code("12345")
-        step_one_page.click_continue()
+        go_to_step_two(driver, base_url, products=(BACKPACK, BIKE_LIGHT))
 
         page = CheckoutStepTwoPage(driver)
         assert page.is_product_in_summary("Sauce Labs Backpack")

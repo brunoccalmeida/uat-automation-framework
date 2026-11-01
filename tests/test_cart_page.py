@@ -8,6 +8,7 @@ from unittest.mock import Mock, patch
 from selenium.webdriver.common.by import By
 
 from pages.cart_page import CartPage
+from tests.helpers.navigation_contract import assert_clicks_then_returns_loaded
 
 
 class TestCartPageLocators:
@@ -124,49 +125,27 @@ class TestClickContinueShopping:
     """Test click_continue_shopping method."""
 
     def test_click_continue_shopping_clicks_and_returns_loaded_inventory_page(self):
-        """click_continue_shopping should click CONTINUE_SHOPPING_BUTTON and return loaded InventoryPage."""
+        """click_continue_shopping clicks the button, returns a loaded InventoryPage."""
         page = CartPage(Mock())
 
-        with (
-            patch.object(page, "click") as mock_click,
-            patch("pages.inventory_page.InventoryPage") as mock_next,
-        ):
-            calls = Mock()
-            calls.attach_mock(mock_click, "click")
-            calls.attach_mock(mock_next, "destination")
-            result = page.click_continue_shopping()
-
-            mock_click.assert_called_once_with(CartPage.CONTINUE_SHOPPING_BUTTON)
-            mock_next.assert_called_once_with(page.driver)
-            assert [c[0] for c in calls.mock_calls] == [
-                "click",
-                "destination",
-                "destination().wait_until_loaded",
-            ]
-            assert result is mock_next.return_value.wait_until_loaded.return_value
+        assert_clicks_then_returns_loaded(
+            page,
+            page.click_continue_shopping,
+            CartPage.CONTINUE_SHOPPING_BUTTON,
+            "pages.inventory_page.InventoryPage",
+        )
 
 
 class TestClickCheckout:
     """Test click_checkout method."""
 
     def test_click_checkout_clicks_and_returns_loaded_checkout_step_one_page(self):
-        """click_checkout should click CHECKOUT_BUTTON and return loaded CheckoutStepOnePage."""
+        """click_checkout clicks the button, returns a loaded CheckoutStepOnePage."""
         page = CartPage(Mock())
 
-        with (
-            patch.object(page, "click") as mock_click,
-            patch("pages.checkout_step_one_page.CheckoutStepOnePage") as mock_next,
-        ):
-            calls = Mock()
-            calls.attach_mock(mock_click, "click")
-            calls.attach_mock(mock_next, "destination")
-            result = page.click_checkout()
-
-            mock_click.assert_called_once_with(CartPage.CHECKOUT_BUTTON)
-            mock_next.assert_called_once_with(page.driver)
-            assert [c[0] for c in calls.mock_calls] == [
-                "click",
-                "destination",
-                "destination().wait_until_loaded",
-            ]
-            assert result is mock_next.return_value.wait_until_loaded.return_value
+        assert_clicks_then_returns_loaded(
+            page,
+            page.click_checkout,
+            CartPage.CHECKOUT_BUTTON,
+            "pages.checkout_step_one_page.CheckoutStepOnePage",
+        )

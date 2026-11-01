@@ -247,17 +247,10 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction --no-root --with dev
 
-      - name: Run Black (check only)
-        run: poetry run black --check .
-        continue-on-error: true
-
-      - name: Run Flake8
-        run: poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        continue-on-error: true
-
-      - name: Run Pylint
-        run: poetry run pylint **/*.py --exit-zero
-        continue-on-error: true
+      # The same hooks as a local commit (.pre-commit-config.yaml): one
+      # definition of "lint passed" for the developer and for CI.
+      - name: Run pre-commit hooks
+        run: poetry run pre-commit run --all-files --show-diff-on-failure
 
   # The single required check of this workflow (ruleset "Protect master").
   # Matrix jobs are named after their values ("test (3.14)"): requiring them

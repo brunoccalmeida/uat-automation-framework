@@ -1,20 +1,25 @@
+"""Product sorting step definitions for Sauce Demo."""
+
+# behave replaces these decorator placeholders at import time; pylint only
+# sees the placeholders, which are not callable.
+# pylint: disable=not-callable
+
+from behave import then, when
+
 from pages.inventory_page import InventoryPage
 
 
 @when("I refresh the page")
 def step_refresh_page(context):
-    """Refresh the current browser page and espera inventory carregar."""
+    """Refresh the current browser page and wait for the inventory to load."""
     context.driver.refresh()
     page = InventoryPage(context.driver)
     assert page.is_on_inventory_page(), "Inventory page did not load after refresh"
 
 
-from behave import given, then, when
-
-
 @then('the sort dropdown should NOT show "{option}" as selected')
 def step_verify_sort_dropdown_not_selected(context, option):
-    """Verify sort dropdown does NOT show the given option as selected (for bug scenarios).
+    """Verify the sort dropdown does NOT show the option (bug scenarios).
 
     Args:
         context: Behave context.
@@ -22,14 +27,15 @@ def step_verify_sort_dropdown_not_selected(context, option):
     """
     page = InventoryPage(context.driver)
     current_option = page.get_current_sort_option()
-    assert (
-        current_option != option
-    ), f"Sort dropdown unexpectedly shows '{option}' as selected (actual: '{current_option}')"
+    assert current_option != option, (
+        f"Sort dropdown unexpectedly shows '{option}' as selected "
+        f"(actual: '{current_option}')"
+    )
 
 
 @then("products should NOT be sorted by name Z to A")
 def step_verify_sort_name_za_not_sorted(context):
-    """Verify products are NOT sorted by name Z to A (for problem_user bug scenario).
+    """Verify products are NOT sorted by name Z to A (problem_user bug scenario).
 
     Args:
         context: Behave context.
@@ -40,14 +46,6 @@ def step_verify_sort_name_za_not_sorted(context):
     assert (
         product_names != sorted_names
     ), f"Products are (unexpectedly) sorted Z-A: {product_names}"
-
-
-from pages.cart_page import CartPage
-
-
-from behave import given, then, when
-
-from pages.inventory_page import InventoryPage
 
 
 @when('I select sort option "{option}"')

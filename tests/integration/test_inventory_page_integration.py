@@ -3,29 +3,9 @@
 Tests InventoryPage interactions with actual DOM elements.
 """
 
-import pytest
-
 from pages.cart_page import CartPage
 from pages.inventory_page import InventoryPage
 from pages.login_page import LoginPage
-
-
-@pytest.fixture(scope="function")
-def authenticated_driver(driver, base_url):
-    """Provide authenticated driver on inventory page.
-
-    Args:
-        driver: WebDriver instance.
-        base_url: Application base URL.
-
-    Yields:
-        Authenticated WebDriver on inventory page.
-    """
-    driver.get(base_url)
-    login_page = LoginPage(driver)
-    login_page.login("standard_user", "secret_sauce")
-
-    yield driver
 
 
 class TestInventoryPageElements:

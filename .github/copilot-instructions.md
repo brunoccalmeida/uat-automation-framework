@@ -108,6 +108,24 @@ time.sleep(5)  # NÃO-DETERMINÍSTICO
 
 ---
 
+## ⚠️ REGRA: ESPERE O ESTADO FICAR PRONTO ANTES DE AGIR
+**Toda ação seguida de uma leitura ou decisão deve esperar o resultado da ação, nunca um estado intermediário.**
+
+Vale para código de teste, scripts e automação de CI. Antes de ler ou decidir, pergunte: *"isto vê o resultado da ação, ou um estado que ainda está mudando?"*
+
+| Contexto | Estado intermediário (armadilha) | Como esperar corretamente |
+|---|---|---|
+| Selenium em SPA | A URL muda antes de a nova página renderizar | Navegação retorna só após o `PAGE_LOADED` do destino (`wait_until_loaded`) |
+| Formulário com erro | Mensagem de erro antiga ainda na tela parece o resultado do novo envio | Remover o estado antigo antes de agir (`submit_and_wait_for_outcome`) |
+| API do GitHub | `mergeStateStatus` = `UNKNOWN` logo após um merge no `master` | Aguardar até o estado deixar de ser `UNKNOWN` antes de decidir |
+| Checks de CI | Logo após atualizar a branch, os checks verdes ainda são do commit anterior | Consultar os checks pelo SHA da head atual |
+
+- **"Ainda não sei" não é "sim".** Estados como `UNKNOWN`, pendente ou resposta vazia significam *esperar*, nunca *seguir*.
+- **Quando o estado final pode ser igual ao inicial**, não há como saber se a ação ocorreu: altere o estado inicial antes de agir (ex.: fechar o erro antigo antes de reenviar).
+- **Espere por condição, nunca por tempo fixo** (`sleep`). Em polling, o intervalo é só o ritmo da checagem; a saída do laço é sempre a condição.
+
+---
+
 ## Code Organization
 
 ### Import Rules

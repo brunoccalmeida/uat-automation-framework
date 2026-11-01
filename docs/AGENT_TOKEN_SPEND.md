@@ -28,9 +28,19 @@ Contexto longo também **piora a resposta**: regra perdida num arquivo grande é
 | Filtrar saída na origem: `grep`, `head`, `--jq`, `gh run view --log-failed`, leitura de arquivo por trecho | Saída despejada no contexto é relida em todo turno pelo resto do chat. Ex.: no #38, `grep` por remov/deprecat no `py/CHANGES` do Selenium, não as notas inteiras | [costs][costs] (hooks/pré-processamento) |
 | Documentação web por seção: sumário de títulos e depois só a seção (`curl -s <url>.md \| sed -n '/^### X/,/^### /p'`) | O WebFetch devolve docs em Markdown crus e inteiros (47 mil caracteres na página de custos, ~20 mil tokens relidos em todo turno); sumário + seção = ~2,2 mil (#58) | Medição local (#58, abaixo) |
 | Hook `PreToolUse` reescreve `pytest`/`behave` para a saída compacta do próprio runner (`-q`, `-f progress2`); `.claude/settings.json` + `scripts/filter_test_output.py` | Saída de teste verde é volume sem informação: `behave` pretty 51 KB → 1,1 KB; `pytest -v` 28 KB → ~1,6 KB. Flags nativas, não `\| grep \| head` como no exemplo oficial: o pipe troca o exit code pelo do `head` (suíte vermelha sai 0, visto em teste de mutação) e o `progress` simples esconde a mensagem da falha. Formato exec com `python` e matcher `Bash\|PowerShell` (só `Bash` não dispara no PowerShell) | [costs][costs] (exemplo oficial) · [hooks][hooks] · `tests/test_filter_test_output.py` (#63) |
+| Plugin de *code intelligence* `pyright-lsp` (oficial): após cada edição de `.py`, o agente recebe os erros de tipo/import que introduziu | Sem ele, o erro só aparece rodando testes ou lendo o arquivo inteiro; com ele, só o diagnóstico das linhas editadas. O servidor (`pyright-langserver`) é ferramenta por máquina (`pipx`), não dependência do Poetry: o Claude Code o inicia pelo nome a partir do PATH, e o `.venv` não está no PATH da extensão. Um pyright fora do projeto só resolve os imports com `[tool.pyright] venv = ".venv"` (sem isso: 13 `reportMissingImports` falsos, visto em teste de mutação), e o `.venv` só existe no projeto para todos com o `poetry.toml` versionado. Portão de pyright no CI, com versão travada, fica para a #27 | [code intelligence][ci] · README do plugin · `tests/test_agent_rules.py` (#63) |
 | CLI (`gh`) antes de servidor MCP | CLI não acrescenta listagem de ferramentas ao contexto | [costs][costs] |
 | Subagente só para: trabalho paralelo independente, isolar saída volumosa, revisor que não viu o código. Pedir resumo curto; modelo menor para tarefa simples | Cada subagente começa do zero (recoleta contexto que a conversa já tinha) e soma requisições. Delegar não torna a resposta melhor | [best practices][bp] · [costs][costs] |
 | Pedidos específicos (arquivo, função, critério de pronto) | Pedido vago dispara varredura ampla do código | [costs][costs] |
+
+### Instalar o `pyright-lsp` em uma máquina nova
+
+O `enabledPlugins` em `.claude/settings.json` liga o plugin para o projeto, mas não instala nada; cada máquina faz uma vez:
+
+1. Servidor (o extra `nodejs` traz o Node.js em wheel; dispensa Node instalado): `py -m pip install --user pipx`, `py -m pipx ensurepath`, `pipx install "pyright[nodejs]"`.
+2. Fechar e reabrir o VS Code (ou o terminal do `claude`): processos já abertos não veem o PATH novo. Conferir com `Get-Command pyright-langserver`.
+3. Plugin: `/plugin` → `pyright-lsp` (marketplace `claude-plugins-official`) → escopo do projeto. No terminal: `claude plugin install pyright-lsp@claude-plugins-official --scope project`.
+4. Confirmar: pedir ao agente um erro de tipo proposital em um `.py`; a edição deve mostrar `Found N new diagnostic issues`. Sem essa linha: `/plugin` → aba **Errors** (`Executable not found in $PATH` = passo 2).
 
 ## Como medir o gasto por missão
 
@@ -149,7 +159,7 @@ Fontes primárias: [Anthropic, *Effective context engineering for AI agents*, 29
 | Filtrar/pré-processar saída de ferramenta | costs (hooks) | Regra manual; docs web não cobertas | **Adotado**: regra de docs por seção (WebFetch = 21%; ~97% menos por consulta) |
 | Hook que filtra saída de testes (só falhas) | costs (exemplo oficial) | Hook com flags nativas | **Adotado** (#63; ver Práticas adotadas) |
 | Modelo menor para subagentes de tarefa simples | costs | Herdam o modelo da sessão | **Adotado** (regra); revisor mantém o modelo da sessão: a qualidade da revisão é o propósito dele |
-| Plugin de *code intelligence* (`pyright-lsp`, oficial) | costs · [code intelligence][ci] | Não há | **Adotar** (#63) |
+| Plugin de *code intelligence* (`pyright-lsp`, oficial) | costs · [code intelligence][ci] | `pipx` + plugin no escopo do projeto | **Adotado** (#63; ver Práticas adotadas) |
 | Desligar servidores MCP sem uso (`/mcp`) | costs | Conectores da conta claude.ai ativos | **Adotar**: ação do dono no `/mcp`, sem medição sob medida (#61 fechada) |
 | Instruções de compactação | costs | Não há | Não se aplica: `/clear` no lugar de `/compact` |
 | Medir antes de otimizar; ler a fatia corretamente | costs | `/usage` no fim da missão | Adotado: leitura da fatia corrigida em "Sinais de desperdício" |

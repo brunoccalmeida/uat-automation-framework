@@ -7,10 +7,15 @@
           {
             "type": "command",
             "command": "python",
-            "args": ["${CLAUDE_PROJECT_DIR}/scripts/filter_test_output.py"]
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/scripts/filter_test_output.py"
+            ]
           }
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "pyright-lsp@claude-plugins-official": true
   }
 }

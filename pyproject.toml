@@ -20,6 +20,13 @@ dependencies = [
 # those lock files with a misleading "pyproject.toml changed" error.
 requires-poetry = ">=2.5.1"
 
+[tool.pyright]
+# The pyright-lsp plugin runs a per-machine pyright (pipx), outside the
+# project; point it at the in-project virtualenv (poetry.toml) so it resolves
+# the project's imports instead of reporting them as missing.
+venvPath = "."
+venv = ".venv"
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"

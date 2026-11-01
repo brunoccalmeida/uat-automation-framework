@@ -323,10 +323,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 185 tests (framework components, 100% Page Objects coverage)
+- **Unit Tests**: 208 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 71 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 55 scenarios, 386 steps (complete user journeys)
-- **Total**: 256 unit/integration tests + 55 E2E scenarios
+- **Total**: 279 unit/integration tests + 55 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -362,7 +362,8 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **DriverManager** | 19 | 100% | ✅ Complete |
 | **Login steps (OR logic)** | 9 | N/A | ✅ Complete |
 | **Smoke Tests** | 4 | N/A | ✅ Complete |
-| **TOTAL** | **185** | **100%** | **Complete** |
+| **Workflow pinning (CI)** | 23 | N/A | ✅ Complete |
+| **TOTAL** | **208** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 346

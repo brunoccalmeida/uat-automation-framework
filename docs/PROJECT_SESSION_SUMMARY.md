@@ -3,7 +3,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "`pip-audit` no CI" (#23, PR #43)
+**Última atualização:** 01/11/2026 — fim da missão "actions por SHA" (#24, PR #45)
 
 ---
 
@@ -12,19 +12,27 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 185 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
+| Testes | 208 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, 6 checks obrigatórios (incl. `pip-audit`), branch atualizada, histórico linear, sem force push, sem bypass |
-| Segurança | Duas fontes: Dependabot (alerts + security updates) e `pip-audit --strict` no workflow `Security` (PRs, push no `master` e diário); versão travada no `poetry.lock` (grupo dev) |
+| Segurança | **Toda action fixada por SHA de commit** (inclusive `actions/*`), barrada por `tests/test_workflow_pinning.py` · Duas fontes: Dependabot (alerts + security updates) e `pip-audit --strict` no workflow `Security` (PRs, push no `master` e diário); versão travada no `poetry.lock` (grupo dev) |
 | Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · **Selenium 4.52** · actions atualizadas (checkout 7, codecov v7) · browsers/drivers pré-instalados no runner |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
-**#24 — fixar as actions de terceiros por SHA** (P1, segurança). Inclui `snok/install-poetry` (também usado no novo `security.yml`).
+**#36 — desacoplar o nome do check obrigatório da matriz do Python** (P1, bloqueio latente: o Python 3.15 já saiu; trocar a matriz renomeia `test (3.14)` e trava todo PR).
 
-Depois, issues **P1** na ordem da regra (bloqueio → segurança → visibilidade → dívida):
-issue #25 (token Codecov; requer ação do dono no codecov.io) → #41 (boas práticas de gasto de tokens dos agentes, pedida pelo dono como alta prioridade).
+Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
+
+1. #36 bloqueio latente (P1)
+2. #25 token Codecov (P1; requer o dono criar o token no codecov.io)
+3. #41 práticas de gasto de tokens (P1) → #35 condensar regras (aplica o #41)
+4. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo) → #28 ordem de imports (talvez junto, se `ruff`)
+5. #26 `.gitignore` UTF-16 + portão de encoding
+6. #29 `find_element` com `visibility_of` (risco de flaky)
+7. #34 → #39 validador de métricas + READMEs traduzidos
+8. #30 config/senha hardcoded · #32 fixtures · #31 page objects retornados
 
 **Se o check `pip-audit` ficar vermelho** sem mudança de código: é CVE nova. Corrija atualizando o pacote; se não houver correção, `--ignore-vuln <ID>` em `security.yml` com justificativa e issue de remoção. Nunca `continue-on-error`.
 
@@ -47,6 +55,7 @@ Viraram regras em `.github/copilot-instructions.md`; aqui só o porquê, em uma 
 - **Versão maior é decisão humana:** ler notas de cada versão intermediária e checar "isto me afeta?" (ex.: codecov v7 removeu `file`).
 - **Lock é gerado:** em conflito, regenere; nunca edite à mão.
 - **RED pelo motivo certo:** no #43, injetar `urllib3` 1.x com `pip` quebrou o próprio `pip-audit` (exit 1 por crash, não por detecção). Leia a saída, não só o código de saída; o RED do CI foi provado com um commit temporário revertido.
+- **Pin por SHA do commit, não da tag:** tag anotada é um objeto próprio; descasque (`^{}` no `git ls-remote`) e confirme em `git/commits/<sha>`. Toda asserção precisa de RED próprio: a do comentário de versão só falhou via mutação.
 - **Pergunta ao dono vem com as melhores práticas antes** (princípio/fonte + recomendação), para decidir informado.
 
 ## Ambiente local (Windows)

@@ -29,7 +29,7 @@ Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → seg
 
 1. #35 condensar regras (aplica o #41, já concluído)
 2. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo) → #28 ordem de imports (talvez junto, se `ruff`)
-3. #26 `.gitignore` UTF-16 + portão de encoding
+3. #26 `.gitignore` UTF-16 + portão de encoding · #52 ruído residual de ortografia (LTeX+) no contexto do agente
 4. #29 `find_element` com `visibility_of` (risco de flaky)
 5. #34 → #39 validador de métricas + READMEs traduzidos
 6. #30 config/senha hardcoded · #32 fixtures · #31 page objects retornados

@@ -100,15 +100,14 @@ poetry run pre-commit install
 
 
 **Pre-commit Hooks & Lint Configuration:**
-All linting and formatting configuration is centralized in the `.pre-commit-config.yaml` file. There is **no** `.flake8` file: all Flake8, Black, and Pylint settings are managed via pre-commit hooks only.
+The hooks in `.pre-commit-config.yaml` are the lint gate: the CI `lint` job runs the same hooks (`pre-commit run --all-files`), with no excluded folders and no ignored failures (`tests/test_lint_gate.py`). Linters run through Poetry, so their versions come from `poetry.lock`.
 
-- ✅ **Black**: Code formatting (`--line-length=88`)
-- ✅ **Flake8**: Linting and style guide enforcement (`--max-line-length=88`, `--extend-ignore=E203,W503,E501`)
-- ✅ **Pylint**: Code analysis for errors and smells (configured via `pyproject.toml`)
+- ✅ **Black**: Code formatting (88 columns)
+- ✅ **Flake8**: Style guide enforcement (`.flake8`, black-compatible: 88 columns, `E203,E701` ignored; flake8 does not read `pyproject.toml`)
+- ✅ **Pylint**: Errors and code smells (`[tool.pylint.*]` in `pyproject.toml`; each disabled check has its reason next to it)
+- ✅ **Pyright**: Static type checking (`[tool.pyright]` in `pyproject.toml`; the editor runs the same checker)
 - ✅ **Security**: Detect private keys, merge conflicts
-- ✅ **Quality**: Trailing whitespace, YAML validation
-
-> **Note:** Do **not** create a `.flake8` file. All configuration is managed in `.pre-commit-config.yaml` for consistency and maintainability.
+- ✅ **Quality**: Trailing whitespace, YAML validation, README metrics
 
 Hooks run automatically on `git commit`. To run all hooks manually: `pre-commit run --all-files`
 

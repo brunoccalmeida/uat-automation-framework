@@ -4,7 +4,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "plugin `pyright-lsp`" (#63, segunda metade)
+**Última atualização:** 01/11/2026 — fim da missão "linters como portão real" (#27, com #32, #33, #67, #70)
 
 ---
 
@@ -13,12 +13,13 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 280 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
+| Testes | 306 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
 | Segurança | **Toda action fixada por SHA de commit** (inclusive `actions/*`), barrada por `tests/test_workflow_pinning.py` · Duas fontes: Dependabot (alerts + security updates) e `pip-audit --strict` no workflow `Security` (PRs, push no `master` e diário); versão travada no `poetry.lock` (grupo dev) |
-| Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · **Selenium 4.52** · actions atualizadas (checkout 7, codecov v7) · browsers/drivers pré-instalados no runner |
+| Portão de lint | CI roda `pre-commit run --all-files`: os mesmos hooks do commit local (black, flake8, pylint, **pyright**, validador de métricas…). Linters via Poetry (versão do `poetry.lock`), sem exclusões, sem `--exit-zero`/`continue-on-error` (`tests/test_lint_gate.py`). 0 avisos no repo. Config: `.flake8` (o flake8 não lê `pyproject.toml`), `[tool.pylint.*]` e `[tool.pyright]` no `pyproject.toml`. Supressões só com o porquê ao lado. Auxiliares de teste em `tests/helpers/` (fora do `name-tests-test`) |
+| Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · pyright 1.1.414 (grupo dev) · **Selenium 4.52** · actions atualizadas (checkout 7, codecov v7) · browsers/drivers pré-instalados no runner |
 | Regras do agente | Sempre carregadas: 106 linhas (#58: docs por seção, prática estabelecida por padrão, subagente simples com modelo menor), **4,1 mil tokens medidos no #54** no `/context` (estimativa ÷ 4 dava 2,45 mil; aqui são ~2,4 bytes/token). Escopo de caminho: `.claude/rules/` = `.github/instructions/` (Selenium, Python, workflows, Poetry), carga sob demanda confirmada no Claude Code; Copilot conferido pelo formato oficial + `chat.includeApplyingInstructions`. `tests/test_agent_rules.py` barra > 200 linhas, divergência entre as cópias e regressão da config de diagnósticos |
 | Diagnósticos do editor | Ortografia só no Code Spell Checker (`en,pt_BR,es` + `cSpell.words`); LTeX+ só gramática. Uma edição de doc: 45 → 6 diagnósticos (~11 → ~1,6 KB). `.vscode/settings.json` e `extensions.json` versionados |
 | Hook de saída de testes | `PreToolUse` (`Bash\|PowerShell`) em `.claude/settings.json` reescreve `pytest` → `-q` e `behave` → `-f progress2` (`scripts/filter_test_output.py`, #65): `behave` 51 → 1,1 KB, `pytest -v` 28 → ~1,6 KB. Flags nativas, sem pipe (o pipe troca o exit code pelo do `head`); `behave` com `-f` explícito fica intacto. `tests/test_filter_test_output.py` |
@@ -27,18 +28,17 @@
 
 ## Próxima missão recomendada
 
-**#27 — linters como portão real** (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step; o pyright também o acusa) escondido por `continue-on-error`; black usa 88 colunas e flake8 79. Decidir aqui se o pyright vira portão do CI (aí sim dependência dev travada no Poetry; hoje `pyright pages features` = 3 erros: o F821 e os da #67).
+**#28 — ordem de imports no portão** (P2, mas é o próximo portão, e portões vêm antes de refatorar). Hoje o pylint já cobra a ordem dos *grupos* (C0411/C0412: stdlib → terceiros → projeto), não a ordem alfabética dentro deles; o editor ordena ao salvar (`source.organizeImports`) e o pipeline não. Opções da issue: isort `--profile black` (troca mínima) ou ruff regra `I`. Adotar o ruff é decisão maior (ele substitui flake8 e parte do pylint, ~100× mais rápido): trazer ao dono com as práticas antes, medindo o que mudaria (`ruff check --select I` + regras equivalentes ao flake8). Portão novo = hook local via Poetry no `.pre-commit-config.yaml` + o linter em `LINTERS` de `tests/test_lint_gate.py` (RED).
 
 Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercado e lacunas"): os "72% de subagentes" (#56) eram leitura errada da métrica: a fatia de uma recomendação é o uso **ao qual ela se aplica**, não o que custou. Estimativa (pesos de custo supostos): subagentes ≈ 1,6%; a fatia veio de uma sessão com várias missões sem `/clear` (contexto médio 277 mil; as de uma missão, ~75 mil, com trabalhos diferentes: correlação). O maior consumo por ferramenta é o **WebFetch (21%)**, que traz docs em Markdown inteiros: nova regra, documentação por seção. Correção feita no mesmo chat, a pedido do dono: o levantamento tinha presunções (pesos de custo não conferidos, correlação lida como causa, práticas oficiais rejeitadas com amostra pequena). Critério agora em regra: prática estabelecida por padrão; medição sob medida só se a economia supera claramente o custo de investigar. Ação do dono: desligar no `/mcp` conectores sem uso (#61 fechada, sem medição).
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #27 linters como portão real (acima) → #28 ordem de imports (talvez junto, se `ruff`)
-2. #67 `get_attribute()` tratado como `str` no `InventoryPage` (achado do pyright; risco de `TypeError` em vez de falha clara)
-3. #26 `.gitignore` UTF-16 + portão de encoding (o Git o trata como binário; editar preservando CRLF, como no #54; `docs/PROJECT_SESSION*.*` ignorado mas versionado)
-4. #29 `find_element` com `visibility_of` (risco de flaky)
-5. #34 → #39 validador de métricas + READMEs traduzidos
-6. #30 config/senha hardcoded · #32 fixtures · #31 page objects retornados
+1. #28 ordem de imports (acima)
+2. #26 `.gitignore` UTF-16 + portão de encoding (o Git o trata como binário; editar preservando CRLF, como no #54; `docs/PROJECT_SESSION*.*` ignorado mas versionado)
+3. #29 `find_element` com `visibility_of` (risco de flaky)
+4. #34 → #39 validador de métricas (já tem testes de caracterização, `tests/test_validate_readme_metrics.py`) + READMEs traduzidos
+5. #30 config/senha hardcoded · #31 page objects retornados
 
 **Antes de trocar a versão do Python na matriz** (3.15 já saiu): resolva o #48 (`build-report` baixa `allure-results-py3.14` por nome fixo; a troca quebra o report, de forma visível). O ruleset já não depende da matriz (#36).
 
@@ -70,6 +70,8 @@ Viraram regras em `.github/copilot-instructions.md` (ou nos arquivos com escopo 
 - **Gasto de tokens** (#41): todo turno reenvia todo o contexto; regras sempre carregadas < 200 linhas, `@import` não economiza, saídas filtradas na origem (docs web por seção, #58), subagente só com motivo; fatia de recomendação do `/usage` ≠ gasto (#56). Medição: `/usage` antes do `/clear`. Detalhes e fontes: `docs/AGENT_TOKEN_SPEND.md`.
 - **Diagnóstico do editor entra no contexto:** a extensão do VS Code anexa os avisos do LTeX+ a cada edição; sem `<!-- LTeX: language=pt-BR -->` na 1ª linha, um `.md` em português gera centenas de falsos positivos (462 em uma edição no #41). Todo `.md` novo fora do inglês leva o comentário.
 - **Regra em dois agentes = duas cópias** (#35): Claude e Copilot leem escopo de caminho de pastas e frontmatter diferentes; a divergência é barrada por teste, não por disciplina.
+- **Portão que nunca falha é pior que nenhum** (#27): exclusões, `--exit-zero` e `continue-on-error` esconderam um F821 real. CI e commit rodam os mesmos hooks; regra sem exceção virou teste (`tests/test_lint_gate.py`). Falso positivo se suprime no ponto exato, com o porquê (behave troca os decorators em tempo de import; pylint não lê stubs `.pyi`, e o Selenium carrega `webdriver.Chrome` sob demanda: importar do módulo concreto resolveu sem supressão).
+- **Portão novo barra commits parciais:** cada commit é checado com a config *dele*; dividir "ligar o portão" e "corrigir o que ele acusa" exigiria `--no-verify`. Mudança indivisível = commit único com mensagem detalhada.
 - **Alterar o ruleset é bloqueado para o agente** (classificador de permissões, "CI Bypass"); só com autorização explícita do dono para aquela alteração. Ordem segura: CI do PR verde com o novo check → ruleset → merge (o merge valida a regra nova).
 
 ## Ambiente local (Windows)

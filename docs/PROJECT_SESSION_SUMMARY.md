@@ -3,7 +3,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "Integrar PRs pendentes do Dependabot" (#20, #38)
+**Última atualização:** 01/11/2026 — fim da missão "`pip-audit` no CI" (#23, PR #43)
 
 ---
 
@@ -14,17 +14,19 @@
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
 | Testes | 185 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
-| Proteção do `master` | Ruleset "Protect master": PR obrigatório, 5 checks obrigatórios, branch atualizada, histórico linear, sem force push, sem bypass |
-| Segurança | Dependabot alerts + security updates ligados; vulnerabilidades altas corrigidas; `pip-audit` usado manualmente como 2ª fonte (CI: issue #23) |
+| Proteção do `master` | Ruleset "Protect master": PR obrigatório, 6 checks obrigatórios (incl. `pip-audit`), branch atualizada, histórico linear, sem force push, sem bypass |
+| Segurança | Duas fontes: Dependabot (alerts + security updates) e `pip-audit --strict` no workflow `Security` (PRs, push no `master` e diário); versão travada no `poetry.lock` (grupo dev) |
 | Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · **Selenium 4.52** · actions atualizadas (checkout 7, codecov v7) · browsers/drivers pré-instalados no runner |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
-**#23 — `pip-audit` no CI** (P1, segurança): segunda fonte de vulnerabilidades, hoje só manual.
+**#24 — fixar as actions de terceiros por SHA** (P1, segurança). Inclui `snok/install-poetry` (também usado no novo `security.yml`).
 
 Depois, issues **P1** na ordem da regra (bloqueio → segurança → visibilidade → dívida):
-issue #24 (SHA pins das actions) → #25 (token Codecov; requer ação do dono no codecov.io) → #41 (boas práticas de gasto de tokens dos agentes, pedida pelo dono como alta prioridade).
+issue #25 (token Codecov; requer ação do dono no codecov.io) → #41 (boas práticas de gasto de tokens dos agentes, pedida pelo dono como alta prioridade).
+
+**Se o check `pip-audit` ficar vermelho** sem mudança de código: é CVE nova. Corrija atualizando o pacote; se não houver correção, `--ignore-vuln <ID>` em `security.yml` com justificativa e issue de remoção. Nunca `continue-on-error`.
 
 **Ao abrir PR que atualize Selenium (ou outra dependência de execução):** triagem por `grep` no `py/CHANGES` oficial (remov/deprecat) + busca no código pelas APIs citadas, e todas as camadas localmente antes do merge. Assim foi feito no #38 (4.39 → 4.52: nenhuma API removida era usada).
 
@@ -44,6 +46,8 @@ Viraram regras em `.github/copilot-instructions.md`; aqui só o porquê, em uma 
 - **TDD de duplo ciclo:** unitário falhando antes de cada unidade; teste que nunca falhou não prova nada (teste de mutação).
 - **Versão maior é decisão humana:** ler notas de cada versão intermediária e checar "isto me afeta?" (ex.: codecov v7 removeu `file`).
 - **Lock é gerado:** em conflito, regenere; nunca edite à mão.
+- **RED pelo motivo certo:** no #43, injetar `urllib3` 1.x com `pip` quebrou o próprio `pip-audit` (exit 1 por crash, não por detecção). Leia a saída, não só o código de saída; o RED do CI foi provado com um commit temporário revertido.
+- **Pergunta ao dono vem com as melhores práticas antes** (princípio/fonte + recomendação), para decidir informado.
 
 ## Ambiente local (Windows)
 

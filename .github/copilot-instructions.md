@@ -7,6 +7,7 @@
 **Toda decisão (código, testes, CI, ambiente, processo) segue as melhores práticas reconhecidas da indústria.**
 
 - Havendo mais de um caminho, recomende o indicado pelas melhores práticas e cite o princípio que o sustenta (ex.: dev/prod parity, YAGNI, fail fast).
+- Toda pergunta de decisão ao usuário traz antes o que indicam as melhores práticas (princípio ou fonte) e a recomendação; o usuário decide já informado.
 - Não escolha atalhos por conveniência (ex.: contornar um problema de ambiente com código novo).
 - Desvios só com justificativa explícita, registrada no commit ou na documentação.
 - Regra deste arquivo que não siga as melhores práticas deve ser substituída, não contornada.

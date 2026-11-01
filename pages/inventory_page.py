@@ -45,7 +45,7 @@ class InventoryPage(BasePage):
         Returns:
             True if inventory container is present, False otherwise.
         """
-        return self.is_element_present(self.INVENTORY_CONTAINER, timeout=3)
+        return self.is_element_visible(self.INVENTORY_CONTAINER, timeout=3)
 
     def get_page_title(self) -> str:
         """Get the page title text.
@@ -82,7 +82,7 @@ class InventoryPage(BasePage):
         Returns:
             Number shown in cart badge, 0 if no badge present.
         """
-        if self.is_element_present(self.SHOPPING_CART_BADGE, timeout=1):
+        if self.is_element_visible(self.SHOPPING_CART_BADGE, timeout=1):
             badge_text = self.get_text(self.SHOPPING_CART_BADGE)
             return int(badge_text)
         return 0

@@ -157,7 +157,7 @@ class BasePage:
         element = self.find_element(locator)
         return element.text
 
-    def is_element_present(self, locator: tuple[str, str], timeout: int = 3) -> bool:
+    def is_element_visible(self, locator: tuple[str, str], timeout: int = 3) -> bool:
         """Check if element is visible on page.
 
         Args:

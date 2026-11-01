@@ -31,7 +31,7 @@ class CheckoutStepTwoPage(BasePage):
         Returns:
             True if checkout summary container is present, False otherwise.
         """
-        return self.is_element_present(self.CHECKOUT_SUMMARY_CONTAINER, timeout=3)
+        return self.is_element_visible(self.CHECKOUT_SUMMARY_CONTAINER, timeout=3)
 
     def is_product_in_summary(self, product_name: str) -> bool:
         """Check if specific product is in order summary.
@@ -54,7 +54,7 @@ class CheckoutStepTwoPage(BasePage):
         Returns:
             True if payment info is present, False otherwise.
         """
-        return self.is_element_present(self.PAYMENT_INFO, timeout=2)
+        return self.is_element_visible(self.PAYMENT_INFO, timeout=2)
 
     def is_shipping_info_displayed(self) -> bool:
         """Check if shipping information is displayed.
@@ -62,7 +62,7 @@ class CheckoutStepTwoPage(BasePage):
         Returns:
             True if shipping info is present, False otherwise.
         """
-        return self.is_element_present(self.SHIPPING_INFO, timeout=2)
+        return self.is_element_visible(self.SHIPPING_INFO, timeout=2)
 
     def get_item_total(self) -> float:
         """Get item subtotal from order summary.

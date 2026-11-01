@@ -263,11 +263,11 @@ class TestGetTextMethod:
             assert result == expected_text
 
 
-class TestIsElementPresentMethod:
-    """Test is_element_present method."""
+class TestIsElementVisibleMethod:
+    """Test is_element_visible method."""
 
-    def test_is_element_present_returns_true_when_found(self):
-        """is_element_present should return True when element is found."""
+    def test_is_element_visible_returns_true_when_found(self):
+        """is_element_visible should return True when element becomes visible."""
         mock_driver = Mock()
         mock_wait = Mock()
         mock_wait.until.return_value = Mock()  # Element found
@@ -277,13 +277,13 @@ class TestIsElementPresentMethod:
         # Mock WebDriverWait creation for custom timeout
         with patch("pages.base_page.WebDriverWait", return_value=mock_wait):
             locator = (By.ID, "existing-element")
-            result = page.is_element_present(locator, timeout=3)
+            result = page.is_element_visible(locator, timeout=3)
 
         assert result is True
         mock_wait.until.assert_called_once()
 
-    def test_is_element_present_uses_visibility_condition(self):
-        """is_element_present should wait for element to be visible."""
+    def test_is_element_visible_uses_visibility_condition(self):
+        """is_element_visible should wait for element to be visible."""
         mock_driver = Mock()
         mock_wait = Mock()
 
@@ -294,15 +294,15 @@ class TestIsElementPresentMethod:
             patch("pages.base_page.EC") as mock_ec,
         ):
             locator = (By.ID, "element")
-            page.is_element_present(locator, timeout=3)
+            page.is_element_visible(locator, timeout=3)
 
             mock_ec.visibility_of_element_located.assert_called_once_with(locator)
             mock_wait.until.assert_called_once_with(
                 mock_ec.visibility_of_element_located.return_value
             )
 
-    def test_is_element_present_returns_false_on_timeout(self):
-        """is_element_present should return False if element not found."""
+    def test_is_element_visible_returns_false_on_timeout(self):
+        """is_element_visible should return False if element never becomes visible."""
         mock_driver = Mock()
         mock_wait = Mock()
         mock_wait.until.side_effect = TimeoutException("Not found")
@@ -311,12 +311,12 @@ class TestIsElementPresentMethod:
 
         with patch("pages.base_page.WebDriverWait", return_value=mock_wait):
             locator = (By.ID, "missing-element")
-            result = page.is_element_present(locator, timeout=3)
+            result = page.is_element_visible(locator, timeout=3)
 
         assert result is False
 
-    def test_is_element_present_uses_custom_timeout(self):
-        """is_element_present should use provided custom timeout."""
+    def test_is_element_visible_uses_custom_timeout(self):
+        """is_element_visible should use provided custom timeout."""
         mock_driver = Mock()
 
         page = BasePage(mock_driver)
@@ -324,7 +324,7 @@ class TestIsElementPresentMethod:
         with patch("pages.base_page.WebDriverWait") as mock_wait_class:
             locator = (By.ID, "element")
             custom_timeout = 5
-            page.is_element_present(locator, timeout=custom_timeout)
+            page.is_element_visible(locator, timeout=custom_timeout)
 
             # Verify WebDriverWait was created with custom timeout
             mock_wait_class.assert_called_with(mock_driver, custom_timeout)

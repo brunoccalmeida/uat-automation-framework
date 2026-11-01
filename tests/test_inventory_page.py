@@ -48,7 +48,7 @@ class TestIsOnInventoryPage:
         page = InventoryPage(mock_driver)
 
         with patch.object(
-            page, "is_element_present", return_value=True
+            page, "is_element_visible", return_value=True
         ) as mock_is_present:
             result = page.is_on_inventory_page()
 
@@ -114,7 +114,7 @@ class TestGetCartItemCount:
         mock_driver = Mock()
         page = InventoryPage(mock_driver)
 
-        with patch.object(page, "is_element_present", return_value=True):
+        with patch.object(page, "is_element_visible", return_value=True):
             with patch.object(page, "get_text", return_value="3"):
                 result = page.get_cart_item_count()
 
@@ -125,7 +125,7 @@ class TestGetCartItemCount:
         mock_driver = Mock()
         page = InventoryPage(mock_driver)
 
-        with patch.object(page, "is_element_present", return_value=False):
+        with patch.object(page, "is_element_visible", return_value=False):
             result = page.get_cart_item_count()
 
             assert result == 0

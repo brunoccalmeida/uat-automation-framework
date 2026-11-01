@@ -97,7 +97,7 @@ class TestInventoryPageInteractions:
 
         # Login elements should be present
         login_page = LoginPage(authenticated_driver)
-        assert login_page.is_element_present(login_page.USERNAME_INPUT, timeout=3)
+        assert login_page.is_element_visible(login_page.USERNAME_INPUT, timeout=3)
 
 
 class TestInventoryPageNavigation:
@@ -108,10 +108,10 @@ class TestInventoryPageNavigation:
         page = InventoryPage(authenticated_driver)
 
         # Should not raise exception
-        assert page.is_element_present(page.SHOPPING_CART_LINK, timeout=3)
+        assert page.is_element_visible(page.SHOPPING_CART_LINK, timeout=3)
 
     def test_menu_button_is_accessible(self, authenticated_driver):
         """Menu button should be accessible for navigation."""
         page = InventoryPage(authenticated_driver)
 
-        assert page.is_element_present(page.MENU_BUTTON, timeout=3)
+        assert page.is_element_visible(page.MENU_BUTTON, timeout=3)

@@ -48,7 +48,7 @@ class TestIsOnCheckoutForm:
         page = CheckoutStepOnePage(mock_driver)
 
         with patch.object(
-            page, "is_element_present", return_value=True
+            page, "is_element_visible", return_value=True
         ) as mock_is_present:
             result = page.is_on_checkout_form()
 
@@ -144,7 +144,7 @@ class TestIsErrorDisplayed:
         mock_driver = Mock()
         page = CheckoutStepOnePage(mock_driver)
 
-        with patch.object(page, "is_element_present", return_value=True):
+        with patch.object(page, "is_element_visible", return_value=True):
             result = page.is_error_displayed()
 
             assert result is True

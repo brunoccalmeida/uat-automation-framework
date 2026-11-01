@@ -15,21 +15,21 @@ class TestLoginPageElements:
         driver.get(base_url)
         page = LoginPage(driver)
 
-        assert page.is_element_present(page.USERNAME_INPUT, timeout=5)
+        assert page.is_element_visible(page.USERNAME_INPUT, timeout=5)
 
     def test_password_input_is_present(self, driver, base_url):
         """Password input should be present on login page."""
         driver.get(base_url)
         page = LoginPage(driver)
 
-        assert page.is_element_present(page.PASSWORD_INPUT, timeout=5)
+        assert page.is_element_visible(page.PASSWORD_INPUT, timeout=5)
 
     def test_login_button_is_present(self, driver, base_url):
         """Login button should be present on login page."""
         driver.get(base_url)
         page = LoginPage(driver)
 
-        assert page.is_element_present(page.LOGIN_BUTTON, timeout=5)
+        assert page.is_element_visible(page.LOGIN_BUTTON, timeout=5)
 
 
 class TestLoginPageInteractions:
@@ -77,7 +77,7 @@ class TestLoginPageInteractions:
         page.login("invalid_user", "wrong_password")
 
         # Error message should be present
-        assert page.is_element_present(page.ERROR_MESSAGE, timeout=3)
+        assert page.is_element_visible(page.ERROR_MESSAGE, timeout=3)
         error_text = page.get_error_message()
         assert error_text is not None
         assert "Username and password do not match" in error_text

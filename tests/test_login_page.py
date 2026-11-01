@@ -159,7 +159,7 @@ class TestGetErrorMessage:
 
         expected_error = "Epic sadface: Username and password do not match"
 
-        with patch.object(page, "is_element_present", return_value=True):
+        with patch.object(page, "is_element_visible", return_value=True):
             with patch.object(
                 page, "get_text", return_value=expected_error
             ) as mock_get_text:
@@ -173,7 +173,7 @@ class TestGetErrorMessage:
         mock_driver = Mock()
         page = LoginPage(mock_driver)
 
-        with patch.object(page, "is_element_present", return_value=False):
+        with patch.object(page, "is_element_visible", return_value=False):
             with patch.object(page, "get_text") as mock_get_text:
                 result = page.get_error_message()
 
@@ -182,12 +182,12 @@ class TestGetErrorMessage:
                 assert result is None
 
     def test_get_error_message_checks_element_presence_first(self):
-        """get_error_message should check is_element_present before getting text."""
+        """get_error_message should check is_element_visible before getting text."""
         mock_driver = Mock()
         page = LoginPage(mock_driver)
 
         with patch.object(
-            page, "is_element_present", return_value=True
+            page, "is_element_visible", return_value=True
         ) as mock_is_present:
             with patch.object(page, "get_text", return_value="Error"):
                 page.get_error_message()

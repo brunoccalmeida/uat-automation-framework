@@ -13,7 +13,7 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 322 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
+| Testes | 325 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
@@ -68,6 +68,7 @@ Viraram regras em `.github/copilot-instructions.md` (ou nos arquivos com escopo 
 - **TDD de duplo ciclo:** unitário falhando antes de cada unidade; teste que nunca falhou não prova nada (teste de mutação).
 - **Versão maior é decisão humana:** ler notas de cada versão intermediária e checar "isto me afeta?" (ex.: codecov v7 removeu `file`).
 - **Lock é gerado:** em conflito, regenere; nunca edite à mão.
+- **Cache de venv pela versão exata do Python** (#84): o venv aponta para o interpretador exato e as imagens de runner trocam de patch aos poucos; com a chave `3.14`, um venv do 3.14.9 foi restaurado no 3.14.8, o `poetry install` foi pulado (cache hit) e o job rodou sem `behave`. Chave por `steps.setup-python.outputs.python-version` (doc do snok/install-poetry), `tests/test_venv_cache_key.py`.
 - **RED pelo motivo certo:** no #43, injetar `urllib3` 1.x com `pip` quebrou o próprio `pip-audit` (exit 1 por crash, não por detecção). Leia a saída, não só o código de saída; o RED do CI foi provado com um commit temporário revertido.
 - **Pin por SHA do commit, não da tag:** tag anotada é um objeto próprio; descasque (`^{}` no `git ls-remote`) e confirme em `git/commits/<sha>`. Toda asserção precisa de RED próprio: a do comentário de versão só falhou via mutação.
 - **Credencial de curta duração (OIDC) > segredo fixo:** no #25 o Codecov dispensou token. Dependabot e PRs de fork não recebem `id-token: write` (nem secrets): falha ruidosa exige pular o passo exatamente ali, senão todo PR do Dependabot fica vermelho.

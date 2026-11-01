@@ -116,6 +116,14 @@ Ortografia ficou só com o Code Spell Checker (`cSpell.language: "en,pt_BR,es"`,
 
 A recomendação "Trim CLAUDE.md" não apareceu. Este chat inclui ~14 KB das próprias consultas de diagnóstico.
 
+### Registro por missão (`/usage` antes do `/clear`)
+
+Mesma fonte e mesma ressalva: % do limite e fatias de 24 h somando as sessões da máquina; a missão não fica isolada.
+
+| Missão | Sessão 5 h | Semana | `/clear` | Subagentes | `/context` | Leitura |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| #28 (01/11/2026) | 25% | 22% | 55 | 54 | 25 | Chat sem subagentes, e a fatia de subagentes segue em 54%: vem de outras sessões das 24 h, como diagnosticado no #56. Semana +6 p.p. desde o #54 somando #58 e #28 |
+
 ## Levantamento de mercado e lacunas (#58, 01/11/2026)
 
 ### Diagnóstico da #56: de onde vinham os "72% de subagentes"

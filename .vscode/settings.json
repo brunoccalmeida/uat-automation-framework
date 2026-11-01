@@ -16,7 +16,7 @@
   },
   "chat.includeApplyingInstructions": true,
   "cSpell.language": "en,pt_BR,es",
-  "cSpell.words": ["claude", "deprecat", "ltex", "remov"],
+  "cSpell.words": ["claude", "deprecat", "distratores", "ltex", "pytest", "remov"],
   "ltex.disabledRules": {
     "pt-BR": ["MORFOLOGIK_RULE_PT_BR"],
     "es": ["MORFOLOGIK_RULE_ES"]

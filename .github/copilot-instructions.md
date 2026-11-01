@@ -36,6 +36,7 @@ Cada turno reenvia todo o contexto; contexto longo custa mais e piora a aderênc
 - **Regras sempre carregadas < 200 linhas**, só o que vale em todo chat. `@import` não economiza; regra de uma parte do código vai para arquivo com escopo de caminho.
 - **Não repita o que linter/teste já impõe**; regra sem exceção vira teste ou hook, não ênfase.
 - **Filtre saídas na origem** (`grep`, `head`, `--jq`, `gh run view --log-failed`, leitura por trecho); nunca despeje log de CI ou notas de versão inteiras.
+- **Documentação web por seção, não página inteira:** sumário (`curl -s <url>.md | grep -n '^##'`) e depois só a seção (`sed -n '/^### X/,/^### /p'`). O WebFetch devolve docs em Markdown crus e inteiros.
 - **Subagente só com motivo**: trabalho paralelo independente, isolar saída volumosa ou revisor independente. Ele recomeça do zero e soma requisições.
 - **Modelo e esforço fixos durante o chat** (trocar invalida o cache). Duas correções sem sucesso: `/clear` e um prompt melhor.
 

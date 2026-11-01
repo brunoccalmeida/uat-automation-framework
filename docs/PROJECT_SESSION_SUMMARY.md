@@ -4,7 +4,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "`is_element_visible` espera visibilidade" (#82)
+**Última atualização:** 01/11/2026 — fim da missão "métricas do README por linha da tabela" (#34)
 
 ---
 
@@ -13,7 +13,7 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 326 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
+| Testes | 348 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
@@ -25,11 +25,14 @@
 | Diagnósticos do editor | Ortografia só no Code Spell Checker (`en,pt_BR,es` + `cSpell.words`); LTeX+ só gramática. Uma edição de doc: 45 → 6 diagnósticos (~11 → ~1,6 KB). `.vscode/settings.json` e `extensions.json` versionados |
 | Hook de saída de testes | `PreToolUse` (`Bash\|PowerShell`) em `.claude/settings.json` reescreve `pytest` → `-q` e `behave` → `-f progress2` (`scripts/filter_test_output.py`, #65): `behave` 51 → 1,1 KB, `pytest -v` 28 → ~1,6 KB. Flags nativas, sem pipe (o pipe troca o exit code pelo do `head`); `behave` com `-f` explícito fica intacto. `tests/test_filter_test_output.py` |
 | Code intelligence | Plugin oficial `pyright-lsp` ligado no escopo do projeto (`enabledPlugins` em `.claude/settings.json`); servidor por máquina via `pipx install "pyright[nodejs]"` (precisa estar no PATH; o `.venv` não está no PATH da extensão). `[tool.pyright] venv = ".venv"` + `poetry.toml` (`in-project`) para resolver os imports do projeto. Verificado: erro proposital → diagnóstico `reportAssignmentType`, assíncrono (chega logo após a edição). Passo a passo por máquina em `docs/AGENT_TOKEN_SPEND.md`. `tests/test_agent_rules.py` |
+| Métricas do README | Hook `validate-readme-metrics` **corrige e reprova** (padrão do black; DRY, como `terraform-docs`/`cog --check`): cada linha das tabelas de testes cita seus arquivos na coluna `Source`; o hook reescreve contagens por linha, TOTAL e resumo por camada (`pytest --co -qq` + `behave --dry-run -f json`), e reprova arquivo sem linha, em duas linhas ou desconhecido. Roda quando README, `tests/` ou `features/` mudam; no CI pelo `--all-files`. Falha de coleta reprova (antes era pulada). Cobertura só conferida, e nunca no CI (#87). `tests/test_validate_readme_metrics.py` |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
-**#34 — validador de métricas confere as linhas da tabela, não só o total** (já tem testes de caracterização, `tests/test_validate_readme_metrics.py`); em seguida #39 (READMEs traduzidos, que dependem de métricas confiáveis). No #82 a linha `BasePage` (22 → 23) de novo só foi conferida à mão.
+**#39 — sincronizar os READMEs traduzidos (pt-BR, es) com o README.md.** As métricas agora são confiáveis (#34). Decidir pelas melhores práticas se as traduções também ganham a coluna `Source` e passam pelo mesmo hook (o script hoje lê só `README.md`), para não voltarem a divergir.
+
+Do #34: a tabela do Behave estava errada **em todas as linhas** (ex.: User Journey 13/109, real 5/78), só os totais certos: ajustada à mão para fechar a soma desde dez/2025. Validar o total aceita qualquer distribuição que some certo. Decisão (pedida pelo dono, "o que indicam as melhores práticas?"): DRY (*Pragmatic Programmer*: gerar a doc que repete o código) + padrão "gerar e cobrar no CI"; o mapeamento linha → arquivos é decisão humana e mora ao lado da tabela (coluna `Source`), não num dict no script (segunda cópia dos rótulos). RED da API nova era `AttributeError` (não prova comportamento): confirmado com 4 mutações, cada uma morta (a do caso #34 pelo `test_wrong_split_with_right_total_is_fixed`). O próprio hook corrigiu o README real (1ª execução reescreve e sai 1, 2ª sai 0). Achado: `pre-commit` esconde a saída de hook que passa, então o `WARN` de cobertura pulada some no CI (#87).
 
 Do #29 + #82: toda espera de `BasePage` usa `visibility_of` (`find_element` no #29; `is_element_present` → **`is_element_visible`** no #82). Lição do #29: o teste antigo só cobrava `wait.until` chamado, não a condição (nunca podia falhar); agora os dois cobram a condição (`patch("pages.base_page.EC")` + `assert_called_once_with`), RED visto ("called 0 times"). Rename decidido por nomes que revelam a intenção e menor surpresa (`present` = `presence_of` no vocabulário do Selenium); sem alias, todos os chamadores são do repo (YAGNI). Dois commits (`fix` da condição, `refactor` do rename) para o `bisect` separar comportamento de forma. Mocks `patch.object(page, "nome")` usam string: o pyright não os vê, o rename precisa cobrir strings. Os casos de `False` dos chamadores são elemento **ausente** (badge vazio, erro inexistente), onde presença e visibilidade coincidem: todas as camadas verdes com navegador real.
 
@@ -43,7 +46,7 @@ Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercad
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #34 → #39 validador de métricas (já tem testes de caracterização, `tests/test_validate_readme_metrics.py`) + READMEs traduzidos
+1. #39 READMEs traduzidos · #87 cobertura do README conferida no CI
 2. #30 config/senha hardcoded · #31 page objects retornados
 3. #78 avaliar regras do ruff que se sobrepõem ao pylint (medido, separado)
 

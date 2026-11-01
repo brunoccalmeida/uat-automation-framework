@@ -1,9 +1,10 @@
+<!-- LTeX: language=pt-BR -->
 # PROJECT_SESSION_SUMMARY.md
 
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "cobertura no Codecov via OIDC" (#25, PR #50)
+**Última atualização:** 01/11/2026 — fim da missão "práticas de gasto de tokens do agente" (#41)
 
 ---
 
@@ -22,13 +23,13 @@
 
 ## Próxima missão recomendada
 
-**#41 — práticas de gasto de tokens do agente** (P1), seguida do #35 (condensar as regras carregadas em todo chat, aplicando o #41).
+**#35 — condensar as regras carregadas em todo chat**, aplicando o #41. Hoje `.github/copilot-instructions.md` tem 357 linhas (~4,3 mil tokens em toda requisição); a meta oficial é < 200. Critérios e linha de base em `docs/AGENT_TOKEN_SPEND.md` e no comentário do #35.
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #41 práticas de gasto de tokens (P1) → #35 condensar regras (aplica o #41)
+1. #35 condensar regras (aplica o #41, já concluído)
 2. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo) → #28 ordem de imports (talvez junto, se `ruff`)
-3. #26 `.gitignore` UTF-16 + portão de encoding
+3. #26 `.gitignore` UTF-16 + portão de encoding · #52 ruído residual de ortografia (LTeX+) no contexto do agente
 4. #29 `find_element` com `visibility_of` (risco de flaky)
 5. #34 → #39 validador de métricas + READMEs traduzidos
 6. #30 config/senha hardcoded · #32 fixtures · #31 page objects retornados
@@ -60,6 +61,8 @@ Viraram regras em `.github/copilot-instructions.md`; aqui só o porquê, em uma 
 - **Credencial de curta duração (OIDC) > segredo fixo:** no #25 o Codecov dispensou token. Dependabot e PRs de fork não recebem `id-token: write` (nem secrets): falha ruidosa exige pular o passo exatamente ali, senão todo PR do Dependabot fica vermelho.
 - **Pergunta ao dono vem com as melhores práticas antes** (princípio/fonte + recomendação), para decidir informado.
 - **Check obrigatório pulado conta como aprovado:** gate com `always()` (não `!cancelled()`: workflow cancelado pularia o gate) e lista de permissão. A mutação `!cancelled()` foi a mais sutil do #36.
+- **Gasto de tokens** (#41): todo turno reenvia todo o contexto; regras sempre carregadas < 200 linhas, `@import` não economiza, saídas filtradas na origem, subagente só com motivo. Medição: `/usage` antes do `/clear`. Detalhes e fontes: `docs/AGENT_TOKEN_SPEND.md`.
+- **Diagnóstico do editor entra no contexto:** a extensão do VS Code anexa os avisos do LTeX+ a cada edição; sem `<!-- LTeX: language=pt-BR -->` na 1ª linha, um `.md` em português gera centenas de falsos positivos (462 em uma edição no #41). Todo `.md` novo fora do inglês leva o comentário.
 - **Alterar o ruleset é bloqueado para o agente** (classificador de permissões, "CI Bypass"); só com autorização explícita do dono para aquela alteração. Ordem segura: CI do PR verde com o novo check → ruleset → merge (o merge valida a regra nova).
 
 ## Ambiente local (Windows)

@@ -1,3 +1,4 @@
+<!-- LTeX: language=pt-BR -->
 # UAT Automation Framework - Coding Guidelines
 
 ## ⚠️ REGRA DE OURO: TDD É OBRIGATÓRIO
@@ -25,7 +26,16 @@ Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** 
 2. Issues em dia: resolvidas fechadas pelo PR (`Closes #N`); pendências descobertas registradas como novas issues.
 3. `docs/PROJECT_SESSION_SUMMARY.md` atualizado: estado atual, decisões e próxima missão recomendada.
 4. README.md (incluindo métricas) atualizado.
-5. Avisar o usuário que a missão terminou e que o próximo chat pode começar.
+5. Avisar o usuário que a missão terminou e que o próximo chat pode começar, pedindo que rode `/usage` antes do `/clear` para medir o gasto (ver `docs/AGENT_TOKEN_SPEND.md`).
+
+## 🪙 Gasto de tokens (contexto)
+Cada turno reenvia todo o contexto; contexto longo custa mais e piora a aderência às regras. Fontes, porquês e medição: `docs/AGENT_TOKEN_SPEND.md`.
+
+- **Regras sempre carregadas < 200 linhas**, só o que vale em todo chat. `@import` não economiza; regra de uma parte do código vai para arquivo com escopo de caminho (`.claude/rules/` com `paths:`, `.github/instructions/` com `applyTo`).
+- **Não repita o que linter/teste já impõe**; regra sem exceção vira teste ou hook, não ênfase.
+- **Filtre saídas na origem** (`grep`, `head`, `--jq`, `gh run view --log-failed`, leitura por trecho); nunca despeje log de CI ou notas de versão inteiras.
+- **Subagente só com motivo**: trabalho paralelo independente, isolar saída volumosa ou revisor independente. Ele recomeça do zero e soma requisições.
+- **Modelo e esforço fixos durante o chat** (trocar invalida o cache). Duas correções sem sucesso: `/clear` e um prompt melhor.
 
 ---
 

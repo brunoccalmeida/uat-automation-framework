@@ -27,15 +27,16 @@
 
 **#27 — linters como portão real** (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step) escondido por `continue-on-error`; black usa 88 colunas e flake8 79.
 
-Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercado e lacunas"): os "72% de subagentes" (#56) eram leitura errada da métrica: a fatia de uma recomendação é o uso **ao qual ela se aplica**, não o que custou. Subagentes reais = 1,6%; o custo veio de uma sessão com várias missões (contexto médio 277 mil), já corrigido por "uma missão por chat" (~75 mil). O maior consumo por ferramenta é o **WebFetch (21%)**, que traz docs em Markdown inteiros: nova regra, documentação por seção. Pendente do dono: avaliar desligar conectores MCP sem uso (`/mcp`), medindo com `/context` (piso de ~47 mil tokens por sessão).
+Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercado e lacunas"): os "72% de subagentes" (#56) eram leitura errada da métrica: a fatia de uma recomendação é o uso **ao qual ela se aplica**, não o que custou. Subagentes reais = 1,6%; o custo veio de uma sessão com várias missões (contexto médio 277 mil), já corrigido por "uma missão por chat" (~75 mil). O maior consumo por ferramenta é o **WebFetch (21%)**, que traz docs em Markdown inteiros: nova regra, documentação por seção. Custo fixo de ~47 mil tokens por sessão (regras = 4,1 mil; o resto é ambiente: prompt do sistema, ferramentas, skills, conectores MCP) virou a #61.
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
 1. #27 linters como portão real (acima) → #28 ordem de imports (talvez junto, se `ruff`)
-2. #26 `.gitignore` UTF-16 + portão de encoding (o Git o trata como binário; editar preservando CRLF, como no #54; `docs/PROJECT_SESSION*.*` ignorado mas versionado)
-3. #29 `find_element` com `visibility_of` (risco de flaky)
-4. #34 → #39 validador de métricas + READMEs traduzidos
-5. #30 config/senha hardcoded · #32 fixtures · #31 page objects retornados
+2. #61 medir (`/context`, o dono roda no início de um chat novo) e reduzir o custo fixo por sessão; P2 por enquanto: definições MCP já são adiadas, ganho incerto até medir. Efeito composto: se a medição mostrar ganho grande, sobe para antes da #27
+3. #26 `.gitignore` UTF-16 + portão de encoding (o Git o trata como binário; editar preservando CRLF, como no #54; `docs/PROJECT_SESSION*.*` ignorado mas versionado)
+4. #29 `find_element` com `visibility_of` (risco de flaky)
+5. #34 → #39 validador de métricas + READMEs traduzidos
+6. #30 config/senha hardcoded · #32 fixtures · #31 page objects retornados
 
 **Antes de trocar a versão do Python na matriz** (3.15 já saiu): resolva o #48 (`build-report` baixa `allure-results-py3.14` por nome fixo; a troca quebra o report, de forma visível). O ruleset já não depende da matriz (#36).
 

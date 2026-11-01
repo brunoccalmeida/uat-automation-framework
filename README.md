@@ -373,8 +373,8 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **TOTAL** | | **374** | **100%** | **Complete** |
 
 **Code Coverage:**
-- **Total statements:** 350
-- **Covered:** 349 (99%)
+- **Total statements:** 352
+- **Covered:** 351 (99%)
 - **Pages Module**: 100%
 - **Core Module**: 99% (1 uncovered line in `core/config.py`)
 

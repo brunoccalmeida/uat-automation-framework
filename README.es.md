@@ -375,8 +375,8 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **TOTAL** | | **374** | **100%** | **Completo** |
 
 **Cobertura de Código:**
-- **Total de statements:** 350
-- **Cubiertos:** 349 (99%)
+- **Total de statements:** 352
+- **Cubiertos:** 351 (99%)
 - **Módulo Pages**: 100%
 - **Módulo Core**: 99% (1 línea sin cubrir en `core/config.py`)
 

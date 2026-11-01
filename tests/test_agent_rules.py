@@ -12,6 +12,7 @@ must stay identical, or one agent silently follows outdated rules.
 See docs/AGENT_TOKEN_SPEND.md.
 """
 
+import json
 from pathlib import Path
 
 import pytest
@@ -31,6 +32,11 @@ def _split_frontmatter(path):
     text = path.read_text(encoding="utf-8")
     _, frontmatter, body = text.split("---\n", 2)
     return yaml.safe_load(frontmatter), body
+
+
+def _vscode(name):
+    """Return a shared VS Code workspace file (.vscode/<name>.json) as a dict."""
+    return json.loads((ROOT / ".vscode" / f"{name}.json").read_text("utf-8"))
 
 
 def _claude_names():
@@ -78,3 +84,47 @@ class TestPathScopedRules:
         copilot, _ = _split_frontmatter(COPILOT_RULES / f"{name}{COPILOT_SUFFIX}")
         copilot_globs = [glob.strip() for glob in copilot["applyTo"].split(",")]
         assert claude["paths"] == copilot_globs
+
+    def test_copilot_applies_path_scoped_rules_in_vscode(self):
+        # VS Code attaches applyTo rules only with this setting on; its default
+        # is undocumented, so the workspace states it
+        assert _vscode("settings")["chat.includeApplyingInstructions"] is True
+
+
+class TestEditorDiagnostics:
+    """The editor attaches its diagnostics to the agent context after each edit.
+
+    LTeX+ spelling flags every English technical term in pt-BR/es docs (39 of
+    45 diagnostics on one doc in #52); spelling is left to Code Spell Checker,
+    which knows English terms and project words, and LTeX+ keeps its grammar
+    rules. Turning one spell checker off is only safe if the other one checks
+    every language the docs are written in.
+    """
+
+    @pytest.mark.parametrize(
+        "language, rule",
+        [("pt-BR", "MORFOLOGIK_RULE_PT_BR"), ("es", "MORFOLOGIK_RULE_ES")],
+    )
+    def test_ltex_spelling_rule_is_disabled(self, language, rule):
+        assert rule in _vscode("settings")["ltex.disabledRules"][language]
+
+    @pytest.mark.parametrize("language", ["en", "pt_BR", "es"])
+    def test_spell_checker_checks_every_doc_language(self, language):
+        languages = _vscode("settings")["cSpell.language"].split(",")
+        assert language in languages
+
+    @pytest.mark.parametrize("word", ["claude", "ltex", "remov", "deprecat"])
+    def test_project_word_is_known_to_the_spell_checker(self, word):
+        assert word in _vscode("settings")["cSpell.words"]
+
+    @pytest.mark.parametrize(
+        "extension",
+        [
+            "ltex-plus.vscode-ltex-plus",
+            "streetsidesoftware.code-spell-checker",
+            "streetsidesoftware.code-spell-checker-portuguese-brazilian",
+            "streetsidesoftware.code-spell-checker-spanish",
+        ],
+    )
+    def test_checker_extension_is_recommended(self, extension):
+        assert extension in _vscode("extensions")["recommendations"]

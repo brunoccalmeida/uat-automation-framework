@@ -1,0 +1,36 @@
+{
+  "cucumber.features": [
+    "features/**/*.feature"
+  ],
+  "cucumber.glue": [
+    "features/steps/**/*.py"
+  ],
+  "cucumberautocomplete.steps": [
+    "features/steps/**/*.py"
+  ],
+  "cucumberautocomplete.strictGherkinCompletion": true,
+  "editor.quickSuggestions": {
+    "comments": false,
+    "strings": true,
+    "other": true
+  },
+  "chat.includeApplyingInstructions": true,
+  "cSpell.language": "en,pt_BR,es",
+  "cSpell.words": ["claude", "deprecat", "ltex", "remov"],
+  "ltex.disabledRules": {
+    "pt-BR": ["MORFOLOGIK_RULE_PT_BR"],
+    "es": ["MORFOLOGIK_RULE_ES"]
+  },
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}"
+  ],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  }
+}

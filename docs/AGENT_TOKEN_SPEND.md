@@ -46,7 +46,7 @@ Sinais de desperdício e o que fazer:
 | Muitos *misses* de cache | Troca de modelo/esforço no meio, pausa maior que o TTL | Fixar modelo no início; retomar sabendo que o 1º turno é caro |
 | Subagentes com fatia alta | Delegação sem um dos três motivos acima | Fazer na conversa principal |
 | Chat longo com custo crescente | Missão acumulou tarefas não relacionadas | Encerrar a missão; handoff; chat novo |
-| Cada edição de `.md` traz centenas de diagnósticos de ortografia | O verificador (LTeX+) checa pt-BR/es como `en-US`; a extensão do Claude Code anexa os diagnósticos do editor ao contexto | Comentário mágico na 1ª linha do arquivo: `<!-- LTeX: language=pt-BR -->` (no #41: 462 diagnósticos, ~115 KB, em uma edição) |
+| Cada edição de `.md` traz centenas de diagnósticos de ortografia | O verificador (LTeX+) checa pt-BR/es como `en-US`; a extensão do Claude Code anexa os diagnósticos do editor ao contexto | Comentário mágico na 1ª linha do arquivo: `<!-- LTeX: language=pt-BR -->` (no #41: 462 diagnósticos, ~115 KB, em uma edição); ortografia só no Code Spell Checker, com termos do projeto em `cSpell.words` (#52: 45 → 6) |
 
 ### Linha de base (01/11/2026, antes do #35)
 
@@ -70,9 +70,44 @@ Como: fluxogramas ASCII e checklists que repetiam o fluxo viraram listas curtas;
 
 A economia real se confirma pelo `/usage` das próximas missões, não por esta estimativa.
 
+### Verificação (#54, 01/11/2026)
+
+Medido, não estimado.
+
+**Regras sempre carregadas (`/context`, bloco *Memory files*):**
+
+| Arquivo | Bytes | Estimado (÷ 4) | Real |
+| --- | ---: | ---: | ---: |
+| `.github/copilot-instructions.md` | 9.902 | ~2.450 | **4.100** |
+| `CLAUDE.md` | 272 | ~70 | 126 |
+
+Neste repositório, **~2,4 bytes/token**, não 4: o "÷ 4" vale para inglês, e pt-BR (acento = 2 bytes em UTF-8), tabelas e comandos rendem menos por token. Logo o "antes" do #35 custava ~7 mil tokens reais; o corte percentual se mantém, os absolutos acima estavam subestimados em ~40%. Para estimar daqui em diante: bytes ÷ 2,4, ou meça com `/context`.
+
+**Regras com escopo de caminho:** ausentes de *Memory files*; entram como anexo quando o caminho é tocado. Neste chat, ler `docs/` e `.vscode/` não trouxe nenhuma; ler `tests/*.py` trouxe `python.md` e `selenium.md` (e não `workflows.md`/`dependencies.md`). Copilot: formato conferido nas fontes oficiais (pasta `.github/instructions/`, `applyTo` com globs separados por vírgula, [GitHub][gh]); no VS Code a aplicação depende de `chat.includeApplyingInstructions`, de padrão não documentado, por isso fixado em `true` no `.vscode/settings.json`. No GitHub.com, regras por caminho valem só para Copilot code review e cloud agent.
+
+**Diagnósticos do editor (#52)**, uma edição de `docs/AGENT_TOKEN_SPEND.md`:
+
+| | Diagnósticos | Ortografia falso-positivo | ~Bytes |
+| --- | ---: | ---: | ---: |
+| Antes | 45 (LTeX+) | 39 | ~11 KB |
+| Depois | 6 (gramática LTeX+) + 0 (cSpell, após a lista de palavras) | 0 | ~1,6 KB |
+
+Ortografia ficou só com o Code Spell Checker (`cSpell.language: "en,pt_BR,es"`, que conhece termos técnicos em inglês, e `cSpell.words` para termos do projeto); o LTeX+ mantém a gramática (`ltex.disabledRules`). Desligar um corretor só é seguro se o outro cobre todos os idiomas: sem `cSpell.language`, o pt-BR ficaria sem checagem nenhuma. `.vscode/settings.json` e `extensions.json` passam a ser versionados (modelo oficial [github/gitignore][gitignore]). Diagnósticos só existem para arquivos abertos no editor, e o anexo automático ao contexto não é determinístico (no #35 veio, neste chat não).
+
+**Gasto (`/usage`, diálogo *Account & usage* da extensão do VS Code, plano Pro):** não mostra tokens por missão, e sim a **% do limite** (sessão de 5 h: 71%; semana: 16%) e recomendações das **últimas 24 h somando todas as sessões da máquina** (fatias se sobrepõem). Por isso não isola uma missão; para tokens por sessão, use `/usage` na CLI. Linha de base de 01/11/2026 (dia com #35, #41 e #54):
+
+| Recomendação | % do uso (24 h) | Leitura |
+| --- | ---: | --- |
+| *Give simple subagents a cheaper model* | 72 | Subagentes de missões anteriores (o #54 não usou nenhum; `/code-review` só 2%): a regra existe e não bastou → issue própria |
+| *Start fresh when you switch tasks* (`/clear`) | 65 | Confirma "uma missão por chat" |
+| *See what fills your context* (`/context`) | 22 | Medido neste chat (acima) |
+
+A recomendação "Trim CLAUDE.md" não apareceu. Este chat inclui ~14 KB das próprias consultas de diagnóstico.
+
 [mem]: https://code.claude.com/docs/en/memory
 [costs]: https://code.claude.com/docs/en/costs
 [bp]: https://code.claude.com/docs/en/best-practices
 [pc]: https://code.claude.com/docs/en/prompt-caching
 [vsc]: https://code.visualstudio.com/docs/copilot/customization/custom-instructions
+[gitignore]: https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
 [gh]: https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions

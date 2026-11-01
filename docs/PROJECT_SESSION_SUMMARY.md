@@ -4,7 +4,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — fim da missão "condensar as regras do agente" (#35)
+**Última atualização:** 01/11/2026 — fim da missão "verificar a economia de tokens" (#54, com #52)
 
 ---
 
@@ -13,29 +13,27 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 242 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
+| Testes | 256 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (346 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
 | Segurança | **Toda action fixada por SHA de commit** (inclusive `actions/*`), barrada por `tests/test_workflow_pinning.py` · Duas fontes: Dependabot (alerts + security updates) e `pip-audit --strict` no workflow `Security` (PRs, push no `master` e diário); versão travada no `poetry.lock` (grupo dev) |
 | Ferramentas | Python 3.14 · **Poetry ≥ 2.5.1** (`requires-poetry`; acompanha o Dependabot) · black 26 · **Selenium 4.52** · actions atualizadas (checkout 7, codecov v7) · browsers/drivers pré-instalados no runner |
-| Regras do agente | Sempre carregadas: 104 linhas (~2,45 mil tokens; eram 357/~4,5 mil). Escopo de caminho: `.claude/rules/` = `.github/instructions/` (Selenium, Python, workflows, Poetry). `tests/test_agent_rules.py` barra > 200 linhas e divergência entre as cópias |
+| Regras do agente | Sempre carregadas: 104 linhas, **4,1 mil tokens medidos** no `/context` (estimativa ÷ 4 dava 2,45 mil; aqui são ~2,4 bytes/token). Escopo de caminho: `.claude/rules/` = `.github/instructions/` (Selenium, Python, workflows, Poetry), carga sob demanda confirmada no Claude Code; Copilot conferido pelo formato oficial + `chat.includeApplyingInstructions`. `tests/test_agent_rules.py` barra > 200 linhas, divergência entre as cópias e regressão da config de diagnósticos |
+| Diagnósticos do editor | Ortografia só no Code Spell Checker (`en,pt_BR,es` + `cSpell.words`); LTeX+ só gramática. Uma edição de doc: 45 → 6 diagnósticos (~11 → ~1,6 KB). `.vscode/settings.json` e `extensions.json` versionados |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
-**#54 — revisitar a #41 e garantir que funcionou** (pedido do dono em 01/11/2026). A #41 cumpriu seus critérios (fontes, regras, medição) e o #35 aplicou o corte, mas a economia só foi **estimada** (bytes ÷ 4). Pronto quando:
+**#27 — linters como portão real** (único P1). Detalhes no item 1 da fila.
 
-- `/context` no início do chat confirma o tamanho real das regras carregadas (sempre carregadas ~2,45 mil tokens; as de escopo de caminho ausentes até tocar `pages/`, `features/`, `tests/`, `*.py`, workflows ou Poetry).
-- As regras com escopo de caminho carregam nos dois agentes: Claude Code (confirmado no #35: ao editar `tests/*.py` entraram `python.md` e `selenium.md`) e **Copilot** (ainda não verificado).
-- `/usage` de pelo menos uma missão comparado ao das anteriores; registrar o número em `docs/AGENT_TOKEN_SPEND.md`. Se o dono não guardou o `/usage` das missões passadas, esta vira a linha de base.
-- Cada sinal de desperdício da tabela do `AGENT_TOKEN_SPEND.md` checado (inclui o #52: uma edição de `.md` no #35 ainda anexou 11,7 KB de diagnósticos do LTeX+).
+Do #54 (medições em `docs/AGENT_TOKEN_SPEND.md`, seção "Verificação"): o diálogo *Account & usage* da extensão mostra % do limite do plano em 24 h somando sessões, não tokens por missão; o maior sinal é **subagentes = 72% do uso** (#56), não o tamanho das regras ("Trim CLAUDE.md" não apareceu). Diagnósticos só existem para arquivos abertos no editor: `getDiagnostics` vazio pode ser "não checado".
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #54 revisitar a #41 (acima) · #52 ruído do LTeX+ no contexto (mesmo tema, pode entrar junto)
-2. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step) escondido por `continue-on-error`; black usa 88 colunas e flake8 79 → #28 ordem de imports (talvez junto, se `ruff`)
-3. #26 `.gitignore` UTF-16 + portão de encoding
+1. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step) escondido por `continue-on-error`; black usa 88 colunas e flake8 79 → #28 ordem de imports (talvez junto, se `ruff`)
+2. #56 o que cria subagentes (72% do uso; efeito composto em toda missão)
+3. #26 `.gitignore` UTF-16 + portão de encoding (o Git o trata como binário; editar preservando CRLF, como no #54; `docs/PROJECT_SESSION*.*` ignorado mas versionado)
 4. #29 `find_element` com `visibility_of` (risco de flaky)
 5. #34 → #39 validador de métricas + READMEs traduzidos
 6. #30 config/senha hardcoded · #32 fixtures · #31 page objects retornados

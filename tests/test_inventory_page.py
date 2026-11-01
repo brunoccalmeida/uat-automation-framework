@@ -6,7 +6,6 @@ Tests the InventoryPage Page Object in isolation using mocks.
 from unittest.mock import Mock, call, patch
 
 import pytest
-
 from selenium.webdriver.common.by import By
 
 from pages.inventory_page import InventoryPage

@@ -4,7 +4,7 @@
 # sees the placeholders, which are not callable.
 # pylint: disable=not-callable
 
-from behave import when, then
+from behave import then, when
 
 from pages.cart_page import CartPage
 from pages.checkout_complete_page import CheckoutCompletePage

@@ -6,8 +6,8 @@ Uses mocks to isolate the logic from Selenium WebDriver.
 
 from unittest.mock import Mock, call, patch
 
-from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 
 from pages.base_page import BasePage
 

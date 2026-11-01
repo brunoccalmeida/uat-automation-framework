@@ -5,6 +5,7 @@ verification with OR logic support.
 """
 
 from unittest.mock import Mock
+
 import pytest
 
 # Import the step functions we want to test

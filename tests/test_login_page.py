@@ -9,8 +9,8 @@ from unittest.mock import Mock, patch
 
 from selenium.webdriver.common.by import By
 
-from pages.login_page import LoginPage
 from pages.inventory_page import InventoryPage
+from pages.login_page import LoginPage
 
 
 class TestLoginPageLocators:

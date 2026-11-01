@@ -7,10 +7,10 @@ Implements BDD steps for shopping cart scenarios.
 # sees the placeholders, which are not callable.
 # pylint: disable=not-callable
 
-from behave import given, when, then
+from behave import given, then, when
 
-from pages.inventory_page import InventoryPage
 from pages.cart_page import CartPage
+from pages.inventory_page import InventoryPage
 
 
 @given("I am on the products page")

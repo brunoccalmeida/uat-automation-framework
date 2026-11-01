@@ -101,7 +101,7 @@ poetry run pre-commit install
 **Hooks de Pre-commit:**
 O framework usa hooks de pre-commit para manter qualidade de código automaticamente:
 - ✅ **Black**: Formatação de código (88 caracteres por linha)
-- ✅ **Flake8**: Linting e aplicação de guia de estilo
+- ✅ **Ruff**: Linting e aplicação de guia de estilo
 - ✅ **Pylint**: Análise de código para erros e code smells
 - ✅ **Segurança**: Detecção de chaves privadas, conflitos de merge
 - ✅ **Qualidade**: Trailing whitespace, validação YAML
@@ -314,7 +314,7 @@ O projeto usa **GitHub Actions** para integração contínua:
 - ✅ **Testes automatizados** em todo push e pull request
 - ✅ **Python 3.14** versão estável mais recente
 - ✅ **Execução headless** de navegador em ambiente CI
-- ✅ **Verificações de qualidade de código** (Black, Flake8, Pylint)
+- ✅ **Verificações de qualidade de código** (Black, Ruff, Pylint, Pyright)
 - ✅ **Artefatos de teste** enviados para revisão
 - ✅ **Relatórios Allure** publicados no GitHub Pages com histórico
 

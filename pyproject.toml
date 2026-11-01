@@ -49,9 +49,12 @@ min-public-methods = 1
 max-line-length = 88
 
 [tool.ruff.lint]
-# Import order only (#28); ruff's isort is near-equivalent to isort's black
-# profile. The editor sorts with the same tool (charliermarsh.ruff).
-select = ["I"]
+# flake8's rules (E, W, F; replaced flake8 in #73) and import order (I, #28;
+# near-equivalent to isort's black profile). No ignores: ruff leaves out the
+# rules black makes moot (E203 is preview-only; E701 accepts black's
+# `class A: ...`), and both tools default to 88 columns. The editor sorts
+# imports with the same tool (charliermarsh.ruff).
+select = ["E", "W", "F", "I"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -61,7 +64,6 @@ build-backend = "poetry.core.masonry.api"
 dev = [
     "pytest (>=9.0.3,<10.0.0)",
     "black (>=26.10.1,<27.0.0)",
-    "flake8 (>=7.5.0,<8.0.0)",
     "pylint (>=4.0.9,<5.0.0)",
     "pytest-cov (>=7.1.0,<8.0.0)",
     "pytest-mock (>=3.17.0,<4.0.0)",

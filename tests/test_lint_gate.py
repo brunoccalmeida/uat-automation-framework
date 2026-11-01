@@ -8,6 +8,7 @@ and the hooks call the linters through Poetry, so their versions come from
 """
 
 import json
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -16,7 +17,8 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 PRE_COMMIT = ROOT / ".pre-commit-config.yaml"
 WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
-LINTERS = ("black", "flake8", "pylint", "pyright", "ruff")
+PYPROJECT = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+LINTERS = ("black", "pylint", "pyright", "ruff")
 VSCODE = ROOT / ".vscode"
 RUN_HOOKS = "poetry run pre-commit run --all-files --show-diff-on-failure"
 
@@ -45,6 +47,25 @@ class TestPreCommitLinters:
 
     def test_linter_version_comes_from_poetry_lock(self, linter):
         assert HOOKS[linter]["entry"].startswith(f"poetry run {linter}")
+
+
+class TestRuffReplacesFlake8:
+    """ruff runs flake8's rules (#73): one tool, config in pyproject.toml.
+
+    Two linters for the same rules mean two versions to update and a
+    stand-alone ``.flake8``, which existed only because flake8 does not read
+    ``pyproject.toml``.
+    """
+
+    def test_ruff_selects_the_flake8_rule_families(self):
+        selected = PYPROJECT["tool"]["ruff"]["lint"]["select"]
+        assert {"E", "W", "F"} <= set(selected)
+
+    def test_flake8_is_gone(self):
+        dev_deps = " ".join(PYPROJECT["dependency-groups"]["dev"])
+        assert "flake8" not in HOOKS
+        assert "flake8" not in dev_deps
+        assert not (ROOT / ".flake8").exists()
 
 
 class TestCiLintJob:

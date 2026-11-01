@@ -53,7 +53,7 @@ class TestIsOnConfirmationPage:
         page = CheckoutCompletePage(mock_driver)
 
         with patch.object(
-            page, "is_element_present", return_value=True
+            page, "is_element_visible", return_value=True
         ) as mock_is_present:
             result = page.is_on_confirmation_page()
 
@@ -67,7 +67,7 @@ class TestIsOnConfirmationPage:
         mock_driver = Mock()
         page = CheckoutCompletePage(mock_driver)
 
-        with patch.object(page, "is_element_present", return_value=False):
+        with patch.object(page, "is_element_visible", return_value=False):
             result = page.is_on_confirmation_page()
 
             assert result is False
@@ -132,7 +132,7 @@ class TestIsPonyExpressDisplayed:
         page = CheckoutCompletePage(mock_driver)
 
         with patch.object(
-            page, "is_element_present", return_value=True
+            page, "is_element_visible", return_value=True
         ) as mock_is_present:
             result = page.is_pony_express_displayed()
 
@@ -146,7 +146,7 @@ class TestIsPonyExpressDisplayed:
         mock_driver = Mock()
         page = CheckoutCompletePage(mock_driver)
 
-        with patch.object(page, "is_element_present", return_value=False):
+        with patch.object(page, "is_element_visible", return_value=False):
             result = page.is_pony_express_displayed()
 
             assert result is False

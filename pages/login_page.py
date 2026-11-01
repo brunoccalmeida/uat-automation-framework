@@ -65,6 +65,6 @@ class LoginPage(BasePage):
         Returns:
             Error message text if present, None otherwise.
         """
-        if self.is_element_present(self.ERROR_MESSAGE):
+        if self.is_element_visible(self.ERROR_MESSAGE):
             return self.get_text(self.ERROR_MESSAGE)
         return None

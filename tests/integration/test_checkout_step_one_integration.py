@@ -19,31 +19,31 @@ class TestCheckoutStepOneElements:
         """First name input field should exist."""
         page = CheckoutStepOnePage(checkout_step_one)
 
-        assert page.is_element_present(page.FIRST_NAME_INPUT, timeout=3)
+        assert page.is_element_visible(page.FIRST_NAME_INPUT, timeout=3)
 
     def test_last_name_input_exists(self, checkout_step_one):
         """Last name input field should exist."""
         page = CheckoutStepOnePage(checkout_step_one)
 
-        assert page.is_element_present(page.LAST_NAME_INPUT, timeout=3)
+        assert page.is_element_visible(page.LAST_NAME_INPUT, timeout=3)
 
     def test_zip_code_input_exists(self, checkout_step_one):
         """Zip code input field should exist."""
         page = CheckoutStepOnePage(checkout_step_one)
 
-        assert page.is_element_present(page.ZIP_CODE_INPUT, timeout=3)
+        assert page.is_element_visible(page.ZIP_CODE_INPUT, timeout=3)
 
     def test_continue_button_exists(self, checkout_step_one):
         """Continue button should exist."""
         page = CheckoutStepOnePage(checkout_step_one)
 
-        assert page.is_element_present(page.CONTINUE_BUTTON, timeout=3)
+        assert page.is_element_visible(page.CONTINUE_BUTTON, timeout=3)
 
     def test_cancel_button_exists(self, checkout_step_one):
         """Cancel button should exist."""
         page = CheckoutStepOnePage(checkout_step_one)
 
-        assert page.is_element_present(page.CANCEL_BUTTON, timeout=3)
+        assert page.is_element_visible(page.CANCEL_BUTTON, timeout=3)
 
 
 class TestCheckoutStepOneInteractions:

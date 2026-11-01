@@ -44,7 +44,7 @@ class TestIsOnCartPage:
         page = CartPage(mock_driver)
 
         with patch.object(
-            page, "is_element_present", return_value=True
+            page, "is_element_visible", return_value=True
         ) as mock_is_present:
             result = page.is_on_cart_page()
 
@@ -56,7 +56,7 @@ class TestIsOnCartPage:
         mock_driver = Mock()
         page = CartPage(mock_driver)
 
-        with patch.object(page, "is_element_present", return_value=False):
+        with patch.object(page, "is_element_visible", return_value=False):
             result = page.is_on_cart_page()
 
             assert result is False

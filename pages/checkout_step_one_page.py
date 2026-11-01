@@ -29,7 +29,7 @@ class CheckoutStepOnePage(BasePage):
         Returns:
             True if checkout info container is present, False otherwise.
         """
-        return self.is_element_present(self.CHECKOUT_INFO_CONTAINER, timeout=5)
+        return self.is_element_visible(self.CHECKOUT_INFO_CONTAINER, timeout=5)
 
     def enter_first_name(self, first_name: str) -> None:
         """Enter first name in checkout form.
@@ -80,7 +80,7 @@ class CheckoutStepOnePage(BasePage):
         Returns:
             True if error message is present, False otherwise.
         """
-        return self.is_element_present(self.ERROR_MESSAGE, timeout=2)
+        return self.is_element_visible(self.ERROR_MESSAGE, timeout=2)
 
     def get_error_message(self) -> str:
         """Get error message text.

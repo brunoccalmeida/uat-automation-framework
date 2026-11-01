@@ -26,7 +26,7 @@ class CheckoutCompletePage(BasePage):
         Returns:
             True if checkout complete container is present, False otherwise.
         """
-        return self.is_element_present(self.CHECKOUT_COMPLETE_CONTAINER, timeout=3)
+        return self.is_element_visible(self.CHECKOUT_COMPLETE_CONTAINER, timeout=3)
 
     def get_confirmation_message(self) -> str:
         """Get order confirmation message.
@@ -59,4 +59,4 @@ class CheckoutCompletePage(BasePage):
         Returns:
             True if image is present, False otherwise.
         """
-        return self.is_element_present(self.PONY_EXPRESS_IMAGE, timeout=2)
+        return self.is_element_visible(self.PONY_EXPRESS_IMAGE, timeout=2)

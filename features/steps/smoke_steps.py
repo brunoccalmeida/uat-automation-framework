@@ -26,7 +26,7 @@ def step_navigate_to_homepage(context):
 @then("the login page should be displayed")
 def step_verify_login_page(context):
     """Verify login page is displayed."""
-    assert context.login_page.is_element_present(
+    assert context.login_page.is_element_visible(
         context.login_page.USERNAME_INPUT
     ), "Login page should be displayed (username field present)"
 
@@ -42,7 +42,7 @@ def step_verify_page_title(context, expected_text):
 @then("the username field should be visible")
 def step_verify_username_field(context):
     """Verify username field is visible."""
-    assert context.login_page.is_element_present(
+    assert context.login_page.is_element_visible(
         context.login_page.USERNAME_INPUT
     ), "Username field should be visible"
 
@@ -50,7 +50,7 @@ def step_verify_username_field(context):
 @then("the password field should be visible")
 def step_verify_password_field(context):
     """Verify password field is visible."""
-    assert context.login_page.is_element_present(
+    assert context.login_page.is_element_visible(
         context.login_page.PASSWORD_INPUT
     ), "Password field should be visible"
 
@@ -58,7 +58,7 @@ def step_verify_password_field(context):
 @then("the login button should be visible")
 def step_verify_login_button(context):
     """Verify login button is visible."""
-    assert context.login_page.is_element_present(
+    assert context.login_page.is_element_visible(
         context.login_page.LOGIN_BUTTON
     ), "Login button should be visible"
 

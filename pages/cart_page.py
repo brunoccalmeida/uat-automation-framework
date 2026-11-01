@@ -27,7 +27,7 @@ class CartPage(BasePage):
         Returns:
             True if cart container is present, False otherwise.
         """
-        return self.is_element_present(self.CART_CONTAINER, timeout=3)
+        return self.is_element_visible(self.CART_CONTAINER, timeout=3)
 
     def get_cart_item_count(self) -> int:
         """Get number of items in cart.

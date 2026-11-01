@@ -32,13 +32,13 @@ class TestCheckoutStepTwoElements:
         """Finish button should exist."""
         page = CheckoutStepTwoPage(checkout_step_two)
 
-        assert page.is_element_present(page.FINISH_BUTTON, timeout=3)
+        assert page.is_element_visible(page.FINISH_BUTTON, timeout=3)
 
     def test_cancel_button_exists(self, checkout_step_two):
         """Cancel button should exist."""
         page = CheckoutStepTwoPage(checkout_step_two)
 
-        assert page.is_element_present(page.CANCEL_BUTTON, timeout=3)
+        assert page.is_element_visible(page.CANCEL_BUTTON, timeout=3)
 
 
 class TestCheckoutStepTwoOrderSummary:

@@ -322,10 +322,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 325 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 326 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 71 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 55 scenarios, 386 steps (complete user journeys)
-- **Total**: 396 unit/integration tests + 55 E2E scenarios
+- **Total**: 397 unit/integration tests + 55 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -350,7 +350,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 
 | Module | Tests | Coverage | Status |
 |--------|-------|----------|--------|
-| **BasePage** | 22 | 100% | ✅ Complete |
+| **BasePage** | 23 | 100% | ✅ Complete |
 | **LoginPage** | 14 | 100% | ✅ Complete |
 | **CartPage** | 13 | 100% | ✅ Complete |
 | **InventoryPage** | 26 | 100% | ✅ Complete |
@@ -370,7 +370,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **README metrics validator** | 6 | N/A | ✅ Complete |
 | **Text encoding gate (pre-commit, `.gitattributes`)** | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | 3 | N/A | ✅ Complete |
-| **TOTAL** | **325** | **100%** | **Complete** |
+| **TOTAL** | **326** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 346

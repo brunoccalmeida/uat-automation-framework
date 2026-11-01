@@ -27,13 +27,13 @@ class TestCartPageElements:
         """Continue Shopping button should exist."""
         page = CartPage(cart_with_products)
 
-        assert page.is_element_present(page.CONTINUE_SHOPPING_BUTTON, timeout=3)
+        assert page.is_element_visible(page.CONTINUE_SHOPPING_BUTTON, timeout=3)
 
     def test_checkout_button_exists(self, cart_with_products):
         """Checkout button should exist."""
         page = CartPage(cart_with_products)
 
-        assert page.is_element_present(page.CHECKOUT_BUTTON, timeout=3)
+        assert page.is_element_visible(page.CHECKOUT_BUTTON, timeout=3)
 
 
 class TestCartPageInteractions:

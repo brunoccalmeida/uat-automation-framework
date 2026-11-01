@@ -5,25 +5,11 @@
 environment:
   remote:
     base_url: "https://www.saucedemo.com"
-    timeout: 10
-    implicit_wait: 5
-    # Pre-configured test users (password: secret_sauce for all)
-    test_users:
-      standard: "standard_user"
-      locked: "locked_out_user"
-      problem: "problem_user"
-      glitch: "performance_glitch_user"
-      error: "error_user"
-      visual: "visual_user"
+    # Password shared by all pre-configured test users (standard_user, ...)
     default_password: "secret_sauce"
 
 # Browser configuration
 browser:
-  name: "chrome"  # chrome, firefox, edge
+  name: "chrome"  # chrome, firefox
   headless: true  # Headless by default (faster, less resources). Use -Dheadless=false for debugging
   window_size: "1920,1080"
-
-# Logging
-logging:
-  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

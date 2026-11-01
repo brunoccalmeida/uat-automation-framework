@@ -194,16 +194,13 @@ browser:
   name: "chrome"  # chrome | firefox
 ```
 
-> Nota: `edge` pode aparecer em documentação/config, mas não está implementado no `DriverManager` e resultará em erro de browser não suportado.
+### Esperas (timeouts)
 
-### Timeout Padrão
+Não há timeout no `config.yaml`. Os Page Objects usam só esperas explícitas (`WebDriverWait`, padrão de 10 s em `BasePage`), e o projeto não usa *implicit wait*, de propósito: a documentação do Selenium avisa para não misturar os dois tipos ("Do not mix implicit and explicit waits"), porque a combinação gera tempos de espera imprevisíveis.
 
-Configurado via `config.yaml`:
-```yaml
-browser:
-  implicit_wait: 10  # segundos
-  page_load_timeout: 30  # segundos
-```
+### Credenciais dos usuários de teste
+
+A senha comum aos usuários da Sauce Demo fica em um só lugar, `environment.remote.default_password` no `config.yaml`, lida por `get_default_password`. Os cenários dizem só quem entra (`When I log in as "standard_user"`); senha literal no cenário, apenas quando ela é o dado sob teste (ex.: `login_negative.feature`). `tests/test_config.py` barra a senha literal em código (`.py` e `.feature`).
 
 ## 📚 Boas Práticas
 
@@ -218,8 +215,7 @@ browser:
 
 1. **Use variável de ambiente** `HEADLESS=true`
 2. **Não dependa** de CLI parameters em pipelines
-3. **Configure timeout** adequado para headless (pode ser mais rápido)
-4. **Salve screenshots** em caso de falha (mesmo em headless)
+3. **Salve screenshots** em caso de falha (mesmo em headless)
 
 ### Para o Time
 

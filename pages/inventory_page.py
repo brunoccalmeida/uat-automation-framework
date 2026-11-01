@@ -139,17 +139,27 @@ class InventoryPage(BasePage):
 
         Returns:
             Value of selected sort option (az, za, lohi, hilo).
+
+        Raises:
+            ValueError: If the selected option has no value attribute.
         """
         dropdown_element = self.find_element(self.SORT_DROPDOWN)
         select = Select(dropdown_element)
-        return select.first_selected_option.get_attribute("value")
+        value = select.first_selected_option.get_attribute("value")
+        if value is None:
+            raise ValueError("Selected sort option has no value attribute")
+        return value
 
     def are_product_images_broken(self) -> bool:
-        """Return True if every product image is broken (src = sl-404)."""
+        """Return True if every product image is broken (src = sl-404).
+
+        An image without src is not the sl-404 placeholder, so it counts as
+        not broken.
+        """
         images = self.driver.find_elements(By.CSS_SELECTOR, ".inventory_item_img img")
         if not images:
             return False
-        return all("sl-404" in img.get_attribute("src") for img in images)
+        return all("sl-404" in (img.get_attribute("src") or "") for img in images)
 
     def get_sort_dropdown_options(self) -> list[str]:
         """Get all available sort options from dropdown.

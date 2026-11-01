@@ -15,7 +15,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 PRE_COMMIT = ROOT / ".pre-commit-config.yaml"
 WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
-LINTERS = ("black", "flake8", "pylint")
+LINTERS = ("black", "flake8", "pylint", "pyright")
 RUN_HOOKS = "poetry run pre-commit run --all-files --show-diff-on-failure"
 
 

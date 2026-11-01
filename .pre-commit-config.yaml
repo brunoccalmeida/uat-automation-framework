@@ -32,6 +32,14 @@ repos:
         require_serial: true
         args: ['-rn', '-sn']
 
+      # Type checks; the editor runs the same checker (pyright-lsp plugin).
+      - id: pyright
+        name: pyright
+        entry: poetry run pyright
+        language: system
+        types: [python]
+        require_serial: true
+
       - id: validate-readme-metrics
         name: Validate README.md metrics
         entry: poetry run python scripts/validate_readme_metrics.py

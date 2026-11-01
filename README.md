@@ -323,10 +323,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 242 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 256 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 71 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 55 scenarios, 386 steps (complete user journeys)
-- **Total**: 313 unit/integration tests + 55 E2E scenarios
+- **Total**: 327 unit/integration tests + 55 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -365,8 +365,8 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Workflow pinning (CI)** | 24 | N/A | ✅ Complete |
 | **CI gate (required check)** | 16 | N/A | ✅ Complete |
 | **Codecov upload (CI)** | 6 | N/A | ✅ Complete |
-| **Agent rules (size, sync)** | 11 | N/A | ✅ Complete |
-| **TOTAL** | **242** | **100%** | **Complete** |
+| **Agent rules (size, sync, editor diagnostics)** | 25 | N/A | ✅ Complete |
+| **TOTAL** | **256** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 346

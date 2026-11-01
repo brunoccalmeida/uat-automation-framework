@@ -25,14 +25,14 @@
 
 ## Próxima missão recomendada
 
-**#27 — linters como portão real** (único P1). Detalhes no item 1 da fila.
+**#58 — levantar as melhores práticas de mercado para economizar tokens/créditos de IA e aplicá-las** (P1, escolha do dono em 01/11/2026). A #41 se baseou quase só na documentação dos fornecedores e a #54 só mediu; falta um levantamento amplo (fontes primárias datadas além do fornecedor), uma tabela de lacunas com decisão por prática e a aplicação, com medição antes/depois. Inclui a #56 (subagentes = 72% do uso). Escolhida antes da #27 por efeito composto: o desperdício encarece toda missão, inclusive a #27.
 
 Do #54 (medições em `docs/AGENT_TOKEN_SPEND.md`, seção "Verificação"): o diálogo *Account & usage* da extensão mostra % do limite do plano em 24 h somando sessões, não tokens por missão; o maior sinal é **subagentes = 72% do uso** (#56), não o tamanho das regras ("Trim CLAUDE.md" não apareceu). Diagnósticos só existem para arquivos abertos no editor: `getDiagnostics` vazio pode ser "não checado".
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step) escondido por `continue-on-error`; black usa 88 colunas e flake8 79 → #28 ordem de imports (talvez junto, se `ruff`)
-2. #56 o que cria subagentes (72% do uso; efeito composto em toda missão)
+1. #58 práticas de mercado para gasto de tokens (acima), com #56 dentro
+2. #27 linters como portão real (P1; inclui #33 via pylint C0415 e mover config do flake8 para arquivo). Evidência do #35: o lint fatal do CI já falha hoje (`F821 undefined name 'when'` em `features/steps/sorting_steps.py`, import abaixo do 1º step) escondido por `continue-on-error`; black usa 88 colunas e flake8 79 → #28 ordem de imports (talvez junto, se `ruff`)
 3. #26 `.gitignore` UTF-16 + portão de encoding (o Git o trata como binário; editar preservando CRLF, como no #54; `docs/PROJECT_SESSION*.*` ignorado mas versionado)
 4. #29 `find_element` com `visibility_of` (risco de flaky)
 5. #34 → #39 validador de métricas + READMEs traduzidos

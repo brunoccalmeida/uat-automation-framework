@@ -125,6 +125,13 @@ jobs:
         env:
           HEADLESS: true
 
+      # The pre-commit hook skips the coverage check where there is no
+      # coverage.xml (the lint job); check it here, where the report is
+      # written, and fail if it is missing (#87).
+      - name: Check README coverage
+        if: ${{ !cancelled() }}
+        run: poetry run python scripts/validate_readme_metrics.py --coverage coverage.xml
+
       # OIDC: a short-lived credential per run, no stored secret. GitHub
       # withholds the OIDC token from Dependabot runs and fork PRs, so the
       # upload is skipped exactly there; everywhere else a failure fails CI.

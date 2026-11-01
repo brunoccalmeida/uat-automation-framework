@@ -323,10 +323,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 364 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes Unitários**: 369 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
 - **Testes de Integração**: 71 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 55 cenários, 386 steps (jornadas completas de usuário)
-- **Total**: 435 testes unitários/de integração + 55 cenários E2E
+- **Total**: 440 testes unitários/de integração + 55 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -368,14 +368,14 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Regras do agente (tamanho, sincronia, diagnósticos do editor, code intelligence)** | `tests/test_agent_rules.py` | 28 | N/A | ✅ Completo |
 | **Hook de saída de testes do agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
 | **Portão de lint (pre-commit + CI + ordem de imports no editor, ruff no lugar do flake8)** | `tests/test_lint_gate.py` | 22 | N/A | ✅ Completo |
-| **Métricas dos READMEs (sincronia por linha pela coluna Fonte, traduções)** | `tests/test_validate_readme_metrics.py` | 44 | N/A | ✅ Completo |
+| **Métricas dos READMEs (sincronia por linha pela coluna Fonte, traduções)** | `tests/test_validate_readme_metrics.py` | 49 | N/A | ✅ Completo |
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
-| **TOTAL** | | **364** | **100%** | **Completo** |
+| **TOTAL** | | **369** | **100%** | **Completo** |
 
 **Cobertura de Código:**
-- **Total de statements:** 346
-- **Cobertos:** 345 (99%)
+- **Total de statements:** 350
+- **Cobertos:** 349 (99%)
 - **Módulo Pages**: 100%
 - **Módulo Core**: 99% (1 linha sem cobertura em `core/config.py`)
 

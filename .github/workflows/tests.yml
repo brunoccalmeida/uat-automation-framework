@@ -17,7 +17,6 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.14']
         browser: ['chrome', 'firefox']
       fail-fast: false
 
@@ -25,11 +24,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         id: setup-python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version-file: .python-version
 
       - name: Install Poetry
         uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263  # v1.4.2
@@ -72,20 +71,15 @@ jobs:
       contents: read
       id-token: write  # OIDC credential for the Codecov upload
 
-    strategy:
-      matrix:
-        python-version: ['3.14']
-      fail-fast: false
-
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         id: setup-python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version-file: .python-version
 
       - name: Install Poetry
         uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263  # v1.4.2
@@ -156,7 +150,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
-          name: test-results-py${{ matrix.python-version }}
+          name: test-results
           path: |
             reports/
             *.log
@@ -166,7 +160,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
-          name: allure-results-py${{ matrix.python-version }}
+          name: allure-results
           path: reports/allure-results
           retention-days: 30
 
@@ -181,7 +175,7 @@ jobs:
       - name: Download Allure results
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
-          name: allure-results-py3.14
+          name: allure-results
           path: allure-results
 
       - name: Get previous report (for trend history)
@@ -244,7 +238,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
-          python-version: '3.14'
+          python-version-file: .python-version
 
       - name: Install Poetry
         uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263  # v1.4.2
@@ -262,7 +256,7 @@ jobs:
         run: poetry run pre-commit run --all-files --show-diff-on-failure
 
   # The single required check of this workflow (ruleset "Protect master").
-  # Matrix jobs are named after their values ("test (3.14)"): requiring them
+  # Matrix jobs are named after their values ("smoke-matrix (chrome)"): requiring them
   # by name would block every PR after a version bump, waiting for a check
   # that never runs. This job's name never changes.
   # always(): a skipped required check counts as passed, so the gate must run

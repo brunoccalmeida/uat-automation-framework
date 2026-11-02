@@ -6,7 +6,7 @@ Represents the products/inventory page after successful login.
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 
-from pages import cart_page, login_page
+from pages import cart_page, login_page, product_details_page
 from pages.base_page import BasePage
 
 
@@ -31,6 +31,7 @@ class InventoryPage(BasePage):
     PAGE_LOADED = INVENTORY_CONTAINER
     INVENTORY_ITEMS = (By.CLASS_NAME, "inventory_item")
     INVENTORY_ITEM_NAME = (By.CLASS_NAME, "inventory_item_name")
+    INVENTORY_ITEM_DESC = (By.CLASS_NAME, "inventory_item_desc")
     INVENTORY_ITEM_PRICE = (By.CLASS_NAME, "inventory_item_price")
     PAGE_TITLE = (By.CLASS_NAME, "title")
     SHOPPING_CART_BADGE = (By.CLASS_NAME, "shopping_cart_badge")
@@ -38,6 +39,32 @@ class InventoryPage(BasePage):
     MENU_BUTTON = (By.ID, "react-burger-menu-btn")
     LOGOUT_LINK = (By.ID, "logout_sidebar_link")
     SORT_DROPDOWN = (By.CLASS_NAME, "product_sort_container")
+
+    @staticmethod
+    def product_card_locator(product_name: str) -> tuple[str, str]:
+        """Locator of the product card containing the given name.
+
+        Args:
+            product_name: Name of product (e.g., 'Sauce Labs Backpack').
+        """
+        return (
+            By.XPATH,
+            "//div[@data-test='inventory-item']"
+            "[.//div[@data-test='inventory-item-name'"
+            f" and text()='{product_name}']]",
+        )
+
+    @staticmethod
+    def product_name_locator(product_name: str) -> tuple[str, str]:
+        """Locator of the product title, the link to its details.
+
+        Args:
+            product_name: Name of product (e.g., 'Sauce Labs Backpack').
+        """
+        return (
+            By.XPATH,
+            f"//div[@data-test='inventory-item-name' and text()='{product_name}']",
+        )
 
     def is_on_inventory_page(self) -> bool:
         """Check if user is on inventory page.
@@ -75,6 +102,36 @@ class InventoryPage(BasePage):
         button_id = f"add-to-cart-{product_name.lower().replace(' ', '-')}"
         add_button = (By.ID, button_id)
         self.click(add_button)
+
+    def get_product_card(self, product_name: str) -> "product_details_page.ProductInfo":
+        """Get name, description and price shown on a product card.
+
+        Args:
+            product_name: Name of product (e.g., 'Sauce Labs Backpack').
+
+        Returns:
+            ProductInfo, comparable with the details page's.
+        """
+        card = self.find_element(self.product_card_locator(product_name))
+        return product_details_page.ProductInfo(
+            name=card.find_element(*self.INVENTORY_ITEM_NAME).text,
+            description=card.find_element(*self.INVENTORY_ITEM_DESC).text,
+            price=card.find_element(*self.INVENTORY_ITEM_PRICE).text,
+        )
+
+    def open_product_details(
+        self, product_name: str
+    ) -> "product_details_page.ProductDetailsPage":
+        """Open a product's details by clicking its title.
+
+        Args:
+            product_name: Name of product (e.g., 'Sauce Labs Backpack').
+
+        Returns:
+            ProductDetailsPage, once rendered.
+        """
+        self.click(self.product_name_locator(product_name))
+        return product_details_page.ProductDetailsPage(self.driver).wait_until_loaded()
 
     def remove_product(self, product_name: str) -> None:
         """Remove specific product from shopping cart on this page.

@@ -9,6 +9,7 @@ import pytest
 from selenium.webdriver.common.by import By
 
 from pages.inventory_page import InventoryPage
+from pages.product_details_page import ProductInfo
 from tests.helpers.navigation_contract import assert_clicks_then_returns_loaded
 
 
@@ -401,3 +402,68 @@ class TestRemoveProduct:
             page.remove_product("Sauce Labs Backpack")
 
         mock_click.assert_called_once_with((By.ID, "remove-sauce-labs-backpack"))
+
+
+class TestProductCardLocators:
+    """Test product card locators."""
+
+    def test_inventory_item_desc_locator(self):
+        """INVENTORY_ITEM_DESC locator should use the card description class."""
+        assert InventoryPage.INVENTORY_ITEM_DESC == (
+            By.CLASS_NAME,
+            "inventory_item_desc",
+        )
+
+    def test_product_card_locator_finds_card_by_its_name(self):
+        """product_card_locator should match the card containing the name."""
+        assert InventoryPage.product_card_locator("Sauce Labs Backpack") == (
+            By.XPATH,
+            "//div[@data-test='inventory-item']"
+            "[.//div[@data-test='inventory-item-name'"
+            " and text()='Sauce Labs Backpack']]",
+        )
+
+    def test_product_name_locator_finds_name_link(self):
+        """product_name_locator should match the card title by its text."""
+        assert InventoryPage.product_name_locator("Sauce Labs Backpack") == (
+            By.XPATH,
+            "//div[@data-test='inventory-item-name' and text()='Sauce Labs Backpack']",
+        )
+
+
+class TestGetProductCard:
+    """Test get_product_card method."""
+
+    def test_get_product_card_reads_name_description_and_price_of_card(self):
+        """get_product_card should read the card found by its name."""
+        page = InventoryPage(Mock())
+        card = Mock()
+        texts = {
+            InventoryPage.INVENTORY_ITEM_NAME: "Backpack",
+            InventoryPage.INVENTORY_ITEM_DESC: "Sleek pack",
+            InventoryPage.INVENTORY_ITEM_PRICE: "$29.99",
+        }
+        card.find_element.side_effect = lambda by, value: Mock(text=texts[(by, value)])
+
+        with patch.object(page, "find_element", return_value=card) as mock_find:
+            result = page.get_product_card("Backpack")
+
+        mock_find.assert_called_once_with(
+            InventoryPage.product_card_locator("Backpack")
+        )
+        assert result == ProductInfo("Backpack", "Sleek pack", "$29.99")
+
+
+class TestOpenProductDetails:
+    """Test open_product_details method."""
+
+    def test_open_product_details_clicks_name_and_returns_loaded_details(self):
+        """open_product_details clicks the title, returns loaded details."""
+        page = InventoryPage(Mock())
+
+        assert_clicks_then_returns_loaded(
+            page,
+            lambda: page.open_product_details("Backpack"),
+            InventoryPage.product_name_locator("Backpack"),
+            "pages.product_details_page.ProductDetailsPage",
+        )

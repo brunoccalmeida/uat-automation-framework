@@ -165,6 +165,7 @@ poetry run behave --tags=@login            # All login tests (functional + negat
 poetry run behave --tags=@cart             # All cart tests
 poetry run behave --tags=@checkout         # All checkout tests
 poetry run behave --tags=@sorting          # All sorting tests
+poetry run behave --tags=@product_details  # All product details tests
 
 # Run by priority/special
 poetry run behave --tags=@critical         # Critical user journeys
@@ -184,7 +185,7 @@ poetry run behave --tags=@e2e --tags=~@smoke  # E2E excluding smoke
 **Tag Hierarchy:**
 - **Layer**: `@e2e` (all features use this)
 - **Type**: `@functional` | `@negative` | `@user_journey` | `@smoke` | `@edgecase`
-- **Domain**: `@login` | `@cart` | `@checkout` | `@sorting`
+- **Domain**: `@login` | `@cart` | `@checkout` | `@sorting` | `@product_details`
 - **Priority**: `@critical` | `@problem_user` | `@error_user`
 
 **Cross-Browser Testing:**
@@ -322,10 +323,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 436 tests (framework components, 100% Page Objects coverage, CI guardrails)
-- **Integration Tests**: 75 tests (Page Objects + real browser, including navigation synchronization)
-- **E2E Tests**: 62 scenarios, 421 steps (complete user journeys)
-- **Total**: 511 unit/integration tests + 62 E2E scenarios
+- **Unit Tests**: 456 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Integration Tests**: 84 tests (Page Objects + real browser, including navigation synchronization)
+- **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
+- **Total**: 540 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -345,7 +346,8 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Product Sorting** | `features/product_sorting.feature`, `features/product_sorting_negative.feature`, `features/product_sorting_problem_user.feature` | 14 | 92 | ✅ Complete |
 | **User Journey** | `features/user_journey_purchase.feature`, `features/user_journey_variations.feature`, `features/problem_user_journey.feature` | 5 | 78 | ✅ Complete |
 | **Error User (known defects)** | `features/error_user.feature` | 7 | 35 | ✅ Complete |
-| **TOTAL** | | **62** | **421** | **100%** |
+| **Product Details (incl. known defects)** | `features/product_details.feature`, `features/product_details_known_defects.feature` | 11 | 42 | ✅ Complete |
+| **TOTAL** | | **73** | **463** | **100%** |
 
 ### Unit Tests (Pytest)
 
@@ -354,7 +356,8 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **BasePage** | `tests/test_base_page.py` | 25 | 100% | ✅ Complete |
 | **LoginPage** | `tests/test_login_page.py` | 14 | 100% | ✅ Complete |
 | **CartPage** | `tests/test_cart_page.py` | 13 | 100% | ✅ Complete |
-| **InventoryPage** | `tests/test_inventory_page.py` | 27 | 100% | ✅ Complete |
+| **InventoryPage** | `tests/test_inventory_page.py` | 32 | 100% | ✅ Complete |
+| **ProductDetailsPage** | `tests/test_product_details_page.py` | 15 | 100% | ✅ Complete |
 | **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 15 | 100% | ✅ Complete |
 | **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 16 | 100% | ✅ Complete |
 | **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 12 | 100% | ✅ Complete |
@@ -374,11 +377,11 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Complete |
-| **TOTAL** | | **436** | **100%** | **Complete** |
+| **TOTAL** | | **456** | **100%** | **Complete** |
 
 **Code Coverage:**
-- **Total statements:** 367
-- **Covered:** 366 (99%)
+- **Total statements:** 412
+- **Covered:** 411 (99%)
 - **Pages Module**: 100%
 - **Core Module**: 99% (1 uncovered line in `core/config.py`)
 
@@ -392,10 +395,11 @@ Integration tests validate Page Objects with real browser interactions, filling 
 | **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 12 | Chrome | ✅ Complete |
 | **InventoryPage (sorting)** | `tests/integration/test_inventory_sorting_integration.py` | 1 | Chrome | ✅ Complete |
 | **CartPage** | `tests/integration/test_cart_page_integration.py` | 10 | Chrome | ✅ Complete |
+| **ProductDetailsPage** | `tests/integration/test_product_details_integration.py` | 9 | Chrome | ✅ Complete |
 | **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 16 | Chrome | ✅ Complete |
 | **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 14 | Chrome | ✅ Complete |
 | **Navigation synchronization** | `tests/integration/test_navigation_integration.py` | 13 | Chrome | ✅ Complete |
-| **TOTAL** | | **75** | **Real** | **Complete** |
+| **TOTAL** | | **84** | **Real** | **Complete** |
 
 **Key Differences from Unit Tests:**
 - ✅ Real Selenium WebDriver (not mocked)
@@ -440,7 +444,7 @@ Integration tests validate Page Objects with real browser interactions, filling 
 Some Sauce Demo users (notably `problem_user` and `error_user`) are intentionally designed to exhibit bugs or non-standard behaviors, such as sorting failures, visual glitches or broken checkout steps. To keep the suite clear and maintainable:
 
 - **Normal user scenarios** live in their respective feature files (e.g., `product_sorting.feature`).
-- **Edge cases and known bugs** (like the `problem_user` sorting bug) are isolated in dedicated feature files (e.g., [`product_sorting_problem_user.feature`](features/product_sorting_problem_user.feature), [`error_user.feature`](features/error_user.feature)), tagged with `@edgecase`. Their scenarios assert the defect, so a scenario fails if Sauce Demo changes it.
+- **Edge cases and known bugs** (like the `problem_user` sorting bug) are isolated in dedicated feature files (e.g., [`product_sorting_problem_user.feature`](features/product_sorting_problem_user.feature), [`error_user.feature`](features/error_user.feature), [`product_details_known_defects.feature`](features/product_details_known_defects.feature)), tagged with `@edgecase`. Their scenarios assert the defect, so a scenario fails if Sauce Demo changes it.
 
 Why this separation?
 - Keeps business requirements and regression tests clean and focused

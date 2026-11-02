@@ -4,7 +4,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 01/11/2026 — missão "Python 3.15" (#95) pausada: bloqueada pelo PyYAML sem wheel cp315
+**Última atualização:** 02/11/2026 — missão "Defeitos conhecidos do `error_user`" (#98) concluída (PR #99); #95 segue bloqueada pelo PyYAML sem wheel cp315
 
 ---
 
@@ -13,7 +13,7 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 389 unit · 71 integration · 55 cenários E2E (386 steps) · cobertura 99% (352 statements) |
+| Testes | 395 unit · 75 integration · 62 cenários E2E (421 steps) · cobertura 99% (367 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
@@ -32,7 +32,9 @@
 
 ## Próxima missão recomendada
 
-**Nenhuma issue desbloqueada.** A única aberta, #95 (Python 3.15), tem o label `blocked`. Sinal para retomar: o Dependabot abrir o PR de uma release do PyYAML com wheel `cp315` (yaml/pyyaml#951). Daí a troca é mecânica: `.python-version`, cffi 2.0.0 → 2.1.1 no lock (a 2.0.0 não tem wheel cp315), badge e menções a "Python 3.14" nos três READMEs; depois todas as camadas no CI. Falta ainda decidir o `requires-python` (`>=3.15` por dev/prod parity, ou manter o 3.14 com matriz e parâmetro `python` no Allure). Enquanto isso, o próximo chat pode abrir uma issue nova ou atender o Dependabot.
+**Nenhuma issue desbloqueada.** A única aberta, #95 (Python 3.15), tem o label `blocked`. Sinal para retomar: o Dependabot abrir o PR de uma release do PyYAML com wheel `cp315` (yaml/pyyaml#951). Daí a troca é mecânica: `.python-version`, cffi 2.0.0 → 2.1.1 no lock (a 2.0.0 não tem wheel cp315), badge e menções a "Python 3.14" nos três READMEs; depois todas as camadas no CI. Falta ainda decidir o `requires-python` (`>=3.15` por dev/prod parity, ou manter o 3.14 com matriz e parâmetro `python` no Allure). Conferido em 02/11/2026: PyPI ainda na 6.0.3, #951 aberta. Enquanto isso, o próximo chat abre issue nova a partir das ideias do Backlog; recomendação: **página de detalhes de produto** (área sem cobertura, reaproveita a infraestrutura; regressão visual e Docker custam mais e ainda não têm necessidade concreta, YAGNI).
+
+Do #98: `features/error_user.feature` (`@edgecase`) afirma os 5 defeitos do `error_user` (alert na ordenação, 3 produtos que não entram no carrinho, remove na lista de produtos, sobrenome ignorado com o Continue passando, Finish que não conclui), no padrão do `problem_user`: o cenário falha se o Sauce Demo mudar o defeito. Comportamento **medido** com o `standard_user` como controle. Achados: (1) um spike com Chrome puro mostrou todos os campos do formulário vazios **também no controle**; a causa era o diálogo de senha vazada do Chrome (`secret_sauce` está em listas de vazamento) roubando o foco, que o `DriverManager` já desliga. Spike usa o `DriverManager`, nunca driver à mão. (2) **Armadilha em teste de mutação**: o Python reaproveita o `.pyc` quando mtime (em segundos) e tamanho batem; uma mutação que só troca linhas de lugar, restaurada no mesmo segundo, deixou o bytecode mutado ativo e um teste de integração falhou com o código certo em disco (diagnosticado rastreando os comandos WebDriver: `AcceptAlert` antes de `GetAlertText`). Mutação roda com `PYTHONDONTWRITEBYTECODE=1`. (3) Os defeitos deixam o estado igual ao inicial; os steps leem o estado logo após a ação porque o log do navegador mostra o Finish lançando `TypeError` síncrono no handler (nada assíncrono pendente), medido para este defeito, não regra geral. (4) A cobertura pegou um ramo (`raise ValueError` no `get_last_name`) escrito sem teste: teste adicionado e confirmado por mutação. RED: 5 steps `undefined`; o outline do add já passava com steps existentes, então mutação (produto que funciona) morta; 5 mutações de unidade e 4 de integração mortas; a feature rodada como `standard_user` falha nos 7 cenários.
 
 Do #95: a compatibilidade foi **medida, não suposta**, num venv 3.15.2 no scratchpad (lock exato, só wheels). O PyPI só tem a 6.0.3 do PyYAML, sem wheel cp315; sem wheel, o pip compila o sdist e no Windows pede MSVC. O PyPI recusa arquivo novo em release com mais de 14 dias, então só uma release nova resolve. Os outros 78 pacotes instalam com wheel (só o cffi precisa da 2.1.1). Com o PyYAML em Python puro (`--without-libyaml`), só para o diagnóstico: pytest com `-W error::DeprecationWarning` 460 verdes, Behave 55/55, pylint 10/10, `ruff --target-version py315` limpo. **O código está pronto; o bloqueio é só de empacotamento.** Decisão do dono, após consulta (PyPA, "Packaging binary extensions", *Disadvantages*: extensão binária exige compilador em cada máquina ou binário publicado): esperar o upstream. Compilar o sdist (MSVC local) ou trocar o PyYAML seriam atalhos para contornar um atraso de empacotamento. Detalhes no comentário da #95. Label `blocked` criado.
 
@@ -62,7 +64,7 @@ Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercad
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #95 Python 3.15
+1. #95 Python 3.15 (`blocked`)
 
 **Ao trocar a versão do Python** (#95): edite só o `.python-version` (o teste barra versão literal nos workflows) e confira a compatibilidade antes; o ruleset não depende do nome dos jobs (#36).
 
@@ -74,7 +76,7 @@ Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → seg
 
 Tudo em GitHub Issues com labels `priority: P0/P1/P2`: `gh issue list`.
 
-**Ideias de funcionalidades futuras** (ainda sem issue): página de detalhes de produto · cenários do `error_user` · regressão visual (baseline de screenshots) · containerização com Docker.
+**Ideias de funcionalidades futuras** (ainda sem issue): página de detalhes de produto · regressão visual (baseline de screenshots) · containerização com Docker.
 
 ## Decisões e aprendizados que guiam o trabalho
 

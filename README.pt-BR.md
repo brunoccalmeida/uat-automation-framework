@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:588215bee3e2210e6b537c7ebb4dac52290997b850280d5050d9a1372363a017 -->
+<!-- translation-source: README.md sha256:5c1d819ad206949b7b78092ad13cd42c56a65bcbbb381fd75ca5496f4f198562 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -323,10 +323,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 381 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes Unitários**: 389 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
 - **Testes de Integração**: 71 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 55 cenários, 386 steps (jornadas completas de usuário)
-- **Total**: 452 testes unitários/de integração + 55 cenários E2E
+- **Total**: 460 testes unitários/de integração + 55 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -372,7 +372,8 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Métricas dos READMEs (sincronia por linha pela coluna Fonte, traduções)** | `tests/test_validate_readme_metrics.py` | 49 | N/A | ✅ Completo |
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
-| **TOTAL** | | **381** | **100%** | **Completo** |
+| **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Completo |
+| **TOTAL** | | **389** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 352

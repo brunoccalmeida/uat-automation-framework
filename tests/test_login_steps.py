@@ -22,35 +22,36 @@ CONFIG = {
 }
 
 
+@pytest.fixture(name="login_page")
+def fixture_login_page():
+    """Patch LoginPage and return the page the step under test will build."""
+    with patch("features.steps.login_steps.LoginPage") as login_page_cls:
+        yield login_page_cls.return_value
+
+
 class TestStepVerifyErrorContains:
     """Test the error message verification step with OR logic support."""
 
-    def test_simple_text_match_success(self):
+    def test_simple_text_match_success(self, login_page):
         """Should pass when simple text is found in error message."""
         context = Mock()
-        context.login_page.get_error_message.return_value = (
-            "Epic sadface: Username is required"
-        )
+        login_page.get_error_message.return_value = "Epic sadface: Username is required"
 
         # Should not raise assertion
         step_verify_error_contains(context, "Username is required")
 
-    def test_simple_text_match_case_insensitive(self):
+    def test_simple_text_match_case_insensitive(self, login_page):
         """Should match text case-insensitively."""
         context = Mock()
-        context.login_page.get_error_message.return_value = (
-            "Epic sadface: USERNAME IS REQUIRED"
-        )
+        login_page.get_error_message.return_value = "Epic sadface: USERNAME IS REQUIRED"
 
         # Should not raise assertion (case-insensitive)
         step_verify_error_contains(context, "username is required")
 
-    def test_simple_text_match_failure(self):
+    def test_simple_text_match_failure(self, login_page):
         """Should fail when simple text is not found in error message."""
         context = Mock()
-        context.login_page.get_error_message.return_value = (
-            "Epic sadface: Password is required"
-        )
+        login_page.get_error_message.return_value = "Epic sadface: Password is required"
 
         with pytest.raises(AssertionError) as exc_info:
             step_verify_error_contains(context, "Username is required")
@@ -59,32 +60,28 @@ class TestStepVerifyErrorContains:
             exc_info.value
         )
 
-    def test_or_logic_first_alternative_matches(self):
+    def test_or_logic_first_alternative_matches(self, login_page):
         """Should pass when first alternative text is found."""
         context = Mock()
-        context.login_page.get_error_message.return_value = (
-            "Epic sadface: User is locked out"
-        )
+        login_page.get_error_message.return_value = "Epic sadface: User is locked out"
 
         # Should not raise assertion (first alternative matches)
         step_verify_error_contains(context, 'locked out" or "too many attempts')
 
-    def test_or_logic_second_alternative_matches(self):
+    def test_or_logic_second_alternative_matches(self, login_page):
         """Should pass when second alternative text is found."""
         context = Mock()
-        context.login_page.get_error_message.return_value = (
+        login_page.get_error_message.return_value = (
             "Epic sadface: Too many failed attempts"
         )
 
         # Should not raise assertion (second alternative matches "failed attempts")
         step_verify_error_contains(context, 'locked out" or "failed attempts')
 
-    def test_or_logic_no_alternative_matches(self):
+    def test_or_logic_no_alternative_matches(self, login_page):
         """Should fail when no alternative text is found."""
         context = Mock()
-        context.login_page.get_error_message.return_value = (
-            "Epic sadface: Invalid credentials"
-        )
+        login_page.get_error_message.return_value = "Epic sadface: Invalid credentials"
 
         with pytest.raises(AssertionError) as exc_info:
             step_verify_error_contains(context, 'locked out" or "too many attempts')
@@ -94,35 +91,41 @@ class TestStepVerifyErrorContains:
         assert "locked out" in error_message
         assert "too many attempts" in error_message
 
-    def test_or_logic_case_insensitive(self):
+    def test_or_logic_case_insensitive(self, login_page):
         """Should match OR alternatives case-insensitively."""
         context = Mock()
-        context.login_page.get_error_message.return_value = "Epic sadface: LOCKED OUT"
+        login_page.get_error_message.return_value = "Epic sadface: LOCKED OUT"
 
         # Should not raise assertion (case-insensitive match)
         step_verify_error_contains(context, 'locked out" or "too many attempts')
 
-    def test_or_logic_with_multiple_alternatives(self):
+    def test_or_logic_with_multiple_alternatives(self, login_page):
         """Should handle multiple alternatives (more than 2)."""
         context = Mock()
-        context.login_page.get_error_message.return_value = (
-            "Epic sadface: Account suspended"
-        )
+        login_page.get_error_message.return_value = "Epic sadface: Account suspended"
 
         # Should not raise assertion (third alternative matches)
         step_verify_error_contains(
             context, 'locked out" or "banned" or "suspended" or "disabled'
         )
 
-    def test_or_logic_partial_match_within_message(self):
+    def test_or_logic_partial_match_within_message(self, login_page):
         """Should match alternatives as substrings within error message."""
         context = Mock()
-        context.login_page.get_error_message.return_value = (
+        login_page.get_error_message.return_value = (
             "Epic sadface: Username and password do not match any user"
         )
 
         # Should not raise assertion ("do not match" is substring)
         step_verify_error_contains(context, 'invalid" or "do not match')
+
+    def test_missing_error_message_fails_with_clear_assertion(self, login_page):
+        """Should fail with an assertion, not crash, when no error is shown."""
+        context = Mock()
+        login_page.get_error_message.return_value = None
+
+        with pytest.raises(AssertionError, match="Error message should be displayed"):
+            step_verify_error_contains(context, "Username is required")
 
 
 class TestLoginStepsUseConfiguredPassword:
@@ -132,9 +135,10 @@ class TestLoginStepsUseConfiguredPassword:
         """Should log in with the scenario's user and the configured password."""
         context = Mock(config_data=CONFIG)
 
-        step_log_in_as(context, "standard_user")
+        with patch("features.steps.login_steps.LoginPage") as login_page_cls:
+            step_log_in_as(context, "standard_user")
 
-        context.login_page.login.assert_called_once_with("standard_user", "pw")
+        login_page_cls.return_value.login.assert_called_once_with("standard_user", "pw")
 
     def test_logged_in_as_uses_configured_password(self):
         """Should open the app and log in with the configured password."""

@@ -83,6 +83,22 @@ class BasePage:
             message=f"Neither {success_page.__name__} nor error message rendered",
         )
 
+    def accept_alert(self) -> str:
+        """Wait for a JavaScript alert, accept it and return its text.
+
+        The text is read before accepting: the alert closes on accept.
+
+        Returns:
+            Alert message text.
+
+        Raises:
+            TimeoutException: If no alert opens within timeout.
+        """
+        alert = self.wait.until(EC.alert_is_present())
+        text = alert.text
+        alert.accept()
+        return text
+
     def find_element(self, locator: tuple[str, str]):
         """Find visible element with explicit wait.
 

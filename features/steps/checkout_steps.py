@@ -64,6 +64,12 @@ def step_click_finish(context):
     page.click_finish()
 
 
+@when("I try to finish the order")
+def step_try_finish(context):
+    """Click finish on checkout overview, expecting the order to fail."""
+    CheckoutStepTwoPage(context.driver).try_finish()
+
+
 @when("I click back home")
 def step_click_back_home(context):
     """Click back home button on confirmation page."""
@@ -72,10 +78,18 @@ def step_click_back_home(context):
 
 
 @then("I should be on the checkout overview page")
+@then("I should still be on the checkout overview page")
 def step_verify_on_overview_page(context):
     """Verify user is on checkout overview page."""
     page = CheckoutStepTwoPage(context.driver)
     assert page.is_on_checkout_overview_page(), "Should be on checkout overview page"
+
+
+@then("the last name field should be empty")
+def step_verify_last_name_empty(context):
+    """Verify the Last Name input holds no text."""
+    last_name = CheckoutStepOnePage(context.driver).get_last_name()
+    assert last_name == "", f"Last Name should be empty, but is {last_name!r}"
 
 
 @then('I should see "{product_name}" in the order summary')

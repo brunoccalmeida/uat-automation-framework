@@ -76,6 +76,15 @@ class InventoryPage(BasePage):
         add_button = (By.ID, button_id)
         self.click(add_button)
 
+    def remove_product(self, product_name: str) -> None:
+        """Remove specific product from shopping cart on this page.
+
+        Args:
+            product_name: Name of product (e.g., 'Sauce Labs Backpack').
+        """
+        button_id = f"remove-{product_name.lower().replace(' ', '-')}"
+        self.click((By.ID, button_id))
+
     def get_cart_item_count(self) -> int:
         """Get number of items in shopping cart.
 

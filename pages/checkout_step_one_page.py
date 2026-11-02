@@ -55,6 +55,20 @@ class CheckoutStepOnePage(BasePage):
         """
         self.type(self.ZIP_CODE_INPUT, zip_code)
 
+    def get_last_name(self) -> str:
+        """Get the current value of the Last Name input.
+
+        Returns:
+            Text in the Last Name input ('' when empty).
+
+        Raises:
+            ValueError: If the input has no value attribute.
+        """
+        value = self.find_element(self.LAST_NAME_INPUT).get_attribute("value")
+        if value is None:
+            raise ValueError("Last Name input has no value attribute")
+        return value
+
     def click_continue(self) -> None:
         """Click Continue button and wait for the outcome.
 

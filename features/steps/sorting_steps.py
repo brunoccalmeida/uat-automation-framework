@@ -33,6 +33,18 @@ def step_verify_sort_dropdown_not_selected(context, option):
     )
 
 
+@then('I should see an alert saying "{message}"')
+def step_verify_alert(context, message):
+    """Accept the JavaScript alert and verify its message.
+
+    Args:
+        context: Behave context.
+        message: Expected alert text.
+    """
+    text = InventoryPage(context.driver).accept_alert()
+    assert text == message, f"Alert should say {message!r}, but says {text!r}"
+
+
 @then("products should NOT be sorted by name Z to A")
 def step_verify_sort_name_za_not_sorted(context):
     """Verify products are NOT sorted by name Z to A (problem_user bug scenario).

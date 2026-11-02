@@ -3,6 +3,7 @@
 Tests CheckoutStepTwoPage interactions with actual DOM elements.
 """
 
+from pages.checkout_complete_page import CheckoutCompletePage
 from pages.checkout_step_two_page import CheckoutStepTwoPage
 from tests.helpers.navigation import go_to_step_two
 
@@ -120,3 +121,15 @@ class TestCheckoutStepTwoMultipleProducts:
         page = CheckoutStepTwoPage(driver)
         assert page.is_product_in_summary("Sauce Labs Backpack")
         assert page.is_product_in_summary("Sauce Labs Bike Light")
+
+
+class TestCheckoutStepTwoTryFinish:
+    """Test try_finish against the real Finish button."""
+
+    def test_try_finish_completes_the_order_for_standard_user(self, checkout_step_two):
+        """try_finish should click the real Finish button (order completes)."""
+        page = CheckoutStepTwoPage(checkout_step_two)
+
+        page.try_finish()
+
+        assert CheckoutCompletePage(checkout_step_two).wait_until_loaded()

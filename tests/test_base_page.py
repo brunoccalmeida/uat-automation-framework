@@ -420,3 +420,34 @@ class TestSubmitAndWaitForOutcome:
                     message="Neither _LoadablePage nor error message rendered",
                 ),
             ]
+
+
+class TestAcceptAlert:
+    """Test accept_alert method."""
+
+    def test_accept_alert_waits_for_the_alert(self):
+        """accept_alert should wait until an alert is present."""
+        page = BasePage(Mock())
+
+        with (
+            patch.object(page, "wait") as mock_wait,
+            patch("pages.base_page.EC") as mock_ec,
+        ):
+            page.accept_alert()
+
+        mock_wait.until.assert_called_once_with(mock_ec.alert_is_present.return_value)
+
+    def test_accept_alert_reads_the_text_before_accepting(self):
+        """accept_alert should return the text, read before the alert closes."""
+        page = BasePage(Mock())
+        events = []
+        alert = Mock()
+        type(alert).text = property(lambda _: events.append("text") or "Broken!")
+        alert.accept.side_effect = lambda: events.append("accept")
+
+        with patch.object(page, "wait") as mock_wait:
+            mock_wait.until.return_value = alert
+            text = page.accept_alert()
+
+        assert text == "Broken!"
+        assert events == ["text", "accept"]

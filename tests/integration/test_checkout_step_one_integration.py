@@ -67,6 +67,14 @@ class TestCheckoutStepOneInteractions:
         last_name_field = checkout_step_one.find_element(*page.LAST_NAME_INPUT)
         assert last_name_field.get_attribute("value") == "Doe"
 
+    def test_get_last_name_reads_the_typed_text(self, checkout_step_one):
+        """get_last_name should return what was typed into the field."""
+        page = CheckoutStepOnePage(checkout_step_one)
+
+        page.enter_last_name("Doe")
+
+        assert page.get_last_name() == "Doe"
+
     def test_enter_zip_code_types_text(self, checkout_step_one):
         """Entering zip code should type text into field."""
         page = CheckoutStepOnePage(checkout_step_one)

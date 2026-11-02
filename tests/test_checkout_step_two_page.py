@@ -186,3 +186,20 @@ class TestClickCancel:
             CheckoutStepTwoPage.CANCEL_BUTTON,
             "pages.inventory_page.InventoryPage",
         )
+
+
+class TestTryFinish:
+    """Test try_finish method."""
+
+    def test_try_finish_clicks_without_waiting_for_the_confirmation(self):
+        """try_finish should click FINISH_BUTTON and not wait for the next page."""
+        page = CheckoutStepTwoPage(Mock())
+
+        with (
+            patch.object(page, "click") as mock_click,
+            patch("pages.checkout_complete_page.CheckoutCompletePage") as mock_complete,
+        ):
+            page.try_finish()
+
+        mock_click.assert_called_once_with(CheckoutStepTwoPage.FINISH_BUTTON)
+        mock_complete.assert_not_called()

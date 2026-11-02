@@ -4,7 +4,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 02/11/2026 — missão "Procedimentos em skills e subagente revisor" (#101) concluída (PR #102); #95 segue bloqueada pelo PyYAML sem wheel cp315
+**Última atualização:** 02/11/2026 — missão "Página de detalhes de produto" (#104) concluída (PR #106); #95 segue bloqueada pelo PyYAML sem wheel cp315
 
 ---
 
@@ -13,7 +13,7 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 436 unit · 75 integration · 62 cenários E2E (421 steps) · cobertura 99% (367 statements) |
+| Testes | 456 unit · 84 integration · 73 cenários E2E (463 steps) · cobertura 99% (412 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
@@ -33,7 +33,9 @@
 
 ## Próxima missão recomendada
 
-**Nenhuma issue desbloqueada.** A única aberta, #95 (Python 3.15), tem o label `blocked`. Sinal para retomar: o Dependabot abrir o PR de uma release do PyYAML com wheel `cp315` (yaml/pyyaml#951). Daí a troca é mecânica: `.python-version`, cffi 2.0.0 → 2.1.1 no lock (a 2.0.0 não tem wheel cp315), badge e menções a "Python 3.14" nos três READMEs; depois todas as camadas no CI. Falta ainda decidir o `requires-python` (`>=3.15` por dev/prod parity, ou manter o 3.14 com matriz e parâmetro `python` no Allure). Conferido em 02/11/2026: PyPI ainda na 6.0.3, #951 aberta. Enquanto isso, o próximo chat abre issue nova a partir das ideias do Backlog; recomendação: **página de detalhes de produto** (área sem cobertura, reaproveita a infraestrutura; regressão visual e Docker custam mais e ainda não têm necessidade concreta, YAGNI). Primeira missão com o `reviewer` carregado de verdade (só leitura imposta): confira que ele aparece na lista de agentes; e meça o `/context` no início para o "depois" do #101.
+**#105 — cabeçalho compartilhado como Page Component** (`priority: P2`, nasceu no #104). Badge, link do carrinho e menu ficam no cabeçalho de toda página após o login, mas só o `InventoryPage` os modela; os steps de badge criam um `InventoryPage` em qualquer página (carrinho, detalhes) e funcionam só porque o DOM é igual. Prática: Selenium, "Page Component Objects" (componente comum ao site, ex.: barra de navegação, incluído nos page objects). ~70 usos em 10 arquivos (pages, steps, unit, integração); comportamento inalterado, todas as camadas verdes antes e depois. A #95 (Python 3.15) segue `blocked`: conferido em 02/11/2026, PyPI na 6.0.3 do PyYAML sem wheel `cp315`, yaml/pyyaml#951 aberta; ao destravar (PR do Dependabot), ela passa à frente (bloqueio). **Meça o `/context` no início do chat** para o "depois" do #101 (ainda pendente).
+
+Do #104: página de detalhes de produto coberta (`ProductDetailsPage`, `InventoryPage.get_product_card`/`open_product_details`, `product_details.feature` e `product_details_known_defects.feature`). Comportamento **medido** antes do código, com spike no `DriverManager` e `standard_user` de controle: o `problem_user` abre o produto de id + 1 (Backpack → Fleece Jacket; Fleece Jacket → id 6, "ITEM NOT FOUND", preço `$√-1`); o `error_user` não tem o elemento de descrição (ausente mesmo após 5 s; separado de armadilha de espera esperando de fato). Card e detalhes devolvem o mesmo `ProductInfo`: o cenário compara com uma igualdade e a falha mostra os dois lados. Locators por `data-test` e texto exato: `contains(@class, 'inventory_item')` casaria `inventory_item_name` e `contains(text())` casaria um prefixo (mutação morta pelo teste de prefixo). `add_to_cart`/`remove_from_cart` esperam o botão oposto (o carrinho só mudou então); com o defeito do `problem_user` a espera estoura em vez de seguir com estado inalterado. Decisão do dono, após consulta (Selenium, "Page Component Objects"): o cabeçalho compartilhado (badge, link do carrinho) segue lido pelo `InventoryPage`; extraí-lo (~70 usos em 10 arquivos) é a #105, PR atômico. RED: externo 27 steps `undefined`, depois `ModuleNotFoundError`; unitários `ModuleNotFoundError`/`AttributeError`, então mutações: 7 + 6 unitárias e 5 de integração, todas mortas; features com usuários trocados falham 11/11. Achados: (1) o primeiro teste de integração do `get_product_card` usava a Backpack, que é o **primeiro** card: "ler o primeiro card" passaria; trocado pela Bike Light antes de mutar (mutação morta). (2) No Windows, saída redirecionada usa cp1252 e o `behave` quebra (`UnicodeEncodeError`) ao escrever o `√`; diagnóstico local com `PYTHONIOENCODING=utf-8` (CI em Linux não é afetado). (3) O `reviewer` carregou como subagente de verdade (só leitura imposta) e achou 2 pontos de documentação, ambos corrigidos: tags `@problem_user`/`@error_user` nos cenários de defeito (os filtros do README os perdiam) e a tag `@product_details` documentada. O `/context` do "depois" do #101 segue sem medição (medir no início de um chat novo).
 
 Do #101: procedimento (merge, Definition of Done) saiu das regras sempre carregadas para skills, cujo corpo só carrega quando usado; fato e princípio (TDD, esperar o estado) ficaram. Fontes consultadas: Claude Code *skills* ("Control who invokes a skill", "Skill content lifecycle"), *best-practices* ("Put team procedures in skills", "Know what subagents cost", "Review against your spec"), *sub-agents* ("Choose a model"), VS Code *Agent Skills* e *Custom agents*, enum `MergeStateStatus` por introspecção GraphQL. Decisão do dono, após consulta: merge só pelo usuário (`/ship-pr`), porque o merge no `master` também publica o relatório; o resto do ciclo continua automático. A lógica de merge virou script testado, não prosa (instrução determinística → código). RED: config com `FileNotFoundError`; script com `ModuleNotFoundError`, então mutações: 10 no script (uma sobreviveu, prazo 1000×: o teste cobrava *que* desiste, não *quando*; reforçado) e 7 na config, todas mortas. Leituras reais contra o GitHub conferidas antes do merge, e o próprio #102 foi integrado pelo script (primeira execução real: `BLOCKED` com checks pendentes, espera, merge). Achados: (1) **subagente criado no meio da sessão só carrega no próximo chat**, e skills em pasta nova pedem `/reload-skills`; a revisão do #101 rodou como agente genérico com o prompt do `reviewer` (só leitura pedida, não imposta). (2) O revisor achou 3 problemas, todos conferidos antes de corrigir: o cenário dele para `UNSTABLE` (status do Codecov) foi refutado por medição (o repositório não tem status de commit), mas o ponto ficou documentado no script; fonte do VS Code citada no teste; `/ship-pr` espera sair de `UNKNOWN`. (3) A economia nas regras foi menor que a estimada (7 linhas, não ~25: entraram ponteiros e a regra do revisor). **Pendente (ação do dono):** medir o `/context` num chat novo e registrar o "depois".
 
@@ -67,7 +69,8 @@ Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercad
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #95 Python 3.15 (`blocked`)
+1. #105 Cabeçalho como Page Component (`P2`)
+2. #95 Python 3.15 (`blocked`)
 
 **Ao trocar a versão do Python** (#95): edite só o `.python-version` (o teste barra versão literal nos workflows) e confira a compatibilidade antes; o ruleset não depende do nome dos jobs (#36).
 
@@ -79,7 +82,7 @@ Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → seg
 
 Tudo em GitHub Issues com labels `priority: P0/P1/P2`: `gh issue list`.
 
-**Ideias de funcionalidades futuras** (ainda sem issue): página de detalhes de produto · regressão visual (baseline de screenshots) · containerização com Docker.
+**Ideias de funcionalidades futuras** (ainda sem issue): regressão visual (baseline de screenshots) · containerização com Docker.
 
 ## Decisões e aprendizados que guiam o trabalho
 
@@ -110,5 +113,6 @@ Viraram regras em `.github/copilot-instructions.md` (ou nos arquivos com escopo 
 - Chrome e Firefox instalados; interpretador do VS Code = `.venv` do projeto.
 - Poetry instalado pelo instalador oficial (`%APPDATA%\pypoetry`). Se `poetry self update` quebrar no meio, recupere com `%APPDATA%\pypoetry\venv\Scripts\python -m pip install poetry==<versão>`.
 - Windows PowerShell 5.1 grava `>>`/`Out-File` em UTF-16: não use para arquivos de texto do repo (causa da issue #26; agora barrado pelo hook `check-text-encoding`).
+- Saída redirecionada para arquivo usa cp1252: o `behave` quebra com `UnicodeEncodeError` ao escrever caractere fora dele (ex.: o `$√-1` do produto inexistente do `problem_user`). Diagnóstico local com `PYTHONIOENCODING=utf-8`; o CI (Linux, UTF-8) não é afetado.
 - `poetry run python -c "<várias linhas>"` executa só a 1ª linha e sai com 0 (o shim do Windows trunca o argumento): falso sucesso. Python multilinha vai em arquivo (scratchpad).
 - O `sed -i` do Git Bash lê em modo texto: remove o `\r` (padrão com `\r` não casa) e regrava o arquivo com LF. Para editar texto, use o Edit; se o disco ficar com LF, `git add` + regerar o arquivo pelo `git checkout`.

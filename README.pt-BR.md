@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:1bfcdab898525ae5ff1142b93da3fa5a249f023d24e26d64dd383fd59f542bc7 -->
+<!-- translation-source: README.md sha256:d3a6217bd4a50f1bc3a26fcf17a6d4ad7dc45986676979e62435be8b96be8534 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -167,6 +167,7 @@ poetry run behave --tags=@login            # Todos os testes de login (funcionai
 poetry run behave --tags=@cart             # Todos os testes de carrinho
 poetry run behave --tags=@checkout         # Todos os testes de checkout
 poetry run behave --tags=@sorting          # Todos os testes de ordenação
+poetry run behave --tags=@product_details  # Todos os testes de detalhes do produto
 
 # Por prioridade/casos especiais
 poetry run behave --tags=@critical         # Jornadas críticas de usuário
@@ -186,7 +187,7 @@ poetry run behave --tags=@e2e --tags=~@smoke  # E2E sem os smoke tests
 **Hierarquia de Tags:**
 - **Camada**: `@e2e` (todas as features usam)
 - **Tipo**: `@functional` | `@negative` | `@user_journey` | `@smoke` | `@edgecase`
-- **Domínio**: `@login` | `@cart` | `@checkout` | `@sorting`
+- **Domínio**: `@login` | `@cart` | `@checkout` | `@sorting` | `@product_details`
 - **Prioridade**: `@critical` | `@problem_user` | `@error_user`
 
 **Testes Cross-Browser:**
@@ -324,10 +325,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 436 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
-- **Testes de Integração**: 75 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
-- **Testes E2E**: 62 cenários, 421 steps (jornadas completas de usuário)
-- **Total**: 511 testes unitários/de integração + 62 cenários E2E
+- **Testes Unitários**: 456 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes de Integração**: 84 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
+- **Testes E2E**: 73 cenários, 463 steps (jornadas completas de usuário)
+- **Total**: 540 testes unitários/de integração + 73 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -347,7 +348,8 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Ordenação de Produtos** | `features/product_sorting.feature`, `features/product_sorting_negative.feature`, `features/product_sorting_problem_user.feature` | 14 | 92 | ✅ Completo |
 | **Jornada do Usuário** | `features/user_journey_purchase.feature`, `features/user_journey_variations.feature`, `features/problem_user_journey.feature` | 5 | 78 | ✅ Completo |
 | **Error User (defeitos conhecidos)** | `features/error_user.feature` | 7 | 35 | ✅ Completo |
-| **TOTAL** | | **62** | **421** | **100%** |
+| **Detalhes do produto (com defeitos conhecidos)** | `features/product_details.feature`, `features/product_details_known_defects.feature` | 11 | 42 | ✅ Completo |
+| **TOTAL** | | **73** | **463** | **100%** |
 
 ### Testes Unitários (Pytest)
 
@@ -356,7 +358,8 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **BasePage** | `tests/test_base_page.py` | 25 | 100% | ✅ Completo |
 | **LoginPage** | `tests/test_login_page.py` | 14 | 100% | ✅ Completo |
 | **CartPage** | `tests/test_cart_page.py` | 13 | 100% | ✅ Completo |
-| **InventoryPage** | `tests/test_inventory_page.py` | 27 | 100% | ✅ Completo |
+| **InventoryPage** | `tests/test_inventory_page.py` | 32 | 100% | ✅ Completo |
+| **ProductDetailsPage** | `tests/test_product_details_page.py` | 15 | 100% | ✅ Completo |
 | **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 15 | 100% | ✅ Completo |
 | **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 16 | 100% | ✅ Completo |
 | **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 12 | 100% | ✅ Completo |
@@ -376,11 +379,11 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
 | **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Completo |
-| **TOTAL** | | **436** | **100%** | **Completo** |
+| **TOTAL** | | **456** | **100%** | **Completo** |
 
 **Cobertura de Código:**
-- **Total de statements:** 367
-- **Cobertos:** 366 (99%)
+- **Total de statements:** 412
+- **Cobertos:** 411 (99%)
 - **Módulo Pages**: 100%
 - **Módulo Core**: 99% (1 linha sem cobertura em `core/config.py`)
 
@@ -394,10 +397,11 @@ Os testes de integração validam os Page Objects com interações reais no nave
 | **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 12 | Chrome | ✅ Completo |
 | **InventoryPage (ordenação)** | `tests/integration/test_inventory_sorting_integration.py` | 1 | Chrome | ✅ Completo |
 | **CartPage** | `tests/integration/test_cart_page_integration.py` | 10 | Chrome | ✅ Completo |
+| **ProductDetailsPage** | `tests/integration/test_product_details_integration.py` | 9 | Chrome | ✅ Completo |
 | **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 16 | Chrome | ✅ Completo |
 | **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 14 | Chrome | ✅ Completo |
 | **Sincronização da navegação** | `tests/integration/test_navigation_integration.py` | 13 | Chrome | ✅ Completo |
-| **TOTAL** | | **75** | **Real** | **Completo** |
+| **TOTAL** | | **84** | **Real** | **Completo** |
 
 **Diferenças em Relação aos Testes Unitários:**
 - ✅ Selenium WebDriver real (não mockado)
@@ -442,7 +446,7 @@ Os testes de integração validam os Page Objects com interações reais no nave
 Alguns usuários do Sauce Demo (principalmente o `problem_user` e o `error_user`) foram projetados de propósito para apresentar bugs ou comportamentos fora do padrão, como falhas de ordenação, defeitos visuais ou etapas do checkout quebradas. Para manter a suíte clara e fácil de manter:
 
 - **Cenários de usuário normal** ficam nos respectivos arquivos feature (ex.: `product_sorting.feature`).
-- **Casos de borda e bugs conhecidos** (como o bug de ordenação do `problem_user`) ficam isolados em arquivos feature dedicados (ex.: [`product_sorting_problem_user.feature`](features/product_sorting_problem_user.feature), [`error_user.feature`](features/error_user.feature)), com a tag `@edgecase`. Os cenários afirmam o defeito, então um cenário falha se o Sauce Demo mudar esse comportamento.
+- **Casos de borda e bugs conhecidos** (como o bug de ordenação do `problem_user`) ficam isolados em arquivos feature dedicados (ex.: [`product_sorting_problem_user.feature`](features/product_sorting_problem_user.feature), [`error_user.feature`](features/error_user.feature), [`product_details_known_defects.feature`](features/product_details_known_defects.feature)), com a tag `@edgecase`. Os cenários afirmam o defeito, então um cenário falha se o Sauce Demo mudar esse comportamento.
 
 Por que essa separação?
 - Mantém os requisitos de negócio e os testes de regressão limpos e focados

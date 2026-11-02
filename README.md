@@ -322,10 +322,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 395 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 436 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 75 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 62 scenarios, 421 steps (complete user journeys)
-- **Total**: 470 unit/integration tests + 62 E2E scenarios
+- **Total**: 511 unit/integration tests + 62 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -366,14 +366,15 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Workflow pinning (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Complete |
 | **CI gate (required check)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Complete |
 | **Codecov upload (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Complete |
-| **Agent rules (size, sync, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 28 | N/A | ✅ Complete |
+| **Agent rules (size, sync, skills, reviewer subagent, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Complete |
 | **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
+| **Merge when green (`/ship-pr`: required checks from the ruleset, allowlist)** | `tests/test_merge_when_green.py` | 24 | N/A | ✅ Complete |
 | **Lint gate (pre-commit + CI + editor import order, ruff replaces flake8, no rule in two linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Complete |
 | **README metrics (per-row sync from the Source column, translations)** | `tests/test_validate_readme_metrics.py` | 49 | N/A | ✅ Complete |
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Complete |
-| **TOTAL** | | **395** | **100%** | **Complete** |
+| **TOTAL** | | **436** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 367

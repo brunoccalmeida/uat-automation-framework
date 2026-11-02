@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:ddd6edad0cb7c781bc0073d48e711ba424790b1f5e6748c4fa2eac65cc6f9a0c -->
+<!-- translation-source: README.md sha256:1bfcdab898525ae5ff1142b93da3fa5a249f023d24e26d64dd383fd59f542bc7 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -324,10 +324,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 395 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes Unitários**: 436 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
 - **Testes de Integração**: 75 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 62 cenários, 421 steps (jornadas completas de usuário)
-- **Total**: 470 testes unitários/de integração + 62 cenários E2E
+- **Total**: 511 testes unitários/de integração + 62 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -368,14 +368,15 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Fixação das actions (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Completo |
 | **Portão do CI (check obrigatório)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Completo |
 | **Upload para o Codecov (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Completo |
-| **Regras do agente (tamanho, sincronia, diagnósticos do editor, code intelligence)** | `tests/test_agent_rules.py` | 28 | N/A | ✅ Completo |
+| **Regras do agente (tamanho, sincronia, skills, subagente revisor, diagnósticos do editor, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Completo |
 | **Hook de saída de testes do agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
+| **Merge com checks verdes (`/ship-pr`: checks obrigatórios do ruleset, lista de permissão)** | `tests/test_merge_when_green.py` | 24 | N/A | ✅ Completo |
 | **Portão de lint (pre-commit + CI + ordem de imports no editor, ruff no lugar do flake8, nenhuma regra em dois linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Completo |
 | **Métricas dos READMEs (sincronia por linha pela coluna Fonte, traduções)** | `tests/test_validate_readme_metrics.py` | 49 | N/A | ✅ Completo |
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
 | **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Completo |
-| **TOTAL** | | **395** | **100%** | **Completo** |
+| **TOTAL** | | **436** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 367

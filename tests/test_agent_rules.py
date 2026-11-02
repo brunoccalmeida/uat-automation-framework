@@ -26,6 +26,11 @@ MAX_ALWAYS_LOADED_LINES = 200
 CLAUDE_RULES = ROOT / ".claude" / "rules"
 COPILOT_RULES = ROOT / ".github" / "instructions"
 COPILOT_SUFFIX = ".instructions.md"
+# Copilot in VS Code reads skills and agents from these same folders, with the
+# same disable-model-invocation field, so there is one copy (VS Code docs:
+# copilot/customization/agent-skills and custom-agents, read 02/11/2026)
+SKILLS = ROOT / ".claude" / "skills"
+AGENTS = ROOT / ".claude" / "agents"
 
 
 def _split_frontmatter(path):
@@ -90,6 +95,95 @@ class TestPathScopedRules:
         # VS Code attaches applyTo rules only with this setting on; its default
         # is undocumented, so the workspace states it
         assert _vscode("settings")["chat.includeApplyingInstructions"] is True
+
+
+def _skills():
+    return {path.parent.name: path for path in SKILLS.glob("*/SKILL.md")}
+
+
+def _always_loaded_text():
+    return "\n".join(path.read_text(encoding="utf-8") for path in ALWAYS_LOADED)
+
+
+class TestSkills:
+    """Procedures live in skills, whose body loads only when the skill is used.
+
+    A procedure in the always-loaded rules is paid in every turn of every
+    chat; a copy in both places drifts. A skill with side effects outside the
+    repository (a merge to master publishes the report) is started only by the
+    user (``disable-model-invocation``); the others stay available to the
+    agent, because the mission cycle runs without being asked.
+    """
+
+    USER_ONLY = {"ship-pr"}
+
+    def test_expected_skills_exist(self):
+        assert {"ship-pr", "close-mission"} <= set(_skills())
+
+    @pytest.mark.parametrize("name", sorted(_skills()))
+    def test_skill_name_matches_its_directory(self, name):
+        frontmatter, _ = _split_frontmatter(_skills()[name])
+        assert frontmatter["name"] == name
+
+    @pytest.mark.parametrize("name", sorted(_skills()))
+    def test_skill_says_when_to_use_it(self, name):
+        frontmatter, _ = _split_frontmatter(_skills()[name])
+        assert frontmatter["description"].strip()
+
+    @pytest.mark.parametrize("name", sorted(_skills()))
+    def test_only_skills_with_side_effects_are_user_only(self, name):
+        frontmatter, _ = _split_frontmatter(_skills()[name])
+        user_only = frontmatter.get("disable-model-invocation", False)
+        assert user_only is (name in self.USER_ONLY)
+
+    @pytest.mark.parametrize("name", ["ship-pr", "close-mission"])
+    def test_always_loaded_rules_point_to_the_skill(self, name):
+        assert f"`/{name}`" in _always_loaded_text()
+
+    @pytest.mark.parametrize(
+        "name, procedure",
+        [
+            ("ship-pr", "scripts/merge_when_green.py"),
+            ("close-mission", "Fila de PRs vazia"),
+        ],
+    )
+    def test_procedure_lives_only_in_its_skill(self, name, procedure):
+        _, body = _split_frontmatter(SKILLS / name / "SKILL.md")
+        assert procedure in body
+        assert procedure not in _always_loaded_text()
+
+    @pytest.mark.parametrize(
+        "step", ["--match-head-commit", "gh run watch", "gh pr checks --watch"]
+    )
+    def test_merge_steps_left_the_always_loaded_rules(self, step):
+        # scripts/merge_when_green.py waits and merges; its docstring says why
+        assert step not in _always_loaded_text()
+
+
+class TestReviewerSubagent:
+    """A reviewer that hasn't seen how the code was written and can't edit it.
+
+    The read-only limit is enforced by Claude Code from ``tools``, not asked
+    for in the prompt. ``inherit`` keeps the session model: review quality is
+    the reason this subagent exists, and without it an alias or the
+    ``CLAUDE_CODE_SUBAGENT_MODEL`` variable could pick a smaller one.
+    """
+
+    def _frontmatter(self):
+        frontmatter, _ = _split_frontmatter(AGENTS / "reviewer.md")
+        return frontmatter
+
+    def test_reviewer_says_when_to_use_it(self):
+        frontmatter = self._frontmatter()
+        assert frontmatter["name"] == "reviewer"
+        assert frontmatter["description"].strip()
+
+    def test_reviewer_can_only_read(self):
+        tools = {tool.strip() for tool in self._frontmatter()["tools"].split(",")}
+        assert tools == {"Read", "Grep", "Glob"}
+
+    def test_reviewer_runs_on_the_session_model(self):
+        assert self._frontmatter()["model"] == "inherit"
 
 
 class TestEditorDiagnostics:

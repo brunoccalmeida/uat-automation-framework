@@ -17,19 +17,14 @@ Toda decisão (código, testes, CI, ambiente, processo) segue as melhores práti
 - Regra deste arquivo que não siga as melhores práticas deve ser substituída, não contornada.
 
 ## Ciclo de missão (uma missão por chat)
-Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** (objetivo coeso, normalmente uma GitHub Issue) e **o estado do projeto mora no repositório, não na conversa**. O handoff é parte do trabalho: nunca depende de o usuário pedir.
+Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** (objetivo coeso, normalmente uma GitHub Issue) e **o estado do projeto mora no repositório, não na conversa**. O handoff é parte do trabalho: nunca depende de o usuário pedir (só o merge depende: `/ship-pr`).
 
 **Início de cada chat** (automático):
 1. Ler `docs/PROJECT_SESSION_SUMMARY.md` (estado atual e próxima missão recomendada).
 2. Listar issues e PRs abertos (`gh issue list`, `gh pr list`).
 3. Propor a missão de maior prioridade e confirmar com o usuário. Prioridade: bloqueio → segurança → visibilidade → dívida técnica (labels `priority: P0/P1/P2`).
 
-**Fechamento da missão** (Definition of Done, automático):
-1. Fila de PRs vazia: tudo integrado ou explicitamente descartado.
-2. Issues em dia: resolvidas fechadas pelo PR (`Closes #N`); pendências descobertas registradas como novas issues.
-3. `docs/PROJECT_SESSION_SUMMARY.md` atualizado: estado atual, decisões e próxima missão recomendada.
-4. README.md (incluindo métricas) atualizado.
-5. Avisar o usuário que a missão terminou e que o próximo chat pode começar.
+**Fechamento da missão** (automático): skill `/close-mission`, a Definition of Done.
 
 ## Gasto de tokens (contexto)
 Cada turno reenvia todo o contexto; contexto longo custa mais e piora a aderência às regras. Fontes, porquês e medição: `docs/AGENT_TOKEN_SPEND.md`.
@@ -63,8 +58,7 @@ Toda ação seguida de uma leitura ou decisão deve esperar o resultado da açã
 | Selenium em SPA | A URL muda antes de a nova página renderizar | Navegação retorna só após o `PAGE_LOADED` do destino (`wait_until_loaded`) |
 | Formulário com erro | Mensagem de erro antiga ainda na tela parece o resultado do novo envio | Remover o estado antigo antes de agir (`submit_and_wait_for_outcome`) |
 | API do GitHub | `mergeStateStatus` = `UNKNOWN` logo após um merge no `master` | Aguardar até o estado deixar de ser `UNKNOWN` antes de decidir |
-| Checks de CI | Logo após atualizar a branch, os checks verdes ainda são do commit anterior | Consultar os checks pelo SHA da head atual |
-| `gh pr checks --watch --required` | Retorna antes de o `ci-passed` existir (o gate só aparece quando seus `needs` terminam) e mostra só o `pip-audit` | `gh run watch <run-id> --exit-status` no run do `Tests`; depois ler os checks obrigatórios do SHA da head e fazer o merge com `--match-head-commit` |
+| Checks de CI | Logo após atualizar a branch, os checks verdes ainda são do commit anterior; o `ci-passed` só existe quando seus `needs` terminam | Consultar os checks pelo SHA da head atual; check ausente é pendente |
 
 - **"Ainda não sei" não é "sim".** `UNKNOWN`, pendente ou resposta vazia significam *esperar*, nunca *seguir*.
 - **Quando o estado final pode ser igual ao inicial**, não há como saber se a ação ocorreu: altere o estado inicial antes de agir (ex.: fechar o erro antigo antes de reenviar).
@@ -99,9 +93,8 @@ Ao reportar um erro: **erro observado**, **causa raiz** (o porquê), **análise*
 - O `master` é protegido (ruleset): só aceita PR com os checks obrigatórios (`ci-passed` e `pip-audit`) verdes e **branch atualizada**. Cada merge desatualiza os outros PRs abertos, custando novo ciclo de CI e revisão. Por isso:
   - **Um PR aberto por vez.** Trabalho pronto espera em commit local até a fila esvaziar. Merge antes do próximo PR, sem empilhar (empilhar só se justifica com revisão demorada, em equipes).
   - **Dependabot agrupado:** GitHub Actions e Python minor/patch em um PR cada; só versões maiores do Python ficam isoladas, uma por PR.
-  - **Merge só com checks verdes no SHA da head do PR.** Branch atrás do `master`: atualizar e esperar o CI de novo.
-  - **Squash merge**, histórico do `master` linear. **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
-  - Automação de merge segue lista de permissão: só faz o merge se **cada** check obrigatório estiver explicitamente aprovado; qualquer outro estado (falha, pendente, resposta vazia) interrompe.
+  - **Merge só pelo `/ship-pr`, que o usuário dispara** (o merge no `master` publica o relatório): o agente abre o PR e pede o comando. Squash, só com cada check obrigatório aprovado no SHA da head (lista de permissão). **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
+- **Antes de abrir o PR da missão**, o subagente `reviewer` revisa o diff (salvo em arquivo no scratchpad) contra a issue; corrija os achados que procedem e registre os descartados com o porquê.
 
 ## Princípios
 Explícito é melhor que implícito; simples é melhor que complexo; legibilidade conta; erros nunca passam em silêncio; diante da ambiguidade, recuse a tentação de adivinhar.

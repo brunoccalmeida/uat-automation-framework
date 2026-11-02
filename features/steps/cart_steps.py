@@ -17,37 +17,32 @@ from pages.inventory_page import InventoryPage
 @then("I should be on the products page")
 def step_on_products_page(context):
     """Verify user is on products/inventory page."""
-    context.inventory_page = InventoryPage(context.driver)
-    assert context.inventory_page.is_on_inventory_page(), "Should be on products page"
+    page = InventoryPage(context.driver)
+    assert page.is_on_inventory_page(), "Should be on products page"
 
 
 @given('I have added "{product_name}" to the cart')
 def step_have_added_product(context, product_name):
     """Add product to cart (setup step)."""
-    context.inventory_page = InventoryPage(context.driver)
-    context.inventory_page.add_product_to_cart(product_name)
+    InventoryPage(context.driver).add_product_to_cart(product_name)
 
 
 @given("I am on the cart page")
 def step_on_cart_page(context):
     """Navigate to cart page."""
-    if not hasattr(context, "inventory_page"):
-        context.inventory_page = InventoryPage(context.driver)
-    context.inventory_page.click_shopping_cart()
+    InventoryPage(context.driver).click_shopping_cart()
 
 
 @when('I add "{product_name}" to the cart')
 def step_add_product_to_cart(context, product_name):
     """Add specific product to shopping cart."""
-    context.inventory_page.add_product_to_cart(product_name)
+    InventoryPage(context.driver).add_product_to_cart(product_name)
 
 
 @when("I click the shopping cart icon")
 def step_click_cart_icon(context):
     """Click shopping cart icon to view cart."""
-    if not hasattr(context, "inventory_page"):
-        context.inventory_page = InventoryPage(context.driver)
-    context.inventory_page.click_shopping_cart()
+    InventoryPage(context.driver).click_shopping_cart()
 
 
 @when('I remove "{product_name}" from the cart')
@@ -73,18 +68,14 @@ def step_click_button(context, button_text):
 def step_navigate_different_pages(context):
     """Navigate to different pages to test cart persistence."""
     # Navigate to cart and back
-    if not hasattr(context, "inventory_page"):
-        context.inventory_page = InventoryPage(context.driver)
-    context.inventory_page.click_shopping_cart()
-    cart_page = CartPage(context.driver)
-    cart_page.click_continue_shopping()
+    InventoryPage(context.driver).click_shopping_cart().click_continue_shopping()
 
 
 @then('the cart badge should show "{count}"')
 @then('the cart badge should still show "{count}"')
 def step_verify_cart_badge(context, count):
     """Verify cart badge shows expected count."""
-    actual_count = context.inventory_page.get_cart_item_count()
+    actual_count = InventoryPage(context.driver).get_cart_item_count()
     assert actual_count == int(
         count
     ), f"Cart badge should show {count}, but shows {actual_count}"
@@ -95,7 +86,7 @@ def step_verify_button_text(context, button_text):
     """Verify product button text changed."""
     # Implementation depends on checking button state
     # For now, verify cart count changed (button text change correlates)
-    cart_count = context.inventory_page.get_cart_item_count()
+    cart_count = InventoryPage(context.driver).get_cart_item_count()
     if button_text == "Remove":
         assert cart_count > 0, "Product should be in cart (button changed to Remove)"
 
@@ -139,8 +130,6 @@ def step_verify_cart_empty(context):
 def step_verify_no_cart_badge(context):
     """Verify cart badge is not displayed."""
     # Return to inventory page to check badge
-    cart_page = CartPage(context.driver)
-    cart_page.click_continue_shopping()
-    inventory_page = InventoryPage(context.driver)
+    inventory_page = CartPage(context.driver).click_continue_shopping()
     cart_count = inventory_page.get_cart_item_count()
     assert cart_count == 0, "Cart badge should not be visible (count should be 0)"

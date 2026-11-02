@@ -321,10 +321,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 374 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 378 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 71 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 55 scenarios, 386 steps (complete user journeys)
-- **Total**: 445 unit/integration tests + 55 E2E scenarios
+- **Total**: 449 unit/integration tests + 55 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -359,7 +359,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Config** | `tests/test_config.py` | 2 | 94% | ✅ Complete |
 | **ConfigResolver** | `tests/test_config_resolver.py` | 40 | 100% | ✅ Complete |
 | **DriverManager** | `tests/test_driver_manager.py` | 19 | 100% | ✅ Complete |
-| **Step definitions (OR logic, configured password)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py` | 12 | N/A | ✅ Complete |
+| **Step definitions (OR logic, configured password, local page objects)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 16 | N/A | ✅ Complete |
 | **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Complete |
 | **Workflow pinning (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Complete |
 | **CI gate (required check)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Complete |
@@ -370,7 +370,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **README metrics (per-row sync from the Source column, translations)** | `tests/test_validate_readme_metrics.py` | 49 | N/A | ✅ Complete |
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Complete |
-| **TOTAL** | | **374** | **100%** | **Complete** |
+| **TOTAL** | | **378** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 352

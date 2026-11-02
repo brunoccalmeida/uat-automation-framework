@@ -18,11 +18,8 @@ from pages.checkout_step_two_page import CheckoutStepTwoPage
 @when("I click the checkout button")
 def step_click_checkout(context):
     """Click checkout button from cart page."""
-    cart_page = CartPage(context.driver)
-    cart_page.click_checkout()
-    page = CheckoutStepOnePage(context.driver)
-    # Ensure page is ready
-    assert page.is_on_checkout_form(), "Should be on checkout form page"
+    # Returns only once the checkout form has loaded (wait_until_loaded).
+    CartPage(context.driver).click_checkout()
 
 
 @when("I fill in the checkout information:")

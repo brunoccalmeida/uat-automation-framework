@@ -19,7 +19,6 @@ def step_on_login_page(context):
     """Navigate to Sauce Demo login page."""
     base_url = get_base_url(context.config_data)
     context.driver.get(base_url)
-    context.login_page = LoginPage(context.driver)
 
 
 @given('I am logged in as "{username}"')
@@ -27,51 +26,45 @@ def step_logged_in_as_user(context, username):
     """Log in as specific user."""
     base_url = get_base_url(context.config_data)
     context.driver.get(base_url)
-    context.login_page = LoginPage(context.driver)
-    context.login_page.login(username, get_default_password(context.config_data))
-    context.inventory_page = InventoryPage(context.driver)
+    LoginPage(context.driver).login(username, get_default_password(context.config_data))
 
 
 @when('I enter username "{username}"')
 def step_enter_username(context, username):
     """Enter username into login form."""
-    context.login_page.enter_username(username)
+    LoginPage(context.driver).enter_username(username)
 
 
 @when('I log in as "{username}"')
 def step_log_in_as(context, username):
     """Log in as a pre-configured test user with the configured password."""
-    context.login_page.login(username, get_default_password(context.config_data))
+    LoginPage(context.driver).login(username, get_default_password(context.config_data))
 
 
 @when('I login with username "{username}" and password "{password}"')
 def step_login_with_credentials(context, username, password):
     """Log in with provided credentials."""
-    context.login_page.login(username, password)
+    LoginPage(context.driver).login(username, password)
 
 
 @when("I click the menu button")
 def step_click_menu(context):
     """Click menu button."""
-    context.inventory_page.click(context.inventory_page.MENU_BUTTON)
+    page = InventoryPage(context.driver)
+    page.click(page.MENU_BUTTON)
 
 
 @when("I click the login button")
 def step_click_login_button(context):
     """Click login button."""
-    context.login_page.click_login()
-
-
-# Remover steps duplicados/placeholders inválidos e garantir steps corretos
+    LoginPage(context.driver).click_login()
 
 
 @then("I should be on the inventory page")
 def step_verify_on_inventory_page(context):
     """Verify user is on inventory/products page."""
-    context.inventory_page = InventoryPage(context.driver)
-    assert (
-        context.inventory_page.is_on_inventory_page()
-    ), "User should be on inventory page"
+    page = InventoryPage(context.driver)
+    assert page.is_on_inventory_page(), "User should be on inventory page"
 
 
 @then('the page title should be "{expected_title}"')
@@ -87,7 +80,7 @@ def step_verify_page_title(context, expected_title):
 @then("I should see login error message")
 def step_verify_login_error(context):
     """Verify login error message is displayed."""
-    error_message = context.login_page.get_error_message()
+    error_message = LoginPage(context.driver).get_error_message()
     assert error_message is not None, "Error message should be displayed"
     assert len(error_message) > 0, "Error message should not be empty"
 
@@ -99,7 +92,8 @@ def step_verify_error_contains(context, text):
     Supports OR logic with ' or ' separator for alternative texts.
     Example: 'locked out" or "too many attempts'
     """
-    error_message = context.login_page.get_error_message()
+    error_message = LoginPage(context.driver).get_error_message()
+    assert error_message is not None, "Error message should be displayed"
 
     # Check if text contains OR operator
     if '" or "' in text:
@@ -145,8 +139,8 @@ def step_verify_see_products_page(context):
 @when("I click logout")
 def step_click_logout(context):
     """Click logout from menu (menu should already be open)."""
-    # Use existing inventory_page from context (menu already clicked)
-    context.inventory_page.click(context.inventory_page.LOGOUT_LINK)
+    page = InventoryPage(context.driver)
+    page.click(page.LOGOUT_LINK)
 
 
 @then("I should be redirected to the login page")

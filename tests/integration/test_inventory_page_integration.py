@@ -6,6 +6,7 @@ Tests InventoryPage interactions with actual DOM elements.
 from pages.cart_page import CartPage
 from pages.inventory_page import InventoryPage
 from pages.login_page import LoginPage
+from tests.helpers.navigation import go_to_inventory
 
 
 class TestInventoryPageElements:
@@ -115,3 +116,33 @@ class TestInventoryPageNavigation:
         page = InventoryPage(authenticated_driver)
 
         assert page.is_element_visible(page.MENU_BUTTON, timeout=3)
+
+
+class TestInventoryPageRemoveProduct:
+    """Test removing a product from the inventory page."""
+
+    def test_remove_product_clears_the_badge(self, authenticated_driver):
+        """Removing the only product in the cart should clear the badge."""
+        page = InventoryPage(authenticated_driver)
+        page.add_product_to_cart("Sauce Labs Backpack")
+        assert page.get_cart_item_count() == 1
+
+        page.remove_product("Sauce Labs Backpack")
+
+        assert page.get_cart_item_count() == 0
+
+
+class TestInventoryPageAlert:
+    """Test JavaScript alerts raised on the inventory page."""
+
+    def test_accept_alert_returns_the_error_user_sort_alert(self, driver, base_url):
+        """error_user sorting opens an alert; accept_alert returns its text."""
+        go_to_inventory(driver, base_url, "error_user")
+        page = InventoryPage(driver)
+
+        page.select_sort_option("za")
+
+        assert page.accept_alert() == (
+            "Sorting is broken! This error has been reported to Backtrace."
+        )
+        assert page.get_product_names()

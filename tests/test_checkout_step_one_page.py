@@ -5,6 +5,7 @@ Tests the CheckoutStepOnePage Page Object in isolation using mocks.
 
 from unittest.mock import Mock, patch
 
+import pytest
 from selenium.webdriver.common.by import By
 
 from pages.checkout_step_one_page import CheckoutStepOnePage
@@ -165,3 +166,28 @@ class TestGetErrorMessage:
 
             mock_get_text.assert_called_once_with(CheckoutStepOnePage.ERROR_MESSAGE)
             assert result == "Error: First Name is required"
+
+
+class TestGetLastName:
+    """Test get_last_name method."""
+
+    def test_get_last_name_returns_the_input_value(self):
+        """get_last_name should return the Last Name input's current value."""
+        page = CheckoutStepOnePage(Mock())
+
+        with patch.object(page, "find_element") as mock_find:
+            mock_find.return_value.get_attribute.return_value = "Byron"
+            value = page.get_last_name()
+
+        mock_find.assert_called_once_with(CheckoutStepOnePage.LAST_NAME_INPUT)
+        mock_find.return_value.get_attribute.assert_called_once_with("value")
+        assert value == "Byron"
+
+    def test_get_last_name_raises_when_the_input_has_no_value(self):
+        """get_last_name should fail loudly, not return None, without a value."""
+        page = CheckoutStepOnePage(Mock())
+
+        with patch.object(page, "find_element") as mock_find:
+            mock_find.return_value.get_attribute.return_value = None
+            with pytest.raises(ValueError, match="no value attribute"):
+                page.get_last_name()

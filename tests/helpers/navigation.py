@@ -14,10 +14,10 @@ from pages.login_page import LoginPage
 DEFAULT_PRODUCTS = ("Sauce Labs Backpack",)
 
 
-def go_to_inventory(driver, base_url):
-    """Log in as standard_user and land on the inventory page."""
+def go_to_inventory(driver, base_url, username="standard_user"):
+    """Log in as username and land on the inventory page."""
     driver.get(base_url)
-    LoginPage(driver).login("standard_user", get_default_password(load_config()))
+    LoginPage(driver).login(username, get_default_password(load_config()))
 
 
 def go_to_cart(driver, base_url, products=DEFAULT_PRODUCTS):

@@ -388,3 +388,16 @@ class TestSortDropdownContainsOption:
             result = page.sort_dropdown_contains_option("Invalid Option")
 
             assert result is False
+
+
+class TestRemoveProduct:
+    """Test remove_product method."""
+
+    def test_remove_product_clicks_the_product_remove_button(self):
+        """remove_product should click the product's Remove button on this page."""
+        page = InventoryPage(Mock())
+
+        with patch.object(page, "click") as mock_click:
+            page.remove_product("Sauce Labs Backpack")
+
+        mock_click.assert_called_once_with((By.ID, "remove-sauce-labs-backpack"))

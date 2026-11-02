@@ -39,6 +39,12 @@ def step_add_product_to_cart(context, product_name):
     InventoryPage(context.driver).add_product_to_cart(product_name)
 
 
+@when('I remove "{product_name}" from the products page')
+def step_remove_product_from_products_page(context, product_name):
+    """Remove product with its button on the products page."""
+    InventoryPage(context.driver).remove_product(product_name)
+
+
 @when("I click the shopping cart icon")
 def step_click_cart_icon(context):
     """Click shopping cart icon to view cart."""

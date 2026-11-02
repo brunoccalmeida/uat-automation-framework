@@ -105,6 +105,14 @@ class CheckoutStepTwoPage(BasePage):
             self.driver
         ).wait_until_loaded()
 
+    def try_finish(self) -> None:
+        """Click Finish without waiting for the confirmation page.
+
+        For flows where finishing is expected to fail (e.g. error_user), so
+        the caller checks the outcome; click_finish waits for success.
+        """
+        self.click(self.FINISH_BUTTON)
+
     def click_cancel(self) -> "inventory_page.InventoryPage":
         """Click Cancel button to return to products page.
 

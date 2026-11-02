@@ -1,5 +1,5 @@
 <!-- LTeX: language=es -->
-<!-- translation-source: README.md sha256:0492a00cc437963304862c95cbf1143d2ed72ad102529e11e5a7d00b62d24a2c -->
+<!-- translation-source: README.md sha256:588215bee3e2210e6b537c7ebb4dac52290997b850280d5050d9a1372363a017 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -105,8 +105,8 @@ poetry run pre-commit install
 Los hooks de `.pre-commit-config.yaml` son la puerta de lint: el job `lint` del CI ejecuta los mismos hooks (`pre-commit run --all-files`), sin carpetas excluidas y sin fallos ignorados (`tests/test_lint_gate.py`). Los linters se ejecutan con Poetry, así que sus versiones vienen del `poetry.lock`.
 
 - ✅ **Black**: Formato de código (88 columnas)
-- ✅ **Ruff**: Reglas de estilo y de error (`E`, `W`, `F` de flake8) y orden de imports (`I`), configuradas en `[tool.ruff.lint]` (`pyproject.toml`)
-- ✅ **Pylint**: Errores y code smells (`[tool.pylint.*]` en `pyproject.toml`; cada chequeo desactivado tiene su motivo al lado)
+- ✅ **Ruff**: Reglas de estilo y de error (`E`, `W`, `F` de flake8), orden de imports (`I`) y las reglas de Pylint que implementa (`PL`), configuradas en `[tool.ruff.lint]` (`pyproject.toml`)
+- ✅ **Pylint**: Chequeos que Ruff no tiene, como inferencia y código duplicado (`[tool.pylint.*]` en `pyproject.toml`; cada chequeo desactivado tiene su motivo al lado, y ninguno corre en los dos linters)
 - ✅ **Pyright**: Chequeo estático de tipos (`[tool.pyright]` en `pyproject.toml`; el editor usa el mismo verificador)
 - ✅ **Seguridad**: Detecta claves privadas y conflictos de merge
 - ✅ **Calidad**: Espacios al final de línea, validación de YAML, métricas de los READMEs y sus traducciones
@@ -323,10 +323,10 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 ```
 
 **Distribución por Capa:**
-- **Pruebas Unitarias**: 378 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
+- **Pruebas Unitarias**: 381 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
 - **Pruebas de Integración**: 71 pruebas (Page Objects + navegador real, incluida la sincronización de la navegación)
 - **Pruebas E2E**: 55 escenarios, 386 steps (jornadas completas de usuario)
-- **Total**: 449 pruebas unitarias/de integración + 55 escenarios E2E
+- **Total**: 452 pruebas unitarias/de integración + 55 escenarios E2E
 
 **Cuándo Usar Cada Capa:**
 | Tipo de Prueba | Propósito | Velocidad | Navegador | Ejemplo |
@@ -368,11 +368,11 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **Subida a Codecov (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Completo |
 | **Reglas del agente (tamaño, sincronía, diagnósticos del editor, code intelligence)** | `tests/test_agent_rules.py` | 28 | N/A | ✅ Completo |
 | **Hook de salida de pruebas del agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
-| **Puerta de lint (pre-commit + CI + orden de imports en el editor, ruff en lugar de flake8)** | `tests/test_lint_gate.py` | 22 | N/A | ✅ Completo |
+| **Puerta de lint (pre-commit + CI + orden de imports en el editor, ruff en lugar de flake8, ninguna regla en dos linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Completo |
 | **Métricas de los READMEs (sincronía por fila desde la columna Fuente, traducciones)** | `tests/test_validate_readme_metrics.py` | 49 | N/A | ✅ Completo |
 | **Puerta de codificación (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Clave de caché del venv (CI, versión exacta de Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
-| **TOTAL** | | **378** | **100%** | **Completo** |
+| **TOTAL** | | **381** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 352

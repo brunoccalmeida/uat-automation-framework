@@ -31,10 +31,80 @@ venv = ".venv"
 [tool.pylint.main]
 # Resolves core/pages imports when pre-commit passes only the staged files.
 source-roots = ["."]
-# Page objects import each other on purpose (navigation graph, see
-# pages/__init__.py). R0401 is reported for the whole package, so pylint
-# cannot disable it inline.
-disable = ["cyclic-import"]
+disable = [
+    # Page objects import each other on purpose (navigation graph, see
+    # pages/__init__.py). R0401 is reported for the whole package, so pylint
+    # cannot disable it inline.
+    "cyclic-import",
+    # Handled by ruff (#78), which runs them in the editor too; matched by
+    # name in tests/test_lint_gate.py, so a ruff upgrade cannot double one.
+    "line-too-long",                       # E501
+    "bare-except",                         # E722
+    "unused-import",                       # F401
+    "yield-outside-function",              # F704
+    "return-outside-function",             # F706
+    "unused-variable",                     # F841
+    "useless-import-alias",                # PLC0414
+    "non-ascii-name",                      # PLC2401
+    "unnecessary-direct-lambda-call",      # PLC3002
+    "return-in-init",                      # PLE0101
+    "nonlocal-and-global",                 # PLE0115
+    "continue-in-finally",                 # PLE0116
+    "nonlocal-without-binding",            # PLE0117
+    "duplicate-bases",                     # PLE0241
+    "unexpected-special-method-signature", # PLE0302
+    "invalid-all-object",                  # PLE0604
+    "invalid-all-format",                  # PLE0605
+    "potential-index-error",               # PLE0643
+    "misplaced-bare-raise",                # PLE0704
+    "await-outside-async",                 # PLE1142
+    "logging-too-many-args",               # PLE1205
+    "logging-too-few-args",                # PLE1206
+    "bad-string-format-type",              # PLE1307
+    "bad-str-strip-call",                  # PLE1310
+    "invalid-envvar-value",                # PLE1507
+    "singledispatch-method",               # PLE1519
+    "singledispatchmethod-function",       # PLE1520
+    "bidirectional-unicode",               # PLE2502
+    "invalid-character-backspace",         # PLE2510
+    "invalid-character-sub",               # PLE2512
+    "invalid-character-esc",               # PLE2513
+    "invalid-character-nul",               # PLE2514
+    "invalid-character-zero-width-space",  # PLE2515
+    "comparison-with-itself",              # PLR0124
+    "property-with-parameters",            # PLR0206
+    "too-many-return-statements",          # PLR0911
+    "too-many-branches",                   # PLR0912
+    "too-many-arguments",                  # PLR0913
+    "too-many-statements",                 # PLR0915
+    "too-many-positional-arguments",       # PLR0917
+    "redefined-argument-from-local",       # PLR1704
+    "stop-iteration-return",               # PLR1708
+    "useless-return",                      # PLR1711
+    "unnecessary-dict-index-lookup",       # PLR1733
+    "unnecessary-list-index-lookup",       # PLR1736
+    "unnecessary-lambda",                  # PLW0108
+    "useless-else-on-loop",                # PLW0120
+    "self-assigning-variable",             # PLW0127
+    "redeclared-assigned-name",            # PLW0128
+    "assert-on-string-literal",            # PLW0129
+    "named-expr-without-context",          # PLW0131
+    "nan-comparison",                      # PLW0177
+    "bad-staticmethod-argument",           # PLW0211
+    "super-without-brackets",              # PLW0245
+    "import-self",                         # PLW0406
+    "global-variable-not-assigned",        # PLW0602
+    "global-statement",                    # PLW0603
+    "global-at-module-level",              # PLW0604
+    "binary-op-exception",                 # PLW0711
+    "bad-open-mode",                       # PLW1501
+    "shallow-copy-environ",                # PLW1507
+    "invalid-envvar-default",              # PLW1508
+    "subprocess-popen-preexec-fn",         # PLW1509
+    "useless-with-lock",                   # PLW2101
+    "nested-min-max",                      # PLW3301
+    "trailing-whitespace",                 # W291
+]
 
 [tool.pylint.basic]
 # A test's name is its documentation; private helpers keep pylint's default.
@@ -53,8 +123,12 @@ max-line-length = 88
 # near-equivalent to isort's black profile). No ignores: ruff leaves out the
 # rules black makes moot (E203 is preview-only; E701 accepts black's
 # `class A: ...`), and both tools default to 88 columns. The editor sorts
-# imports with the same tool (charliermarsh.ruff).
-select = ["E", "W", "F", "I"]
+# imports with the same tool (charliermarsh.ruff). PL: the pylint rules ruff
+# implements (#78), shown in the editor while typing; pylint skips them.
+select = ["E", "W", "F", "I", "PL"]
+# A pylint extension this project never enabled. In a test, the literal in an
+# assert is the expected value under test; a constant would hide it.
+ignore = ["PLR2004"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

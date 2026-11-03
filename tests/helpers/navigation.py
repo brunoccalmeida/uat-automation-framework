@@ -26,7 +26,7 @@ def go_to_cart(driver, base_url, products=DEFAULT_PRODUCTS):
     inventory_page = InventoryPage(driver)
     for product in products:
         inventory_page.add_product_to_cart(product)
-    inventory_page.click_shopping_cart()
+    inventory_page.header.click_shopping_cart()
 
 
 def go_to_step_one(driver, base_url, products=DEFAULT_PRODUCTS):

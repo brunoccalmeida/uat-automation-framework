@@ -55,6 +55,37 @@ class BasePage:
         )
         return self
 
+    def wait_until_stable(self, locator: tuple[str, str]):
+        """Wait until an element is visible and has stopped moving.
+
+        An element that slides in (e.g. a menu) counts as visible and
+        clickable while it still moves, so a click then may miss it. It is
+        stable once its bounding box is the same on two consecutive polls,
+        as in Playwright's "Stable" actionability check.
+
+        Args:
+            locator: Tuple of (By strategy, locator value).
+
+        Returns:
+            WebElement once visible and stable.
+
+        Raises:
+            TimeoutException: If element is not stable within timeout.
+        """
+        last_rect = None
+
+        def has_stopped_moving(driver):
+            nonlocal last_rect
+            element = EC.visibility_of_element_located(locator)(driver)
+            rect = element.rect if element else None
+            stopped = rect is not None and rect == last_rect
+            last_rect = rect
+            return element if stopped else False
+
+        return self.wait.until(
+            has_stopped_moving, message=f"{locator} did not stop moving"
+        )
+
     def submit_and_wait_for_outcome(
         self, submit_button: tuple[str, str], success_page: type["BasePage"]
     ) -> None:

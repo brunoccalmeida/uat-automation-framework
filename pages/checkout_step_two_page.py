@@ -4,8 +4,9 @@ Represents the checkout overview page with order summary.
 """
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 
-from pages import checkout_complete_page, inventory_page
+from pages import checkout_complete_page, header_component, inventory_page
 from pages.base_page import BasePage
 
 
@@ -24,6 +25,16 @@ class CheckoutStepTwoPage(BasePage):
     SHIPPING_INFO = (By.CSS_SELECTOR, "[data-test='shipping-info-value']")
     FINISH_BUTTON = (By.ID, "finish")
     CANCEL_BUTTON = (By.ID, "cancel")
+
+    def __init__(self, driver: WebDriver, timeout: int = 10):
+        """Initialize the page and the header it includes.
+
+        Args:
+            driver: Selenium WebDriver instance.
+            timeout: Default timeout for waiting operations.
+        """
+        super().__init__(driver, timeout)
+        self.header = header_component.HeaderComponent(driver, timeout)
 
     def is_on_checkout_overview_page(self) -> bool:
         """Check if user is on checkout overview page.

@@ -4,8 +4,9 @@ Represents the order confirmation page after successful checkout.
 """
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 
-from pages import inventory_page
+from pages import header_component, inventory_page
 from pages.base_page import BasePage
 
 
@@ -19,6 +20,16 @@ class CheckoutCompletePage(BasePage):
     COMPLETE_TEXT = (By.CLASS_NAME, "complete-text")
     BACK_HOME_BUTTON = (By.ID, "back-to-products")
     PONY_EXPRESS_IMAGE = (By.CLASS_NAME, "pony_express")
+
+    def __init__(self, driver: WebDriver, timeout: int = 10):
+        """Initialize the page and the header it includes.
+
+        Args:
+            driver: Selenium WebDriver instance.
+            timeout: Default timeout for waiting operations.
+        """
+        super().__init__(driver, timeout)
+        self.header = header_component.HeaderComponent(driver, timeout)
 
     def is_on_confirmation_page(self) -> bool:
         """Check if user is on order confirmation page.

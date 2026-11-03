@@ -63,10 +63,10 @@ class TestInventoryNavigation:
     """Test navigation methods on inventory page."""
 
     def test_logout_returns_loaded_login_page(self, driver, base_url):
-        """logout should return LoginPage after it renders."""
+        """header.logout should return LoginPage after it renders."""
         go_to_inventory(driver, base_url)
 
-        next_page = InventoryPage(driver).logout()
+        next_page = InventoryPage(driver).header.logout()
 
         assert driver.find_elements(*LoginPage.LOGIN_BUTTON)
         assert isinstance(next_page, LoginPage)

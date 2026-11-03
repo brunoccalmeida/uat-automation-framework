@@ -6,8 +6,9 @@ Represents the details page of a single product, opened from its card.
 from typing import NamedTuple
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 
-from pages import inventory_page
+from pages import header_component, inventory_page
 from pages.base_page import BasePage
 
 
@@ -33,6 +34,16 @@ class ProductDetailsPage(BasePage):
     # Matches whichever of the two cart buttons is shown
     CART_BUTTON = (By.CSS_SELECTOR, ".inventory_details_desc_container button")
     BACK_BUTTON = (By.ID, "back-to-products")
+
+    def __init__(self, driver: WebDriver, timeout: int = 10):
+        """Initialize the page and the header it includes.
+
+        Args:
+            driver: Selenium WebDriver instance.
+            timeout: Default timeout for waiting operations.
+        """
+        super().__init__(driver, timeout)
+        self.header = header_component.HeaderComponent(driver, timeout)
 
     def get_name(self) -> str:
         """Get the displayed product name.

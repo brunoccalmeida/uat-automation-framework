@@ -323,10 +323,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 477 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 479 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 93 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 570 unit/integration tests + 73 E2E scenarios
+- **Total**: 572 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -353,7 +353,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 
 | Module | Source | Tests | Coverage | Status |
 |--------|--------|-------|----------|--------|
-| **BasePage** | `tests/test_base_page.py` | 28 | 100% | ✅ Complete |
+| **BasePage** | `tests/test_base_page.py` | 30 | 100% | ✅ Complete |
 | **LoginPage** | `tests/test_login_page.py` | 14 | 100% | ✅ Complete |
 | **CartPage** | `tests/test_cart_page.py` | 13 | 100% | ✅ Complete |
 | **InventoryPage** | `tests/test_inventory_page.py` | 26 | 100% | ✅ Complete |
@@ -379,7 +379,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Complete |
-| **TOTAL** | | **477** | **100%** | **Complete** |
+| **TOTAL** | | **479** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 455

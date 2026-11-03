@@ -4,6 +4,8 @@ Tests the fundamental Page Object functionality without requiring a browser.
 Uses mocks to isolate the logic from Selenium WebDriver.
 """
 
+import ast
+from pathlib import Path
 from unittest.mock import Mock, call, patch
 
 from selenium.common.exceptions import TimeoutException
@@ -70,7 +72,8 @@ class TestFindElement:
 
             mock_ec.visibility_of_element_located.assert_called_once_with(locator)
             page.wait.until.assert_called_once_with(
-                mock_ec.visibility_of_element_located.return_value
+                mock_ec.visibility_of_element_located.return_value,
+                message="('id', 'test-id') did not become visible",
             )
 
 
@@ -92,6 +95,21 @@ class TestFindClickableElement:
 
         assert result is mock_element
         mock_wait.until.assert_called_once()
+
+    def test_find_clickable_element_names_locator_and_condition_on_timeout(self):
+        """A timeout must say what was awaited, not raise an empty message."""
+        page = BasePage(Mock())
+        page.wait = Mock()
+        locator = (By.ID, "button-id")
+
+        with patch("pages.base_page.EC") as mock_ec:
+            page.find_clickable_element(locator)
+
+            mock_ec.element_to_be_clickable.assert_called_once_with(locator)
+            page.wait.until.assert_called_once_with(
+                mock_ec.element_to_be_clickable.return_value,
+                message="('id', 'button-id') did not become clickable",
+            )
 
 
 class TestTypeMethod:
@@ -148,6 +166,9 @@ class TestTypeMethod:
 
                     # Should be called once for re-verification
                     mock_wait.assert_called_once()
+                    assert mock_wait.call_args.kwargs["message"] == (
+                        "('id', 'input-field') did not stay clickable after scrolling"
+                    )
 
     def test_type_clears_field_before_typing(self):
         """type should clear existing text before typing new text."""
@@ -298,7 +319,8 @@ class TestIsElementVisibleMethod:
 
             mock_ec.visibility_of_element_located.assert_called_once_with(locator)
             mock_wait.until.assert_called_once_with(
-                mock_ec.visibility_of_element_located.return_value
+                mock_ec.visibility_of_element_located.return_value,
+                message="('id', 'element') did not become visible",
             )
 
     def test_is_element_visible_returns_false_on_timeout(self):
@@ -474,7 +496,10 @@ class TestSubmitAndWaitForOutcome:
             )
             assert calls.mock_calls == [
                 call.click(_FormPage.ERROR_CLOSE_BUTTON),
-                call.wait_until(mock_ec.invisibility_of_element_located.return_value),
+                call.wait_until(
+                    mock_ec.invisibility_of_element_located.return_value,
+                    message="('id', 'form-error') did not disappear",
+                ),
                 call.click(_FormPage.SUBMIT_BUTTON),
                 call.wait_until(
                     mock_ec.any_of.return_value,
@@ -496,7 +521,9 @@ class TestAcceptAlert:
         ):
             page.accept_alert()
 
-        mock_wait.until.assert_called_once_with(mock_ec.alert_is_present.return_value)
+        mock_wait.until.assert_called_once_with(
+            mock_ec.alert_is_present.return_value, message="No alert opened"
+        )
 
     def test_accept_alert_reads_the_text_before_accepting(self):
         """accept_alert should return the text, read before the alert closes."""
@@ -512,3 +539,18 @@ class TestAcceptAlert:
 
         assert text == "Broken!"
         assert events == ["text", "accept"]
+
+
+def test_every_wait_in_pages_names_what_it_awaited():
+    """A wait without message= times out with an empty message (#109)."""
+    unnamed = [
+        f"{path.name}:{node.lineno}"
+        for path in sorted((Path(__file__).parents[1] / "pages").glob("*.py"))
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8")))
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "until"
+        and not any(keyword.arg == "message" for keyword in node.keywords)
+    ]
+
+    assert not unnamed, f"wait.until without message=: {unnamed}"

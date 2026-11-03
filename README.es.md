@@ -325,10 +325,10 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 ```
 
 **Distribución por Capa:**
-- **Pruebas Unitarias**: 477 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
+- **Pruebas Unitarias**: 479 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
 - **Pruebas de Integración**: 93 pruebas (Page Objects + navegador real, incluida la sincronización de la navegación)
 - **Pruebas E2E**: 73 escenarios, 463 steps (jornadas completas de usuario)
-- **Total**: 570 pruebas unitarias/de integración + 73 escenarios E2E
+- **Total**: 572 pruebas unitarias/de integración + 73 escenarios E2E
 
 **Cuándo Usar Cada Capa:**
 | Tipo de Prueba | Propósito | Velocidad | Navegador | Ejemplo |
@@ -355,7 +355,7 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 
 | Módulo | Fuente | Pruebas | Cobertura | Estado |
 |--------|--------|---------|-----------|--------|
-| **BasePage** | `tests/test_base_page.py` | 28 | 100% | ✅ Completo |
+| **BasePage** | `tests/test_base_page.py` | 30 | 100% | ✅ Completo |
 | **LoginPage** | `tests/test_login_page.py` | 14 | 100% | ✅ Completo |
 | **CartPage** | `tests/test_cart_page.py` | 13 | 100% | ✅ Completo |
 | **InventoryPage** | `tests/test_inventory_page.py` | 26 | 100% | ✅ Completo |
@@ -381,7 +381,7 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **Puerta de codificación (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Clave de caché del venv (CI, versión exacta de Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
 | **Fuente de la versión de Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Completo |
-| **TOTAL** | | **477** | **100%** | **Completo** |
+| **TOTAL** | | **479** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 455

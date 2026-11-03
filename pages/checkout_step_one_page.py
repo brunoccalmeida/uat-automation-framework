@@ -4,8 +4,9 @@ Represents the first step of checkout where customer information is entered.
 """
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 
-from pages import cart_page, checkout_step_two_page
+from pages import cart_page, checkout_step_two_page, header_component
 from pages.base_page import BasePage
 
 
@@ -22,6 +23,16 @@ class CheckoutStepOnePage(BasePage):
     CANCEL_BUTTON = (By.ID, "cancel")
     ERROR_MESSAGE = (By.CSS_SELECTOR, "[data-test='error']")
     ERROR_CLOSE_BUTTON = (By.CSS_SELECTOR, "[data-test='error-button']")
+
+    def __init__(self, driver: WebDriver, timeout: int = 10):
+        """Initialize the page and the header it includes.
+
+        Args:
+            driver: Selenium WebDriver instance.
+            timeout: Default timeout for waiting operations.
+        """
+        super().__init__(driver, timeout)
+        self.header = header_component.HeaderComponent(driver, timeout)
 
     def is_on_checkout_form(self) -> bool:
         """Check if user is on checkout form page.

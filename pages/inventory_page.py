@@ -4,9 +4,10 @@ Represents the products/inventory page after successful login.
 """
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.select import Select
 
-from pages import cart_page, login_page, product_details_page
+from pages import header_component, product_details_page
 from pages.base_page import BasePage
 
 
@@ -20,7 +21,7 @@ class InventoryPage(BasePage):
             product_name: Name of product (e.g., 'Sauce Labs Backpack').
         """
         # 1. Click cart icon to go to cart page
-        cart = self.click_shopping_cart()
+        cart = self.header.click_shopping_cart()
         # 2. Remove product using CartPage
         cart.remove_product(product_name)
         # 3. Click 'Continue Shopping' to return to inventory
@@ -34,11 +35,17 @@ class InventoryPage(BasePage):
     INVENTORY_ITEM_DESC = (By.CLASS_NAME, "inventory_item_desc")
     INVENTORY_ITEM_PRICE = (By.CLASS_NAME, "inventory_item_price")
     PAGE_TITLE = (By.CLASS_NAME, "title")
-    SHOPPING_CART_BADGE = (By.CLASS_NAME, "shopping_cart_badge")
-    SHOPPING_CART_LINK = (By.CLASS_NAME, "shopping_cart_link")
-    MENU_BUTTON = (By.ID, "react-burger-menu-btn")
-    LOGOUT_LINK = (By.ID, "logout_sidebar_link")
     SORT_DROPDOWN = (By.CLASS_NAME, "product_sort_container")
+
+    def __init__(self, driver: WebDriver, timeout: int = 10):
+        """Initialize the page and the header it includes.
+
+        Args:
+            driver: Selenium WebDriver instance.
+            timeout: Default timeout for waiting operations.
+        """
+        super().__init__(driver, timeout)
+        self.header = header_component.HeaderComponent(driver, timeout)
 
     @staticmethod
     def product_card_locator(product_name: str) -> tuple[str, str]:
@@ -141,36 +148,6 @@ class InventoryPage(BasePage):
         """
         button_id = f"remove-{product_name.lower().replace(' ', '-')}"
         self.click((By.ID, button_id))
-
-    def get_cart_item_count(self) -> int:
-        """Get number of items in shopping cart.
-
-        Returns:
-            Number shown in cart badge, 0 if no badge present.
-        """
-        if self.is_element_visible(self.SHOPPING_CART_BADGE, timeout=1):
-            badge_text = self.get_text(self.SHOPPING_CART_BADGE)
-            return int(badge_text)
-        return 0
-
-    def click_shopping_cart(self) -> "cart_page.CartPage":
-        """Click shopping cart icon to view cart.
-
-        Returns:
-            CartPage, once rendered.
-        """
-        self.click(self.SHOPPING_CART_LINK)
-        return cart_page.CartPage(self.driver).wait_until_loaded()
-
-    def logout(self) -> "login_page.LoginPage":
-        """Log out from application.
-
-        Returns:
-            LoginPage, once rendered.
-        """
-        self.click(self.MENU_BUTTON)
-        self.click(self.LOGOUT_LINK)
-        return login_page.LoginPage(self.driver).wait_until_loaded()
 
     def select_sort_option(self, option: str) -> None:
         """Select sort option from dropdown.

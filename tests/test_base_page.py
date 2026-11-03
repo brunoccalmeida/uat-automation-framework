@@ -357,6 +357,67 @@ class TestWaitUntilLoaded:
             assert result is page
 
 
+class TestWaitUntilStable:
+    """Test wait_until_stable method."""
+
+    LOCATOR = (By.ID, "sliding")
+
+    @staticmethod
+    def _element_at(x):
+        """Visible element mock whose bounding box starts at x."""
+        element = Mock()
+        element.rect = {"x": x, "y": 0, "width": 10, "height": 10}
+        return element
+
+    def _condition(self, page):
+        """Run wait_until_stable and return the condition it waits on."""
+        page.wait = Mock()
+        page.wait_until_stable(self.LOCATOR)
+        page.wait.until.assert_called_once()
+        return page.wait.until.call_args.args[0]
+
+    def test_waits_with_a_message_naming_the_locator(self):
+        """The timeout message should say which element kept moving."""
+        page = BasePage(Mock())
+        page.wait = Mock()
+
+        result = page.wait_until_stable(self.LOCATOR)
+
+        assert page.wait.until.call_args.kwargs == {
+            "message": f"{self.LOCATOR} did not stop moving"
+        }
+        assert result is page.wait.until.return_value
+
+    def test_condition_is_met_only_once_the_box_repeats(self):
+        """A moving element is not ready; one with the same box twice is."""
+        page = BasePage(Mock())
+        moving, still, again = (self._element_at(x) for x in (-210, 24, 24))
+
+        with patch("pages.base_page.EC") as mock_ec:
+            visible = mock_ec.visibility_of_element_located.return_value
+            visible.side_effect = [moving, still, again]
+            condition = self._condition(page)
+
+            results = [condition(page.driver) for _ in range(3)]
+
+        mock_ec.visibility_of_element_located.assert_called_with(self.LOCATOR)
+        assert results == [False, False, again]
+
+    def test_condition_is_not_met_while_the_element_is_hidden(self):
+        """A hidden element is not ready, and no box is remembered for it."""
+        page = BasePage(Mock())
+        shown = self._element_at(24)
+
+        with patch("pages.base_page.EC") as mock_ec:
+            visible = mock_ec.visibility_of_element_located.return_value
+            visible.side_effect = [shown, False, shown, shown]
+            condition = self._condition(page)
+
+            results = [condition(page.driver) for _ in range(4)]
+
+        assert results == [False, False, False, shown]
+
+
 class _FormPage(_LoadablePage):
     """Minimal form page with error locators for testing."""
 

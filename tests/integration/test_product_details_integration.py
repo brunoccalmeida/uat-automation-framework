@@ -80,7 +80,7 @@ class TestProductDetailsCart:
         backpack_details.add_to_cart()
 
         assert backpack_details.get_cart_button_text() == "Remove"
-        assert InventoryPage(backpack_details.driver).get_cart_item_count() == 1
+        assert backpack_details.header.get_cart_item_count() == 1
 
     def test_remove_from_cart_shows_add_to_cart(self, backpack_details):
         """Removing switches the button back to Add to cart."""
@@ -98,4 +98,4 @@ class TestProductDetailsCart:
 
         assert isinstance(inventory, InventoryPage)
         assert inventory.is_on_inventory_page()
-        assert inventory.get_cart_item_count() == 1
+        assert inventory.header.get_cart_item_count() == 1

@@ -10,6 +10,7 @@ Implements BDD steps for user login scenarios.
 from behave import given, then, when
 
 from core.config import get_base_url, get_default_password
+from pages.header_component import HeaderComponent
 from pages.inventory_page import InventoryPage
 from pages.login_page import LoginPage
 
@@ -50,8 +51,7 @@ def step_login_with_credentials(context, username, password):
 @when("I click the menu button")
 def step_click_menu(context):
     """Click menu button."""
-    page = InventoryPage(context.driver)
-    page.click(page.MENU_BUTTON)
+    HeaderComponent(context.driver).open_menu()
 
 
 @when("I click the login button")
@@ -139,8 +139,7 @@ def step_verify_see_products_page(context):
 @when("I click logout")
 def step_click_logout(context):
     """Click logout from menu (menu should already be open)."""
-    page = InventoryPage(context.driver)
-    page.click(page.LOGOUT_LINK)
+    HeaderComponent(context.driver).click_logout()
 
 
 @then("I should be redirected to the login page")

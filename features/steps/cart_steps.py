@@ -10,6 +10,7 @@ Implements BDD steps for shopping cart scenarios.
 from behave import given, then, when
 
 from pages.cart_page import CartPage
+from pages.header_component import HeaderComponent
 from pages.inventory_page import InventoryPage
 
 
@@ -30,7 +31,7 @@ def step_have_added_product(context, product_name):
 @given("I am on the cart page")
 def step_on_cart_page(context):
     """Navigate to cart page."""
-    InventoryPage(context.driver).click_shopping_cart()
+    HeaderComponent(context.driver).click_shopping_cart()
 
 
 @when('I add "{product_name}" to the cart')
@@ -48,7 +49,7 @@ def step_remove_product_from_products_page(context, product_name):
 @when("I click the shopping cart icon")
 def step_click_cart_icon(context):
     """Click shopping cart icon to view cart."""
-    InventoryPage(context.driver).click_shopping_cart()
+    HeaderComponent(context.driver).click_shopping_cart()
 
 
 @when('I remove "{product_name}" from the cart')
@@ -74,14 +75,14 @@ def step_click_button(context, button_text):
 def step_navigate_different_pages(context):
     """Navigate to different pages to test cart persistence."""
     # Navigate to cart and back
-    InventoryPage(context.driver).click_shopping_cart().click_continue_shopping()
+    HeaderComponent(context.driver).click_shopping_cart().click_continue_shopping()
 
 
 @then('the cart badge should show "{count}"')
 @then('the cart badge should still show "{count}"')
 def step_verify_cart_badge(context, count):
     """Verify cart badge shows expected count."""
-    actual_count = InventoryPage(context.driver).get_cart_item_count()
+    actual_count = HeaderComponent(context.driver).get_cart_item_count()
     assert actual_count == int(
         count
     ), f"Cart badge should show {count}, but shows {actual_count}"
@@ -92,7 +93,7 @@ def step_verify_button_text(context, button_text):
     """Verify product button text changed."""
     # Implementation depends on checking button state
     # For now, verify cart count changed (button text change correlates)
-    cart_count = InventoryPage(context.driver).get_cart_item_count()
+    cart_count = HeaderComponent(context.driver).get_cart_item_count()
     if button_text == "Remove":
         assert cart_count > 0, "Product should be in cart (button changed to Remove)"
 
@@ -137,5 +138,5 @@ def step_verify_no_cart_badge(context):
     """Verify cart badge is not displayed."""
     # Return to inventory page to check badge
     inventory_page = CartPage(context.driver).click_continue_shopping()
-    cart_count = inventory_page.get_cart_item_count()
+    cart_count = inventory_page.header.get_cart_item_count()
     assert cart_count == 0, "Cart badge should not be visible (count should be 0)"

@@ -4,8 +4,9 @@ Represents the shopping cart page.
 """
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 
-from pages import checkout_step_one_page, inventory_page
+from pages import checkout_step_one_page, header_component, inventory_page
 from pages.base_page import BasePage
 
 
@@ -20,6 +21,16 @@ class CartPage(BasePage):
     REMOVE_BUTTON_PREFIX = "remove-"  # Will be combined with product name
     CONTINUE_SHOPPING_BUTTON = (By.ID, "continue-shopping")
     CHECKOUT_BUTTON = (By.ID, "checkout")
+
+    def __init__(self, driver: WebDriver, timeout: int = 10):
+        """Initialize the page and the header it includes.
+
+        Args:
+            driver: Selenium WebDriver instance.
+            timeout: Default timeout for waiting operations.
+        """
+        super().__init__(driver, timeout)
+        self.header = header_component.HeaderComponent(driver, timeout)
 
     def is_on_cart_page(self) -> bool:
         """Check if user is on cart page.

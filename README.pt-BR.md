@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:86ae8ff3b8edbbb21bcbab699101a4fd25962e213e23c0d7cb23a196c0396cbe -->
+<!-- translation-source: README.md sha256:18d96c2c8be9c2e04f9b188c55e0f22992be432105d136eebfa30bfb2903038d -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -325,10 +325,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 471 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes Unitários**: 479 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
 - **Testes de Integração**: 93 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 73 cenários, 463 steps (jornadas completas de usuário)
-- **Total**: 564 testes unitários/de integração + 73 cenários E2E
+- **Total**: 572 testes unitários/de integração + 73 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -355,7 +355,7 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 
 | Módulo | Fonte | Testes | Cobertura | Status |
 |--------|-------|--------|-----------|--------|
-| **BasePage** | `tests/test_base_page.py` | 28 | 100% | ✅ Completo |
+| **BasePage** | `tests/test_base_page.py` | 30 | 100% | ✅ Completo |
 | **LoginPage** | `tests/test_login_page.py` | 14 | 100% | ✅ Completo |
 | **CartPage** | `tests/test_cart_page.py` | 13 | 100% | ✅ Completo |
 | **InventoryPage** | `tests/test_inventory_page.py` | 26 | 100% | ✅ Completo |
@@ -368,6 +368,7 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **ConfigResolver** | `tests/test_config_resolver.py` | 40 | 100% | ✅ Completo |
 | **DriverManager** | `tests/test_driver_manager.py` | 19 | 100% | ✅ Completo |
 | **Step definitions (lógica OU, senha da config, page objects locais)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 16 | N/A | ✅ Completo |
+| **Hooks do Behave (screenshot e URL da falha no Allure)** | `tests/test_environment.py` | 6 | N/A | ✅ Completo |
 | **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Completo |
 | **Fixação das actions (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Completo |
 | **Portão do CI (check obrigatório)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Completo |
@@ -380,7 +381,7 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
 | **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Completo |
-| **TOTAL** | | **471** | **100%** | **Completo** |
+| **TOTAL** | | **479** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 455

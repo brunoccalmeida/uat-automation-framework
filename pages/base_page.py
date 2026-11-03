@@ -104,7 +104,10 @@ class BasePage:
         """
         if self.driver.find_elements(*self.ERROR_MESSAGE):
             self.click(self.ERROR_CLOSE_BUTTON)
-            self.wait.until(EC.invisibility_of_element_located(self.ERROR_MESSAGE))
+            self.wait.until(
+                EC.invisibility_of_element_located(self.ERROR_MESSAGE),
+                message=f"{self.ERROR_MESSAGE} did not disappear",
+            )
         self.click(submit_button)
         self.wait.until(
             EC.any_of(
@@ -125,7 +128,7 @@ class BasePage:
         Raises:
             TimeoutException: If no alert opens within timeout.
         """
-        alert = self.wait.until(EC.alert_is_present())
+        alert = self.wait.until(EC.alert_is_present(), message="No alert opened")
         text = alert.text
         alert.accept()
         return text
@@ -145,7 +148,10 @@ class BasePage:
         Raises:
             TimeoutException: If element not visible within timeout.
         """
-        return self.wait.until(EC.visibility_of_element_located(locator))
+        return self.wait.until(
+            EC.visibility_of_element_located(locator),
+            message=f"{locator} did not become visible",
+        )
 
     def find_clickable_element(self, locator: tuple[str, str]):
         """Find clickable element with explicit wait.
@@ -159,7 +165,10 @@ class BasePage:
         Raises:
             TimeoutException: If element not clickable within timeout.
         """
-        return self.wait.until(EC.element_to_be_clickable(locator))
+        return self.wait.until(
+            EC.element_to_be_clickable(locator),
+            message=f"{locator} did not become clickable",
+        )
 
     def click(self, locator: tuple[str, str]) -> None:
         """Click element after ensuring it's clickable.
@@ -186,7 +195,10 @@ class BasePage:
         )
 
         # Double-check element is still interactable after scroll
-        self.wait.until(EC.element_to_be_clickable(locator))
+        self.wait.until(
+            EC.element_to_be_clickable(locator),
+            message=f"{locator} did not stay clickable after scrolling",
+        )
 
         # Now safe to interact
         element.clear()
@@ -216,7 +228,10 @@ class BasePage:
         """
         try:
             wait = WebDriverWait(self.driver, timeout)
-            wait.until(EC.visibility_of_element_located(locator))
+            wait.until(
+                EC.visibility_of_element_located(locator),
+                message=f"{locator} did not become visible",
+            )
             return True
         except TimeoutException:
             return False

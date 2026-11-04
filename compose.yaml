@@ -27,12 +27,12 @@ x-grid: &grid
 services:
   chrome:
     <<: *grid
-    image: selenium/standalone-chrome:4.51.0-20261010@sha256:d6843a37cd2852fac7f33099709a203769f864dcf260e740a34e9605055c1dd5
+    image: selenium/standalone-chrome:155.0.8059.39-20261010@sha256:ddb16bcf906947e06efa3cbd72efb5d804acc63b0cb80b40d3b708ab518d10ff
     ports:
       - "4444:4444"
 
   firefox:
     <<: *grid
-    image: selenium/standalone-firefox:4.51.0-20261010@sha256:2bb7d9e63088ba6dc7f4d5acd807f27d8410221f881853a97ac3c95f50e8d951
+    image: selenium/standalone-firefox:157.0-20261010@sha256:c1a750c5bb1e290e1f47c8fbc7fcf5560e295c6c96bff1fa90b4a3bc9f0b2afe
     ports:
       - "4445:4444"

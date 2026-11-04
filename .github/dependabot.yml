@@ -47,3 +47,10 @@ updates:
     groups:
       selenium-grid:
         patterns: ["selenium/*"]
+    # docker-selenium also tags each image by browser version (155.0...,
+    # 157.0...) and Dependabot compares tags as SemVer, so 155 > 4: #120
+    # jumped families (#121). Ignoring majors keeps the Grid family (4.x);
+    # a Grid major is a human decision.
+    ignore:
+      - dependency-name: "selenium/*"
+        update-types: ["version-update:semver-major"]

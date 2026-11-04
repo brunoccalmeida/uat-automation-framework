@@ -122,3 +122,23 @@ def test_dependabot_updates_compose_images():
     ecosystems = {u["package-ecosystem"] for u in _load(DEPENDABOT)["updates"]}
 
     assert "docker-compose" in ecosystems
+
+
+def test_dependabot_stays_in_the_grid_tag_family():
+    """Only Grid-family tags (4.x) may be proposed (#121).
+
+    docker-selenium also tags each image by browser version, and Dependabot
+    compares tags as SemVer: #120 proposed chrome 155.0.8059.39 and firefox
+    157.0 (a browser downgrade) over 4.51.0. Ignoring majors for selenium/*
+    drops those families; a Grid major stays a human decision.
+    """
+    compose = next(
+        u
+        for u in _load(DEPENDABOT)["updates"]
+        if u["package-ecosystem"] == "docker-compose"
+    )
+
+    assert {
+        "dependency-name": "selenium/*",
+        "update-types": ["version-update:semver-major"],
+    } in compose.get("ignore", [])

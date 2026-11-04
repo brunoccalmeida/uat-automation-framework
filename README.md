@@ -349,10 +349,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 514 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 515 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 96 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 610 unit/integration tests + 73 E2E scenarios
+- **Total**: 611 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -396,7 +396,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Complete |
 | **Workflow pinning (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Complete |
 | **CI gate (required check)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Complete |
-| **Selenium Grid in Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 14 | N/A | ✅ Complete |
+| **Selenium Grid in Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 15 | N/A | ✅ Complete |
 | **Codecov upload (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Complete |
 | **Agent rules (size, sync, skills, reviewer subagent, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Complete |
 | **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
@@ -406,7 +406,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Complete |
-| **TOTAL** | | **514** | **100%** | **Complete** |
+| **TOTAL** | | **515** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 469

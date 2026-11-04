@@ -10,6 +10,7 @@ from core.config_resolver import (
     apply_config_hierarchy,
     resolve_browser_name,
     resolve_headless_mode,
+    resolve_remote_url,
 )
 
 
@@ -266,3 +267,52 @@ class TestRealWorldScenarios:
             config_value=False,
         )
         assert result is True  # Browser should be headless
+
+
+class TestResolveRemoteUrl:
+    """Test remote WebDriver URL resolution (#116).
+
+    No value anywhere is legitimate: it means a local browser.
+    """
+
+    def test_cli_parameter_has_highest_priority(self):
+        """CLI should override ENV and config."""
+        result = resolve_remote_url("http://cli:4444", "http://env:4444", None)
+
+        assert result == "http://cli:4444"
+
+    def test_env_variable_overrides_config(self):
+        """ENV should override config when CLI is not set."""
+        result = resolve_remote_url(None, "http://env:4444", "http://cfg:4444")
+
+        assert result == "http://env:4444"
+
+    def test_config_file_is_fallback(self):
+        """Config value is used when CLI and ENV are not set."""
+        result = resolve_remote_url(None, None, "http://cfg:4444")
+
+        assert result == "http://cfg:4444"
+
+    def test_no_value_anywhere_means_local_browser(self):
+        """None everywhere resolves to None (local driver)."""
+        assert resolve_remote_url(None, None, None) is None
+
+    @pytest.mark.parametrize("blank", ["", "   "])
+    def test_blank_value_falls_through(self, blank):
+        """A blank value (e.g. SELENIUM_REMOTE_URL=) is the same as unset."""
+        assert resolve_remote_url(blank, blank, None) is None
+
+    def test_strips_surrounding_whitespace(self):
+        """Whitespace around the URL is not part of it."""
+        result = resolve_remote_url(None, " http://env:4444 ", None)
+
+        assert result == "http://env:4444"
+
+    def test_apply_config_hierarchy_sets_remote_url(self):
+        """apply_config_hierarchy resolves the remote_url key in place."""
+        config = {}
+        result = apply_config_hierarchy(
+            config, key="remote_url", cli_value=None, env_value="http://env:4444"
+        )
+
+        assert result["remote_url"] == "http://env:4444"

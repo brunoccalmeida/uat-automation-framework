@@ -15,10 +15,19 @@ jobs:
   smoke-matrix:
     runs-on: ubuntu-latest
 
+    name: smoke-matrix (${{ matrix.browser }})
+
     strategy:
       matrix:
-        browser: ['chrome', 'firefox']
+        include:
+          - browser: chrome
+            grid-port: 4444
+          - browser: firefox
+            grid-port: 4445
       fail-fast: false
+
+    env:
+      SELENIUM_REMOTE_URL: http://localhost:${{ matrix.grid-port }}
 
     steps:
       - name: Checkout code
@@ -48,16 +57,18 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
-      # Browsers and drivers come preinstalled and version-matched on the
-      # GitHub runner image. Do not apt-install them: on Ubuntu 24.04
-      # "apt-get install firefox" replaces the working Firefox with the snap
-      # build, which geckodriver cannot drive.
-      - name: Show browser versions
-        run: |
-          google-chrome --version
-          chromedriver --version
-          firefox --version
-          geckodriver --version | head -1
+      # The browser runs in docker-selenium, defined once in compose.yaml
+      # for local runs and CI (dev/prod parity, #116). --wait returns only
+      # when the health check passes: the Grid is ready, not just started.
+      - name: Start Selenium Grid
+        run: SE_NODE_MAX_SESSIONS=$(nproc) docker compose up --wait --wait-timeout 120 ${{ matrix.browser }}
+
+      # shell: bash adds pipefail, so a failed curl fails the step
+      - name: Show Grid and browser versions
+        shell: bash
+        run: >-
+          curl -fsS "$SELENIUM_REMOTE_URL/status"
+          | jq '.value.nodes[] | {grid: .version, browser: .slots[0].stereotype | {browserName, browserVersion}}'
 
       - name: Run BDD smoke tests (${{ matrix.browser }})
         run: |
@@ -65,11 +76,20 @@ jobs:
         env:
           HEADLESS: true
 
+      # Grid and browser logs are the evidence of a session that failed to
+      # start or crashed; print them only then, to keep green runs short.
+      - name: Show Selenium Grid logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 200
+
   test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write  # OIDC credential for the Codecov upload
+
+    env:
+      SELENIUM_REMOTE_URL: http://localhost:4444
 
     steps:
       - name: Checkout code
@@ -99,11 +119,18 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
-      # Chrome and ChromeDriver come preinstalled on the runner image
-      - name: Show browser versions
-        run: |
-          google-chrome --version
-          chromedriver --version
+      # The browser runs in docker-selenium, defined once in compose.yaml
+      # for local runs and CI (dev/prod parity, #116). --wait returns only
+      # when the health check passes: the Grid is ready, not just started.
+      - name: Start Selenium Grid
+        run: SE_NODE_MAX_SESSIONS=$(nproc) docker compose up --wait --wait-timeout 120 chrome
+
+      # shell: bash adds pipefail, so a failed curl fails the step
+      - name: Show Grid and browser versions
+        shell: bash
+        run: >-
+          curl -fsS "$SELENIUM_REMOTE_URL/status"
+          | jq '.value.nodes[] | {grid: .version, browser: .slots[0].stereotype | {browserName, browserVersion}}'
 
       # One layer per step. Later layers still run when an earlier one fails
       # (!cancelled) so each run reports every layer, but any failure fails
@@ -145,6 +172,12 @@ jobs:
           poetry run behave --tags=@e2e -f allure_behave.formatter:AllureFormatter -o reports/allure-results --no-capture
         env:
           HEADLESS: true
+
+      # Grid and browser logs are the evidence of a session that failed to
+      # start or crashed; print them only then, to keep green runs short.
+      - name: Show Selenium Grid logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 200
 
       - name: Upload test results
         if: always()

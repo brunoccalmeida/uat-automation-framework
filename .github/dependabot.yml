@@ -33,3 +33,17 @@ updates:
       # Low risk and reviewed together: one PR for all actions
       github-actions:
         patterns: ["*"]
+
+  # Selenium Grid images in compose.yaml, pinned by digest (#116). Chrome and
+  # Firefox come from the same docker-selenium release and must move together
+  # (tests/test_selenium_grid_ci.py): one PR for both.
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    groups:
+      selenium-grid:
+        patterns: ["selenium/*"]

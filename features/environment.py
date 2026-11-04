@@ -35,6 +35,11 @@ def before_scenario(context, _scenario):
     2. Environment variable: BROWSER=firefox
     3. Config file: config.yaml (browser.name)
 
+    Selenium Grid URL hierarchy (unset everywhere = local browser):
+    1. CLI parameter: -Dremote_url=http://localhost:4444
+    2. Environment variable: SELENIUM_REMOTE_URL=http://localhost:4444
+    3. Config file: config.yaml (browser.remote_url)
+
     Args:
         context: Behave context object.
         _scenario: Current scenario being executed (unused).
@@ -55,6 +60,14 @@ def before_scenario(context, _scenario):
         key="name",
         cli_value=context.config.userdata.get("browser"),
         env_value=os.getenv("BROWSER"),
+    )
+
+    # Apply configuration hierarchy for the Selenium Grid URL (#116)
+    apply_config_hierarchy(
+        config=browser_config,
+        key="remote_url",
+        cli_value=context.config.userdata.get("remote_url"),
+        env_value=os.getenv("SELENIUM_REMOTE_URL"),
     )
 
     context.driver_manager = DriverManager(browser_config)

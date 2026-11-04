@@ -7,7 +7,7 @@ import pytest
 from behave.model_core import Status
 from selenium.common.exceptions import WebDriverException
 
-from features.environment import after_scenario
+from features.environment import after_scenario, before_scenario
 
 URL = "https://www.saucedemo.com/inventory.html"
 
@@ -73,3 +73,39 @@ def test_no_capture_when_driver_was_never_created(allure):
     after_scenario(SimpleNamespace(), Mock(status=Status.hook_error))
 
     allure.attach.assert_not_called()
+
+
+def _before_context(userdata):
+    """Context as Behave hands it to before_scenario."""
+    browser = {"name": "chrome", "headless": True, "remote_url": None}
+    return SimpleNamespace(
+        config_data={"browser": browser},
+        config=SimpleNamespace(userdata=userdata),
+    )
+
+
+@pytest.mark.parametrize(
+    ("userdata", "env", "expected"),
+    [
+        ({"remote_url": "http://cli:4444"}, "http://env:4444", "http://cli:4444"),
+        ({}, "http://env:4444", "http://env:4444"),
+        ({}, None, None),
+    ],
+    ids=["cli-wins", "env", "local-default"],
+)
+@patch("features.environment.DriverManager")
+def test_before_scenario_passes_grid_url_to_driver_manager(
+    driver_manager, monkeypatch, userdata, env, expected
+):
+    """E2E and smoke open their sessions in the configured Grid (#116).
+
+    CI runners also ship local browsers, so without this wiring the Behave
+    suites would pass while silently skipping the container.
+    """
+    monkeypatch.delenv("SELENIUM_REMOTE_URL", raising=False)
+    if env:
+        monkeypatch.setenv("SELENIUM_REMOTE_URL", env)
+
+    before_scenario(_before_context(userdata), Mock())
+
+    assert driver_manager.call_args.args[0]["remote_url"] == expected

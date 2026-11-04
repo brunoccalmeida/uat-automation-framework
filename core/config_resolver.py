@@ -77,6 +77,35 @@ def resolve_browser_name(
     return str(effective_value).strip().lower()
 
 
+def resolve_remote_url(
+    cli_value: str | None, env_value: str | None, config_value: str | None
+) -> str | None:
+    """Resolve the Selenium Grid URL from multiple configuration sources.
+
+    Same hierarchy as the other values (CLI > ENV > config file). No value
+    anywhere is legitimate and means a local browser, so the result may be
+    None. Blank values are treated as unset.
+
+    Args:
+        cli_value: Value from CLI parameter (-Dremote_url=...) or None.
+        env_value: Value from environment variable (SELENIUM_REMOTE_URL) or None.
+        config_value: Value from config file (browser.remote_url) or None.
+
+    Returns:
+        str | None: Grid URL without surrounding whitespace, or None.
+
+    Examples:
+        >>> resolve_remote_url(None, "http://localhost:4444", None)
+        'http://localhost:4444'
+        >>> resolve_remote_url(" ", None, None) is None
+        True
+    """
+    for value in (cli_value, env_value, config_value):
+        if value and value.strip():
+            return value.strip()
+    return None
+
+
 def _str_to_bool(value: str) -> bool:
     """Convert string value to boolean.
 
@@ -136,5 +165,8 @@ def apply_config_hierarchy(
         config[key] = resolve_browser_name(
             cli_value, env_value, config.get(key, "chrome")
         )
+
+    if key == "remote_url":
+        config[key] = resolve_remote_url(cli_value, env_value, config.get(key))
 
     return config

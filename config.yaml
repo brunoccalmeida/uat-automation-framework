@@ -13,3 +13,6 @@ browser:
   name: "chrome"  # chrome, firefox
   headless: true  # Headless by default (faster, less resources). Use -Dheadless=false for debugging
   window_size: "1920,1080"
+  # Selenium Grid URL (e.g. http://localhost:4444 from compose.yaml); null runs a
+  # local browser. Overridden by -Dremote_url or SELENIUM_REMOTE_URL
+  remote_url: null

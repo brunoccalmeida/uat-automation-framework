@@ -4,10 +4,12 @@ Manages Selenium WebDriver lifecycle using OOP approach.
 Handles browser initialization, configuration, and cleanup.
 """
 
+from collections.abc import Callable
 from typing import Any
 
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.chrome.webdriver import WebDriver as Chrome
+from selenium.webdriver.common.options import BaseOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.firefox.webdriver import WebDriver as Firefox
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -103,13 +105,7 @@ class DriverManager:
         options.add_argument("--disable-infobars")
         options.add_argument("--disable-notifications")
 
-        # Create driver (Selenium Manager will handle driver binary)
-        driver = Chrome(options=options)
-
-        # Maximize window for better visibility
-        driver.maximize_window()
-
-        return driver
+        return self._start(options, lambda: Chrome(options=options))
 
     def _create_firefox_driver(self) -> WebDriver:
         """Create Firefox WebDriver with configuration.
@@ -134,8 +130,31 @@ class DriverManager:
         options.set_preference("signon.rememberSignons", False)
         options.set_preference("signon.autofillForms", False)
 
-        # Create driver (Selenium Manager will handle geckodriver binary)
-        driver = Firefox(options=options)
+        return self._start(options, lambda: Firefox(options=options))
+
+    def _start(
+        self, options: BaseOptions, create_local: Callable[[], WebDriver]
+    ) -> WebDriver:
+        """Open the session locally or in the configured Selenium Grid.
+
+        With browser.remote_url set, the session runs in that Grid (e.g. a
+        docker-selenium container) with the same options; otherwise Selenium
+        Manager starts a local browser and its driver binary.
+
+        Args:
+            options: Browser options, the same for local and remote.
+            create_local: Builds the local driver from those same options.
+
+        Returns:
+            WebDriver with its window maximized.
+        """
+        remote_url = self.browser_config.get("remote_url")
+        if remote_url:
+            # The remote WebDriver is the class selenium.webdriver.Remote
+            # re-exports (lazily, which static analysis cannot follow)
+            driver = WebDriver(command_executor=remote_url, options=options)
+        else:
+            driver = create_local()
 
         # Maximize window for better visibility
         driver.maximize_window()

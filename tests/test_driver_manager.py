@@ -329,3 +329,62 @@ class TestQuit:
         manager.quit()
 
         assert manager._driver is None
+
+
+class TestRemoteDriver:
+    """A configured remote_url opens the session in a Selenium Grid (#116).
+
+    The remote session gets the same options as the local one: only where
+    the browser runs changes, not how it is configured.
+    """
+
+    @pytest.mark.parametrize(
+        ("browser", "local_class", "options_class", "factory"),
+        [
+            ("chrome", "Chrome", "ChromeOptions", "_create_chrome_driver"),
+            ("firefox", "Firefox", "FirefoxOptions", "_create_firefox_driver"),
+        ],
+    )
+    def test_remote_url_opens_remote_session_with_browser_options(
+        self, browser, local_class, options_class, factory
+    ):
+        """Remote gets the URL and the browser options; no local browser."""
+        manager = DriverManager(
+            {"name": browser, "remote_url": "http://localhost:4444"}
+        )
+
+        with (
+            patch(f"core.driver_manager.{local_class}") as mock_local,
+            patch(f"core.driver_manager.{options_class}") as mock_options_class,
+            patch("core.driver_manager.WebDriver") as mock_remote,
+        ):
+            result = getattr(manager, factory)()
+
+        mock_remote.assert_called_once_with(
+            command_executor="http://localhost:4444",
+            options=mock_options_class.return_value,
+        )
+        mock_local.assert_not_called()
+        assert result is mock_remote.return_value
+
+    @pytest.mark.parametrize(
+        ("browser", "local_class", "factory"),
+        [
+            ("chrome", "Chrome", "_create_chrome_driver"),
+            ("firefox", "Firefox", "_create_firefox_driver"),
+        ],
+    )
+    def test_without_remote_url_opens_local_browser(
+        self, browser, local_class, factory
+    ):
+        """No remote_url (or None) keeps the local driver, the default."""
+        manager = DriverManager({"name": browser, "remote_url": None})
+
+        with (
+            patch(f"core.driver_manager.{local_class}") as mock_local,
+            patch("core.driver_manager.WebDriver") as mock_remote,
+        ):
+            result = getattr(manager, factory)()
+
+        mock_remote.assert_not_called()
+        assert result is mock_local.return_value

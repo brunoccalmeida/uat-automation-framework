@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:18d96c2c8be9c2e04f9b188c55e0f22992be432105d136eebfa30bfb2903038d -->
+<!-- translation-source: README.md sha256:e2b6920b070770b01851d037bdfdfd16f3bb1eefe74b5390c9efd1cbca72de76 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -89,6 +89,7 @@ Este framework usa uma **abordagem híbrida de programação OO/funcional**, esc
 - Python 3.14+
 - Poetry (gestão de dependências)
 - Navegador Chrome ou Firefox (drivers gerenciados automaticamente pelo Selenium Manager)
+- Docker (opcional): roda os testes no mesmo build de navegador do CI (veja [Mesmo navegador do CI](#mesmo-navegador-do-ci-selenium-grid-no-docker))
 
 ### Instalação
 
@@ -269,6 +270,30 @@ Use `-Dheadless=false` para depurar com o navegador visível.
 
 Veja [CONFIGURATION.md](CONFIGURATION.md) para as opções de configuração detalhadas.
 
+### Mesmo navegador do CI (Selenium Grid no Docker)
+
+O CI roda todo teste de navegador contra o Selenium Grid definido no [compose.yaml](compose.yaml) (imagens oficiais do docker-selenium, fixadas por tag e digest). Rodar localmente contra o mesmo container dá o mesmo build de navegador do CI (paridade dev/prod do 12-factor), qualquer que seja o seu sistema operacional:
+
+```bash
+# Subir o Grid; o --wait só retorna quando o health check passa (Grid pronto)
+SE_NODE_MAX_SESSIONS=$(nproc) docker compose up --wait chrome    # bash
+$env:SE_NODE_MAX_SESSIONS=$env:NUMBER_OF_PROCESSORS; docker compose up --wait chrome  # PowerShell
+
+# Apontar os testes para ele (no Behave, -Dremote_url=... também funciona)
+export SELENIUM_REMOTE_URL=http://localhost:4444          # bash
+$env:SELENIUM_REMOTE_URL="http://localhost:4444"          # PowerShell
+poetry run pytest tests/integration/ -n auto
+poetry run behave
+
+# O Grid do Firefox escuta na porta 4445 (-Dremote_url vence a variável de ambiente)
+docker compose up --wait firefox
+poetry run behave -Dbrowser=firefox -Dremote_url=http://localhost:4445
+
+docker compose down
+```
+
+`SE_NODE_MAX_SESSIONS` dá ao Grid uma sessão por CPU, casando com os workers do `pytest -n auto` (o padrão da imagem é 1). Sem `SELENIUM_REMOTE_URL`, os testes usam um navegador local.
+
 ## 🔄 CI/CD
 
 O projeto usa **GitHub Actions** para integração contínua:
@@ -276,6 +301,7 @@ O projeto usa **GitHub Actions** para integração contínua:
 - ✅ **Testes automatizados** em todo push e pull request
 - ✅ **Python 3.14**, a versão estável mais recente
 - ✅ Execução com **navegador headless** no ambiente de CI
+- ✅ **Navegador no docker-selenium**: os jobs de navegador sobem o Selenium Grid do `compose.yaml`, a mesma imagem fixada da execução local
 - ✅ Checagens de **qualidade de código** (Black, Ruff, Pylint, Pyright)
 - ✅ **Artefatos de teste** enviados para revisão
 - ✅ **Relatórios Allure** publicados no GitHub Pages com histórico
@@ -325,10 +351,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 485 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
-- **Testes de Integração**: 95 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
+- **Testes Unitários**: 514 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes de Integração**: 96 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 73 cenários, 463 steps (jornadas completas de usuário)
-- **Total**: 580 testes unitários/de integração + 73 cenários E2E
+- **Total**: 610 testes unitários/de integração + 73 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -365,13 +391,14 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 16 | 100% | ✅ Completo |
 | **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 12 | 100% | ✅ Completo |
 | **Config** | `tests/test_config.py` | 2 | 94% | ✅ Completo |
-| **ConfigResolver** | `tests/test_config_resolver.py` | 40 | 100% | ✅ Completo |
-| **DriverManager** | `tests/test_driver_manager.py` | 19 | 100% | ✅ Completo |
+| **ConfigResolver** | `tests/test_config_resolver.py` | 48 | 100% | ✅ Completo |
+| **DriverManager** | `tests/test_driver_manager.py` | 23 | 100% | ✅ Completo |
 | **Step definitions (lógica OU, senha da config, page objects locais)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 20 | N/A | ✅ Completo |
-| **Hooks do Behave (screenshot e URL da falha no Allure)** | `tests/test_environment.py` | 6 | N/A | ✅ Completo |
+| **Hooks do Behave (screenshot e URL da falha no Allure)** | `tests/test_environment.py` | 9 | N/A | ✅ Completo |
 | **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Completo |
 | **Fixação das actions (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Completo |
 | **Portão do CI (check obrigatório)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Completo |
+| **Selenium Grid no Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 14 | N/A | ✅ Completo |
 | **Upload para o Codecov (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Completo |
 | **Regras do agente (tamanho, sincronia, skills, subagente revisor, diagnósticos do editor, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Completo |
 | **Hook de saída de testes do agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
@@ -381,7 +408,7 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
 | **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Completo |
-| **TOTAL** | | **485** | **100%** | **Completo** |
+| **TOTAL** | | **514** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 457
@@ -404,7 +431,8 @@ Os testes de integração validam os Page Objects com interações reais no nave
 | **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 16 | Chrome | ✅ Completo |
 | **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 14 | Chrome | ✅ Completo |
 | **Sincronização da navegação** | `tests/integration/test_navigation_integration.py` | 13 | Chrome | ✅ Completo |
-| **TOTAL** | | **95** | **Real** | **Completo** |
+| **Sessão no Selenium Grid** | `tests/integration/test_remote_driver_integration.py` | 1 | Chrome (Grid) | ✅ Completo |
+| **TOTAL** | | **96** | **Real** | **Completo** |
 
 **Diferenças em Relação aos Testes Unitários:**
 - ✅ Selenium WebDriver real (não mockado)
@@ -476,7 +504,7 @@ Melhorias futuras seguindo as melhores práticas da indústria:
 - [x] **Execução Paralela** - pytest-xdist implementado (88% mais rápido)
 - [x] **Testes Cross-browser** - Suporte a Chrome + Firefox com hierarquia CLI/ENV/config
 - [x] **Matriz no CI** - Smoke tests rodam nos dois navegadores automaticamente
-- [ ] **Containerização com Docker** - Ambientes de execução consistentes
+- [x] **Containerização com Docker** - Selenium Grid no docker-selenium, compartilhado entre execução local e CI
 - [ ] **Testes de Regressão Visual** - Integração com Percy/Applitools
 - [ ] **Testes de API** - Feedback mais rápido com testes no nível da API
 

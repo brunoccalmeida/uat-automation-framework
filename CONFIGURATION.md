@@ -194,6 +194,21 @@ browser:
   name: "chrome"  # chrome | firefox
 ```
 
+### Selenium Grid (navegador remoto)
+
+Com uma URL de Selenium Grid configurada, a sessão abre no Grid (`webdriver.Remote`) com as **mesmas options** do navegador local; sem URL, o navegador é local (padrão). O CI usa o Grid do [compose.yaml](compose.yaml) (docker-selenium), e rodar localmente contra ele dá o mesmo build de navegador do CI (paridade dev/prod, #116). Passo a passo no README, seção "Same browser as CI".
+
+**Ordem de Prioridade** (do maior para o menor; valor vazio conta como ausente):
+
+1. **Parâmetro CLI** (Behave): `-Dremote_url=http://localhost:4444`
+2. **Variável de Ambiente**: `SELENIUM_REMOTE_URL=http://localhost:4444` (vale também para os testes de integração)
+3. **Arquivo de Configuração**: `config.yaml` (`browser.remote_url`, `null` por padrão)
+
+| Serviço do `compose.yaml` | URL |
+|---|---|
+| `chrome` | `http://localhost:4444` |
+| `firefox` | `http://localhost:4445` |
+
 ### Esperas (timeouts)
 
 Não há timeout no `config.yaml`. Os Page Objects usam só esperas explícitas (`WebDriverWait`, padrão de 10 s em `BasePage`), e o projeto não usa *implicit wait*, de propósito: a documentação do Selenium avisa para não misturar os dois tipos ("Do not mix implicit and explicit waits"), porque a combinação gera tempos de espera imprevisíveis.
@@ -242,19 +257,19 @@ Remove-Item Env:\HEADLESS  # PowerShell
 - Aumente window_size no config.yaml
 - Verifique explicit waits nos Page Objects
 
-### Chrome não encontrado no CI
-```yaml
-# GitHub Actions - instalar Chrome
-- name: Install Chrome
-  run: |
-    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-    sudo apt-get update
-    sudo apt-get install google-chrome-stable
+### Grid não responde ou sessão não abre
+```bash
+docker compose ps                      # o serviço deve estar "(healthy)"
+curl -s http://localhost:4444/status   # "ready": true quando aceita sessões
+docker compose logs chrome             # erro do Grid ou do navegador
 ```
+`Connection refused` em `localhost:4444`: o Grid não está de pé (`docker compose up --wait chrome`). Sessões que demoram a abrir com `pytest -n auto`: o Grid tem menos sessões que workers; suba com `SE_NODE_MAX_SESSIONS` igual ao número de CPUs. No CI, o step "Show Selenium Grid logs on failure" imprime esses logs quando algo falha.
 
 ## 📖 Referências
 
 - [Behave User Data](https://behave.readthedocs.io/en/latest/api.html#behave.configuration.Configuration.userdata)
 - [Selenium Headless Chrome](https://www.selenium.dev/documentation/webdriver/browsers/chrome/#headless)
 - [12-Factor App - Config](https://12factor.net/config)
+- [docker-selenium](https://github.com/SeleniumHQ/docker-selenium)
+- [12-Factor App - Dev/prod parity](https://12factor.net/dev-prod-parity)
 - [GitHub Actions Environment Variables](https://docs.github.com/en/actions/learn-github-actions/variables)

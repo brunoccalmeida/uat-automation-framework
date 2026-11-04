@@ -87,6 +87,7 @@ This framework uses a **hybrid OOP/Functional programming approach**, choosing t
 - Python 3.14+
 - Poetry (dependency management)
 - Chrome or Firefox browser (drivers managed automatically by Selenium Manager)
+- Docker (optional): runs the tests in the same browser build as CI (see [Same browser as CI](#same-browser-as-ci-selenium-grid-in-docker))
 
 ### Installation
 
@@ -267,6 +268,30 @@ Use `-Dheadless=false` for debugging with visible browser.
 
 See [CONFIGURATION.md](CONFIGURATION.md) for detailed configuration options.
 
+### Same browser as CI (Selenium Grid in Docker)
+
+CI runs every browser test against the Selenium Grid defined in [compose.yaml](compose.yaml) (official docker-selenium images, pinned by tag and digest). Running locally against the same container gives the same browser build as CI (12-factor dev/prod parity), whatever your operating system:
+
+```bash
+# Start the Grid; --wait returns once the health check passes (Grid ready)
+SE_NODE_MAX_SESSIONS=$(nproc) docker compose up --wait chrome    # bash
+$env:SE_NODE_MAX_SESSIONS=$env:NUMBER_OF_PROCESSORS; docker compose up --wait chrome  # PowerShell
+
+# Point the tests at it (CLI -Dremote_url=... also works for Behave)
+export SELENIUM_REMOTE_URL=http://localhost:4444          # bash
+$env:SELENIUM_REMOTE_URL="http://localhost:4444"          # PowerShell
+poetry run pytest tests/integration/ -n auto
+poetry run behave
+
+# Firefox Grid listens on port 4445 (-Dremote_url beats the env variable)
+docker compose up --wait firefox
+poetry run behave -Dbrowser=firefox -Dremote_url=http://localhost:4445
+
+docker compose down
+```
+
+`SE_NODE_MAX_SESSIONS` gives the Grid one session per CPU, matching the workers of `pytest -n auto` (the image default is 1). Without `SELENIUM_REMOTE_URL`, tests use a local browser.
+
 ## 🔄 CI/CD
 
 The project uses **GitHub Actions** for continuous integration:
@@ -274,6 +299,7 @@ The project uses **GitHub Actions** for continuous integration:
 - ✅ **Automated testing** on every push and pull request
 - ✅ **Python 3.14** latest stable version
 - ✅ **Headless browser** execution in CI environment
+- ✅ **Browser in docker-selenium**: browser jobs start the Selenium Grid from `compose.yaml`, the same pinned image as local runs
 - ✅ **Code quality** checks (Black, Ruff, Pylint, Pyright)
 - ✅ **Test artifacts** uploaded for review
 - ✅ **Allure reports** published to GitHub Pages with history
@@ -323,10 +349,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 485 tests (framework components, 100% Page Objects coverage, CI guardrails)
-- **Integration Tests**: 95 tests (Page Objects + real browser, including navigation synchronization)
+- **Unit Tests**: 514 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Integration Tests**: 96 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 580 unit/integration tests + 73 E2E scenarios
+- **Total**: 610 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -363,13 +389,14 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 16 | 100% | ✅ Complete |
 | **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 12 | 100% | ✅ Complete |
 | **Config** | `tests/test_config.py` | 2 | 94% | ✅ Complete |
-| **ConfigResolver** | `tests/test_config_resolver.py` | 40 | 100% | ✅ Complete |
-| **DriverManager** | `tests/test_driver_manager.py` | 19 | 100% | ✅ Complete |
+| **ConfigResolver** | `tests/test_config_resolver.py` | 48 | 100% | ✅ Complete |
+| **DriverManager** | `tests/test_driver_manager.py` | 23 | 100% | ✅ Complete |
 | **Step definitions (OR logic, configured password, local page objects)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 20 | N/A | ✅ Complete |
-| **Behave hooks (failure screenshot and URL in Allure)** | `tests/test_environment.py` | 6 | N/A | ✅ Complete |
+| **Behave hooks (failure screenshot and URL in Allure)** | `tests/test_environment.py` | 9 | N/A | ✅ Complete |
 | **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Complete |
 | **Workflow pinning (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Complete |
 | **CI gate (required check)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Complete |
+| **Selenium Grid in Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 14 | N/A | ✅ Complete |
 | **Codecov upload (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Complete |
 | **Agent rules (size, sync, skills, reviewer subagent, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Complete |
 | **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
@@ -379,7 +406,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Complete |
-| **TOTAL** | | **485** | **100%** | **Complete** |
+| **TOTAL** | | **514** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 457
@@ -402,7 +429,8 @@ Integration tests validate Page Objects with real browser interactions, filling 
 | **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 16 | Chrome | ✅ Complete |
 | **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 14 | Chrome | ✅ Complete |
 | **Navigation synchronization** | `tests/integration/test_navigation_integration.py` | 13 | Chrome | ✅ Complete |
-| **TOTAL** | | **95** | **Real** | **Complete** |
+| **Selenium Grid session** | `tests/integration/test_remote_driver_integration.py` | 1 | Chrome (Grid) | ✅ Complete |
+| **TOTAL** | | **96** | **Real** | **Complete** |
 
 **Key Differences from Unit Tests:**
 - ✅ Real Selenium WebDriver (not mocked)
@@ -474,7 +502,7 @@ Future enhancements following industry best practices:
 - [x] **Parallel Execution** - pytest-xdist implemented (88% faster)
 - [x] **Cross-browser Testing** - Chrome + Firefox support with CLI/ENV/config hierarchy
 - [x] **CI Matrix** - Smoke tests run on both browsers automatically
-- [ ] **Docker Containerization** - Consistent execution environments
+- [x] **Docker Containerization** - Selenium Grid in docker-selenium, shared by local runs and CI
 - [ ] **Visual Regression Testing** - Percy/Applitools integration
 - [ ] **API Tests** - Faster feedback with API-level testing
 

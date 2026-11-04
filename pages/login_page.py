@@ -20,6 +20,14 @@ class LoginPage(BasePage):
     ERROR_CLOSE_BUTTON = (By.CSS_SELECTOR, "[data-test='error-button']")
     PAGE_LOADED = LOGIN_BUTTON
 
+    def is_on_login_page(self) -> bool:
+        """Check if user is on login page.
+
+        Returns:
+            True if the login form is visible, False otherwise.
+        """
+        return self.is_element_visible(self.PAGE_LOADED, timeout=3)
+
     def enter_username(self, username: str) -> None:
         """Enter username into login form.
 

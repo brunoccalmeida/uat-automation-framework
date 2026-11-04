@@ -115,9 +115,9 @@ def step_verify_error_contains(context, text):
 @then("I should remain on the login page")
 def step_verify_on_login_page(context):
     """Verify user is still on login page."""
-    base_url = get_base_url(context.config_data)
-    current_url = context.driver.current_url
-    assert base_url in current_url, "Should remain on login page after failed login"
+    assert LoginPage(
+        context.driver
+    ).is_on_login_page(), "Should remain on login page after failed login"
 
 
 @then("I should be logged in successfully")
@@ -145,6 +145,6 @@ def step_click_logout(context):
 @then("I should be redirected to the login page")
 def step_verify_redirected_to_login(context):
     """Verify user is redirected to login page."""
-    base_url = get_base_url(context.config_data)
-    current_url = context.driver.current_url
-    assert base_url in current_url, "Should be redirected to login page after logout"
+    assert LoginPage(
+        context.driver
+    ).is_on_login_page(), "Should be redirected to login page after logout"

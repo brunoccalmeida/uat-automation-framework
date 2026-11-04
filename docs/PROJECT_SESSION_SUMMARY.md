@@ -4,7 +4,7 @@
 > **Handoff entre chats.** Estado atual e próxima missão. Leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Histórico detalhado vive no Git: PRs, commits e issues são a fonte de verdade; este arquivo não duplica histórico.
 
-**Última atualização:** 02/11/2026 — missão "Página de detalhes de produto" (#104) concluída (PR #106); #95 segue bloqueada pelo PyYAML sem wheel cp315
+**Última atualização:** 04/11/2026 — missão "Step de página de login que nunca falhava" (#111) concluída (PR #114); #95 segue bloqueada pelo PyYAML sem wheel cp315
 
 ---
 
@@ -13,7 +13,7 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration, E2E Chrome, smoke Chrome + Firefox, lint, report) |
-| Testes | 479 unit · 93 integration · 73 cenários E2E (463 steps) · cobertura 99% (455 statements) |
+| Testes | 485 unit · 95 integration · 73 cenários E2E (463 steps) · cobertura 99% (457 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |
@@ -33,7 +33,9 @@
 
 ## Próxima missão recomendada
 
-**#111 — step `I should remain on the login page` que nunca falha** (`priority: P2`, `bug`, nasceu no #109). Afirma `base_url in current_url` e o `base_url` (`https://www.saucedemo.com`) é prefixo de toda página do site: passou numa sonda que logava antes de afirmar. Usado em 5 cenários (`login`, `login_negative`, `smoke`). Prática: afirmar a página pelo `PAGE_LOADED` (regra de SPA), com o RED da sonda visto antes. A #95 (Python 3.15) segue `blocked` (PyYAML 6.0.3 sem wheel `cp315`, conferido em 03/11/2026); ao destravar, ela passa à frente (bloqueio). **Meça o `/context` no início do chat** para o "depois" do #101 (ainda pendente: não medido no #105 nem no #109).
+**#95 — Python 3.15** (`blocked`, a única issue aberta): PyYAML 6.0.3 ainda sem wheel `cp315` (conferido em 04/11/2026 no JSON do PyPI). Primeiro passo de todo chat: reconferir (`curl -s https://pypi.org/pypi/PyYAML/json`, contar arquivos com `cp315`); se houver wheel, ela é a missão (bloqueio). Se seguir bloqueada, não há issue priorizada: proponha ao dono transformar uma ideia do Backlog (regressão visual, Docker) em issue com prioridade, após consultar as práticas do tema. **Meça o `/context` no início do chat** para o "depois" do #101 (ainda pendente: não medido no #105, #109 nem #111).
+
+Do #111: os steps `I should remain on the login page` **e** `I should be redirected to the login page` (logout; a issue só citava o primeiro, a busca pelo padrão achou o segundo) afirmavam `base_url in current_url`, e o `base_url` é prefixo de toda página do site: asserção tautológica. Agora `assert LoginPage(d).is_on_login_page()` (`PAGE_LOADED` visível, padrão dos outros `is_on_*`). `assert` em vez de `wait_until_loaded()` no step: um `Then` que falha deve ser `AssertionError`, que o Allure classifica como *failed* (comportamento), não `TimeoutException`, *broken* (erro do teste). RED: sonda E2E temporária (logar e afirmar cada step) passava antes e falhou depois com `ASSERT FAILED`; unit do step com a URL do inventário sob o `base_url` deu `DID NOT RAISE` no código antigo; integração (True na login, False no inventário) vista falhando por mutação (`return True`, locator `ERROR_MESSAGE`), cada mutante morto por um teste. Achado de ambiente: `heredoc` e `sed -i` do Git Bash gravam LF numa cópia de trabalho CRLF (`.gitattributes` `text=auto` + `autocrlf`); o pylint (C0327) barrou o arquivo misto. Normalize depois de editar pelo shell; no repositório não muda nada (o Git guarda LF).
 
 Do #109: toda espera do `BasePage` passa `message=` com locator e condição (Selenium, Waits → Customization, "Customizing the timeout message"): a falha do #108 que dizia `TimeoutException: Message:` agora diz `('id', 'user-name') did not become clickable`. O `is_element_visible` engole o timeout, mas também ganhou mensagem para a regra não ter exceção e virar portão (AST em `tests/test_base_page.py`: `wait.until` sem `message=` em `pages/` reprova). `after_scenario` anexa screenshot (`image/png`) e URL (`text/uri-list`) ao resultado do Allure quando `scenario.status.has_failed()` (Behave 1.3: `failed`, `error`, `hook_error`), antes do `quit`, que fica num `finally`. A doc do allure-behave só mostra `allure.attach` dentro de step; **medido** que no hook o anexo cai no cenário certo. RED externo com uma feature-sonda temporária (nunca commitada; fora de `features/` entre execuções, senão o hook de métricas a conta): asserção falsa e timeout, antes sem anexos e com mensagem vazia, depois com os dois anexos e a mensagem. RED interno: 5 testes do `BasePage` endurecidos com a mensagem literal (não f-string: o teste fixa o texto que o humano lê) e o portão falhando só no `is_element_visible`; o hook teve 5 mutações, todas mortas. Suposição registrada (revisor): não foi medido como o allure-behave mostra uma falha da própria captura (navegador travado) sobre um cenário já quebrado; só o unitário cobre. Achado: a sonda revelou que `I should remain on the login page` nunca falha → #111.
 
@@ -73,8 +75,7 @@ Do #58 (detalhes em `docs/AGENT_TOKEN_SPEND.md`, seção "Levantamento de mercad
 
 Fila priorizada (revisada em 01/11/2026 por melhores práticas: bloqueio → segurança → visibilidade → efeito composto → portões de qualidade antes de refatorar → dívida por risco):
 
-1. #111 Step `I should remain on the login page` que nunca falha (`P2`, `bug`)
-2. #95 Python 3.15 (`blocked`)
+1. #95 Python 3.15 (`blocked`)
 
 **Ao trocar a versão do Python** (#95): edite só o `.python-version` (o teste barra versão literal nos workflows) e confira a compatibilidade antes; o ruleset não depende do nome dos jobs (#36).
 

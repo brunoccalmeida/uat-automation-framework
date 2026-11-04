@@ -7,6 +7,7 @@ Follows Testing Pyramid best practices.
 
 from unittest.mock import Mock, patch
 
+import pytest
 from selenium.webdriver.common.by import By
 
 from pages.inventory_page import InventoryPage
@@ -193,3 +194,20 @@ class TestGetErrorMessage:
                 page.get_error_message()
 
                 mock_is_present.assert_called_once_with(LoginPage.ERROR_MESSAGE)
+
+
+class TestIsOnLoginPage:
+    """Test is_on_login_page method."""
+
+    @pytest.mark.parametrize("visible", [True, False])
+    def test_is_on_login_page_reflects_page_loaded_visibility(self, visible):
+        """is_on_login_page should report whether PAGE_LOADED is visible."""
+        page = LoginPage(Mock())
+
+        with patch.object(
+            page, "is_element_visible", return_value=visible
+        ) as mock_is_visible:
+            result = page.is_on_login_page()
+
+        mock_is_visible.assert_called_once_with(LoginPage.PAGE_LOADED, timeout=3)
+        assert result is visible

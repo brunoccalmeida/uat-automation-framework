@@ -104,3 +104,17 @@ class TestLoginPageErrorHandling:
         error = page.get_error_message()
         assert error is not None
         assert "locked out" in error.lower()
+
+
+class TestIsOnLoginPage:
+    """Test is_on_login_page against the real DOM."""
+
+    def test_true_on_login_page(self, driver, base_url):
+        """is_on_login_page should be True on the login page."""
+        driver.get(base_url)
+
+        assert LoginPage(driver).is_on_login_page()
+
+    def test_false_on_another_page_under_base_url(self, authenticated_driver):
+        """is_on_login_page should be False on a page sharing the base URL (#111)."""
+        assert not LoginPage(authenticated_driver).is_on_login_page()

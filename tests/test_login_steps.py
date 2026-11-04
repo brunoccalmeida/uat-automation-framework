@@ -13,6 +13,8 @@ from features.steps.login_steps import (
     step_log_in_as,
     step_logged_in_as_user,
     step_verify_error_contains,
+    step_verify_on_login_page,
+    step_verify_redirected_to_login,
 )
 
 CONFIG = {
@@ -148,3 +150,33 @@ class TestLoginStepsUseConfiguredPassword:
             step_logged_in_as_user(context, "problem_user")
 
         login_page_cls.return_value.login.assert_called_once_with("problem_user", "pw")
+
+
+LOGIN_PAGE_STEPS = [step_verify_on_login_page, step_verify_redirected_to_login]
+
+
+class TestLoginPageAssertionSteps:
+    """Steps asserting the login page check the page, not a URL substring.
+
+    The base URL prefixes every page of the site, so a URL check could never
+    fail (#111).
+    """
+
+    @pytest.mark.parametrize("step", LOGIN_PAGE_STEPS)
+    def test_passes_when_login_page_is_shown(self, step, login_page):
+        """Should pass when the login page is shown."""
+        login_page.is_on_login_page.return_value = True
+
+        step(Mock(config_data=CONFIG))
+
+        login_page.is_on_login_page.assert_called_once_with()
+
+    @pytest.mark.parametrize("step", LOGIN_PAGE_STEPS)
+    def test_fails_on_another_page_of_the_site(self, step, login_page):
+        """Should fail on any other page, even one under the base URL."""
+        login_page.is_on_login_page.return_value = False
+        context = Mock(config_data=CONFIG)
+        context.driver.current_url = "https://example.test/inventory.html"
+
+        with pytest.raises(AssertionError, match="login page"):
+            step(context)

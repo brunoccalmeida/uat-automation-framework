@@ -246,6 +246,13 @@ jobs:
         env:
           HEADLESS: true
 
+      # Fills the report's Environment and Executor panels (#130). Here,
+      # because this is the job with the Grid running: the versions are read
+      # from it, not written down, so an image bump shows up on its own.
+      - name: Write Allure environment and executor
+        if: ${{ !cancelled() }}
+        run: poetry run python scripts/write_allure_metadata.py reports/allure-results
+
       # Grid and browser logs are the evidence of a session that failed to
       # start or crashed; print them only then, to keep green runs short.
       - name: Show Selenium Grid logs on failure

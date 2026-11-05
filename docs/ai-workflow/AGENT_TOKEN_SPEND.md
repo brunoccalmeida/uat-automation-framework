@@ -69,7 +69,7 @@ Contexto do projeto carregado em todo chat (estimativa por bytes ÷ 4):
 | `.github/copilot-instructions.md` (via `@import` no `CLAUDE.md`) | 347 | ~4.300 |
 | `CLAUDE.md` | 7 | ~60 |
 
-`docs/PROJECT_SESSION_SUMMARY.md` (69 linhas, ~1.600) não é `@import`: só entra no contexto quando lido no início do chat (Ciclo de Missão), e por isso também se beneficia de ser curto.
+`docs/ai-workflow/PROJECT_SESSION_SUMMARY.md` (69 linhas, ~1.600) não é `@import`: só entra no contexto quando lido no início do chat (Ciclo de Missão), e por isso também se beneficia de ser curto.
 
 ### Depois do #35 (01/11/2026)
 
@@ -97,7 +97,7 @@ Neste repositório, **~2,4 bytes/token**, não 4: o "÷ 4" vale para inglês, e 
 
 **Regras com escopo de caminho:** ausentes de *Memory files*; entram como anexo quando o caminho é tocado. Neste chat, ler `docs/` e `.vscode/` não trouxe nenhuma; ler `tests/*.py` trouxe `python.md` e `selenium.md` (e não `workflows.md`/`dependencies.md`). Copilot: formato conferido nas fontes oficiais (pasta `.github/instructions/`, `applyTo` com globs separados por vírgula, [GitHub][gh]); no VS Code a aplicação depende de `chat.includeApplyingInstructions`, de padrão não documentado, por isso fixado em `true` no `.vscode/settings.json`. No GitHub.com, regras por caminho valem só para Copilot code review e cloud agent.
 
-**Diagnósticos do editor (#52)**, uma edição de `docs/AGENT_TOKEN_SPEND.md`:
+**Diagnósticos do editor (#52)**, uma edição de `docs/ai-workflow/AGENT_TOKEN_SPEND.md`:
 
 | | Diagnósticos | Ortografia falso-positivo | ~Bytes |
 | --- | ---: | ---: | ---: |

@@ -55,10 +55,13 @@ SUMMARY = """\
 - **Total**: 47 unit/integration tests + 11 E2E scenarios
 """
 
+AT_A_GLANCE = "- **Tests:** {unit} unit · 10 integration · {sc} E2E scenarios\n"
+
 
 def _readme(base=23, total=37, scenarios=11, steps=65, unit=37):
     return "\n".join(
         [
+            AT_A_GLANCE.format(unit=37, sc=11),
             UNIT_TABLE.format(base=base, total=total),
             INTEGRATION_TABLE,
             BEHAVE_TABLE.format(sc=scenarios, st=steps),
@@ -96,11 +99,14 @@ PT_SUMMARY = """\
 - **Total**: 47 testes unitários/de integração + 11 cenários E2E
 """
 
+PT_AT_A_GLANCE = "- **Testes:** {unit} unitários · 10 de integração · 11 cenários E2E\n"
+
 
 def _translation(marker, base=23, total=37, unit=37):
     return "\n".join(
         [
             marker,
+            PT_AT_A_GLANCE.format(unit=unit),
             PT_TABLE.format(base=base, total=total),
             PT_INTEGRATION_TABLE,
             PT_BEHAVE_TABLE,
@@ -272,6 +278,23 @@ class TestUpdateSummary:
         _, errors = validator.update_summary(readme, COUNTS)
 
         assert errors == ["Summary line not found: E2E Tests"]
+
+    def test_outdated_at_a_glance_line_is_fixed(self):
+        """The summary at the top of the README (#125) is kept by the hook too."""
+        readme = _readme().replace("37 unit ·", "5 unit ·")
+        readme = readme.replace("11 E2E scenarios", "3 E2E scenarios")
+
+        updated, errors = validator.update_summary(readme, COUNTS)
+
+        assert not errors
+        assert updated == _readme()
+
+    def test_missing_at_a_glance_line_is_an_error(self):
+        readme = _readme().replace("**Tests:**", "**Testing:**")
+
+        _, errors = validator.update_summary(readme, COUNTS)
+
+        assert errors == ["Summary line not found: At a glance"]
 
 
 class TestLocalizedSummary:

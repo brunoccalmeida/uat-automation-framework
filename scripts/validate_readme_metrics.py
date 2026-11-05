@@ -60,6 +60,7 @@ EN = Locale(
         ("Integration Tests", "**Integration Tests**: {n} tests"),
         ("E2E Tests", "**E2E Tests**: {n} scenarios, {n} steps"),
         ("Total", "**Total**: {n} unit/integration tests + {n} E2E scenarios"),
+        ("At a glance", "**Tests:** {n} unit · {n} integration · {n} E2E scenarios"),
     ),
     statements="**Total statements:**",
     covered="**Covered:**",
@@ -73,6 +74,10 @@ PT_BR = Locale(
         ("Integration Tests", "**Testes de Integração**: {n} testes"),
         ("E2E Tests", "**Testes E2E**: {n} cenários, {n} steps"),
         ("Total", "**Total**: {n} testes unitários/de integração + {n} cenários E2E"),
+        (
+            "At a glance",
+            "**Testes:** {n} unitários · {n} de integração · {n} cenários E2E",
+        ),
     ),
     statements="**Total de statements:**",
     covered="**Cobertos:**",
@@ -88,6 +93,10 @@ ES = Locale(
         (
             "Total",
             "**Total**: {n} pruebas unitarias/de integración + {n} escenarios E2E",
+        ),
+        (
+            "At a glance",
+            "**Pruebas:** {n} unitarias · {n} de integración · {n} escenarios E2E",
         ),
     ),
     statements="**Total de statements:**",
@@ -277,6 +286,11 @@ def update_summary(
         "Integration Tests": (total("Tests", integration=True),),
         "E2E Tests": (total("Scenarios"), total("Steps")),
         "Total": (total("Tests"), total("Scenarios")),
+        "At a glance": (
+            total("Tests", integration=False),
+            total("Tests", integration=True),
+            total("Scenarios"),
+        ),
     }
     errors = []
     for label, template in locale.summary:

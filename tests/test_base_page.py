@@ -10,8 +10,9 @@ from pathlib import Path
 from unittest.mock import Mock, call, patch
 
 import pytest
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 from pages.base_page import BasePage
 
@@ -450,6 +451,31 @@ class TestWaitUntilStable:
 
         with patch("pages.base_page.EC") as mock_ec:
             mock_ec.visibility_of_element_located.return_value.return_value = False
+            with pytest.raises(TimeoutException) as raised:
+                page.wait_until_stable(self.LOCATOR)
+
+        assert raised.value.msg == f"{self.LOCATOR} did not become visible"
+
+    def test_timeout_after_the_element_left_the_dom_says_it_did_not_become_visible(
+        self,
+    ):
+        """Seen once, then gone from the DOM: the last poll saw no element.
+
+        The wait ignores NoSuchElementException, which skips the rest of the
+        poll; a box remembered from before must not survive it.
+        """
+        page = BasePage(Mock())
+        page.wait = WebDriverWait(page.driver, 0.2, poll_frequency=0.01)
+        polls = itertools.count()
+
+        def seen_then_removed(_driver):
+            if next(polls) == 0:
+                return self._element_at(24)
+            raise NoSuchElementException("removed")
+
+        with patch("pages.base_page.EC") as mock_ec:
+            visible = mock_ec.visibility_of_element_located.return_value
+            visible.side_effect = seen_then_removed
             with pytest.raises(TimeoutException) as raised:
                 page.wait_until_stable(self.LOCATOR)
 

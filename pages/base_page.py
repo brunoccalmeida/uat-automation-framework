@@ -78,10 +78,13 @@ class BasePage:
 
         def has_stopped_moving(driver):
             nonlocal last_rect
+            # Cleared before the lookup: the wait ignores NoSuchElementException,
+            # which ends this poll early, and an element gone from the DOM must
+            # not keep the box it had while visible.
+            previous, last_rect = last_rect, None
             element = EC.visibility_of_element_located(locator)(driver)
-            rect = element.rect if element else None
-            stopped = rect is not None and rect == last_rect
-            last_rect = rect
+            last_rect = element.rect if element else None
+            stopped = last_rect is not None and last_rect == previous
             return element if stopped else False
 
         try:

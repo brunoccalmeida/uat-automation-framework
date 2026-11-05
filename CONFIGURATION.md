@@ -163,6 +163,8 @@ O framework suporta **Chrome** e **Firefox**. A configuração segue a mesma hie
 2. **Variável de Ambiente**: `BROWSER=firefox`
 3. **Arquivo de Configuração**: `config.yaml` (`browser.name`)
 
+A mesma hierarquia vale para os testes de integração (pytest), exceto o CLI, que não existe no pytest: `BROWSER=firefox poetry run pytest tests/integration/`. Contra o Grid do Firefox, suba `docker compose up --wait firefox` e use `SELENIUM_REMOTE_URL=http://localhost:4445`. O CI roda as integrações no Chrome (job `test`) e no Firefox (job `integration-matrix`).
+
 #### Exemplos de Uso
 
 **CLI (Prioridade máxima):**

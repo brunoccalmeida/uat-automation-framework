@@ -300,6 +300,7 @@ The project uses **GitHub Actions** for continuous integration:
 - ✅ **Python 3.14** latest stable version
 - ✅ **Headless browser** execution in CI environment
 - ✅ **Browser in docker-selenium**: browser jobs start the Selenium Grid from `compose.yaml`, the same pinned image as local runs
+- ✅ **Cross-browser integration**: Page Object integration tests run on Chrome and Firefox, in parallel jobs
 - ✅ **Code quality** checks (Black, Ruff, Pylint, Pyright)
 - ✅ **Test artifacts** uploaded for review
 - ✅ **Allure reports** published to GitHub Pages with history
@@ -349,10 +350,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 515 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 528 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 96 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 611 unit/integration tests + 73 E2E scenarios
+- **Total**: 624 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -391,12 +392,13 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Config** | `tests/test_config.py` | 2 | 94% | ✅ Complete |
 | **ConfigResolver** | `tests/test_config_resolver.py` | 48 | 100% | ✅ Complete |
 | **DriverManager** | `tests/test_driver_manager.py` | 23 | 100% | ✅ Complete |
+| **Browser test setup (BROWSER, HEADLESS, Grid)** | `tests/test_driver_setup.py` | 3 | N/A | ✅ Complete |
 | **Step definitions (OR logic, configured password, local page objects)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 20 | N/A | ✅ Complete |
 | **Behave hooks (failure screenshot and URL in Allure)** | `tests/test_environment.py` | 9 | N/A | ✅ Complete |
 | **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Complete |
-| **Workflow pinning (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Complete |
+| **Workflow pinning (CI)** | `tests/test_workflow_pinning.py` | 28 | N/A | ✅ Complete |
 | **CI gate (required check)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Complete |
-| **Selenium Grid in Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 15 | N/A | ✅ Complete |
+| **Selenium Grid in Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 19 | N/A | ✅ Complete |
 | **Codecov upload (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Complete |
 | **Agent rules (size, sync, skills, reviewer subagent, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Complete |
 | **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
@@ -404,9 +406,9 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Lint gate (pre-commit + CI + editor import order, ruff replaces flake8, no rule in two linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Complete |
 | **README metrics (per-row sync from the Source column, translations)** | `tests/test_validate_readme_metrics.py` | 49 | N/A | ✅ Complete |
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
-| **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Complete |
-| **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Complete |
-| **TOTAL** | | **515** | **100%** | **Complete** |
+| **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Complete |
+| **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Complete |
+| **TOTAL** | | **528** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 469
@@ -420,16 +422,16 @@ Integration tests validate Page Objects with real browser interactions, filling 
 
 | Module | Source | Tests | Browser | Status |
 |--------|--------|-------|---------|--------|
-| **LoginPage** | `tests/integration/test_login_page_integration.py` | 11 | Chrome | ✅ Complete |
-| **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 7 | Chrome | ✅ Complete |
-| **HeaderComponent** | `tests/integration/test_header_component_integration.py` | 14 | Chrome | ✅ Complete |
-| **InventoryPage (sorting)** | `tests/integration/test_inventory_sorting_integration.py` | 1 | Chrome | ✅ Complete |
-| **CartPage** | `tests/integration/test_cart_page_integration.py` | 10 | Chrome | ✅ Complete |
-| **ProductDetailsPage** | `tests/integration/test_product_details_integration.py` | 9 | Chrome | ✅ Complete |
-| **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 16 | Chrome | ✅ Complete |
-| **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 14 | Chrome | ✅ Complete |
-| **Navigation synchronization** | `tests/integration/test_navigation_integration.py` | 13 | Chrome | ✅ Complete |
-| **Selenium Grid session** | `tests/integration/test_remote_driver_integration.py` | 1 | Chrome (Grid) | ✅ Complete |
+| **LoginPage** | `tests/integration/test_login_page_integration.py` | 11 | Chrome, Firefox | ✅ Complete |
+| **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 7 | Chrome, Firefox | ✅ Complete |
+| **HeaderComponent** | `tests/integration/test_header_component_integration.py` | 14 | Chrome, Firefox | ✅ Complete |
+| **InventoryPage (sorting)** | `tests/integration/test_inventory_sorting_integration.py` | 1 | Chrome, Firefox | ✅ Complete |
+| **CartPage** | `tests/integration/test_cart_page_integration.py` | 10 | Chrome, Firefox | ✅ Complete |
+| **ProductDetailsPage** | `tests/integration/test_product_details_integration.py` | 9 | Chrome, Firefox | ✅ Complete |
+| **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 16 | Chrome, Firefox | ✅ Complete |
+| **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 14 | Chrome, Firefox | ✅ Complete |
+| **Navigation synchronization** | `tests/integration/test_navigation_integration.py` | 13 | Chrome, Firefox | ✅ Complete |
+| **Selenium Grid session** | `tests/integration/test_remote_driver_integration.py` | 1 | Chrome, Firefox (Grid) | ✅ Complete |
 | **TOTAL** | | **96** | **Real** | **Complete** |
 
 **Key Differences from Unit Tests:**

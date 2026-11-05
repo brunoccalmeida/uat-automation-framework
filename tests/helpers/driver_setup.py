@@ -10,8 +10,9 @@ from core.driver_manager import DriverManager
 def make_driver_manager():
     """Build a DriverManager from config.yaml.
 
-    The HEADLESS environment variable overrides the headless setting, so CI
-    runs without a display; SELENIUM_REMOTE_URL opens the session in a
+    Environment variables override config.yaml, as in Behave
+    (features/environment.py): HEADLESS runs without a display, BROWSER
+    selects the browser and SELENIUM_REMOTE_URL opens the session in a
     Selenium Grid (e.g. the docker-selenium container).
     """
     browser_config = get_browser_config(load_config())
@@ -20,6 +21,12 @@ def make_driver_manager():
         key="headless",
         cli_value=None,
         env_value=os.getenv("HEADLESS"),
+    )
+    apply_config_hierarchy(
+        config=browser_config,
+        key="name",
+        cli_value=None,
+        env_value=os.getenv("BROWSER"),
     )
     apply_config_hierarchy(
         config=browser_config,

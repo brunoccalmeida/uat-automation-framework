@@ -1,5 +1,5 @@
 <!-- LTeX: language=es -->
-<!-- translation-source: README.md sha256:e2b6920b070770b01851d037bdfdfd16f3bb1eefe74b5390c9efd1cbca72de76 -->
+<!-- translation-source: README.md sha256:c55f2820c99455166a7aa5ccf7f8c0056648b6c449955f9e8187868c7bf8698f -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -302,6 +302,7 @@ El proyecto usa **GitHub Actions** para la integración continua:
 - ✅ **Python 3.14**, la versión estable más reciente
 - ✅ Ejecución con **navegador headless** en el entorno de CI
 - ✅ **Navegador en docker-selenium**: los jobs de navegador levantan el Selenium Grid de `compose.yaml`, la misma imagen fijada que la ejecución local
+- ✅ **Integración en varios navegadores**: las pruebas de integración de los Page Objects corren en Chrome y Firefox, en jobs paralelos
 - ✅ Chequeos de **calidad de código** (Black, Ruff, Pylint, Pyright)
 - ✅ **Artefactos de prueba** subidos para revisión
 - ✅ **Informes Allure** publicados en GitHub Pages con historial
@@ -351,10 +352,10 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 ```
 
 **Distribución por Capa:**
-- **Pruebas Unitarias**: 515 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
+- **Pruebas Unitarias**: 528 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
 - **Pruebas de Integración**: 96 pruebas (Page Objects + navegador real, incluida la sincronización de la navegación)
 - **Pruebas E2E**: 73 escenarios, 463 steps (jornadas completas de usuario)
-- **Total**: 611 pruebas unitarias/de integración + 73 escenarios E2E
+- **Total**: 624 pruebas unitarias/de integración + 73 escenarios E2E
 
 **Cuándo Usar Cada Capa:**
 | Tipo de Prueba | Propósito | Velocidad | Navegador | Ejemplo |
@@ -393,12 +394,13 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **Config** | `tests/test_config.py` | 2 | 94% | ✅ Completo |
 | **ConfigResolver** | `tests/test_config_resolver.py` | 48 | 100% | ✅ Completo |
 | **DriverManager** | `tests/test_driver_manager.py` | 23 | 100% | ✅ Completo |
+| **Configuración del navegador de las pruebas (BROWSER, HEADLESS, Grid)** | `tests/test_driver_setup.py` | 3 | N/A | ✅ Completo |
 | **Step definitions (lógica O, contraseña de la config, page objects locales)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 20 | N/A | ✅ Completo |
 | **Hooks de Behave (captura y URL del fallo en Allure)** | `tests/test_environment.py` | 9 | N/A | ✅ Completo |
 | **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Completo |
-| **Fijación de las actions (CI)** | `tests/test_workflow_pinning.py` | 24 | N/A | ✅ Completo |
+| **Fijación de las actions (CI)** | `tests/test_workflow_pinning.py` | 28 | N/A | ✅ Completo |
 | **Puerta del CI (check obligatorio)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Completo |
-| **Selenium Grid en Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 15 | N/A | ✅ Completo |
+| **Selenium Grid en Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 19 | N/A | ✅ Completo |
 | **Subida a Codecov (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Completo |
 | **Reglas del agente (tamaño, sincronía, skills, subagente revisor, diagnósticos del editor, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Completo |
 | **Hook de salida de pruebas del agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
@@ -406,9 +408,9 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **Puerta de lint (pre-commit + CI + orden de imports en el editor, ruff en lugar de flake8, ninguna regla en dos linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Completo |
 | **Métricas de los READMEs (sincronía por fila desde la columna Fuente, traducciones)** | `tests/test_validate_readme_metrics.py` | 49 | N/A | ✅ Completo |
 | **Puerta de codificación (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
-| **Clave de caché del venv (CI, versión exacta de Python)** | `tests/test_venv_cache_key.py` | 3 | N/A | ✅ Completo |
-| **Fuente de la versión de Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 8 | N/A | ✅ Completo |
-| **TOTAL** | | **515** | **100%** | **Completo** |
+| **Clave de caché del venv (CI, versión exacta de Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
+| **Fuente de la versión de Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
+| **TOTAL** | | **528** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 469
@@ -422,16 +424,16 @@ Las pruebas de integración validan los Page Objects con interacciones reales en
 
 | Módulo | Fuente | Pruebas | Navegador | Estado |
 |--------|--------|---------|-----------|--------|
-| **LoginPage** | `tests/integration/test_login_page_integration.py` | 11 | Chrome | ✅ Completo |
-| **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 7 | Chrome | ✅ Completo |
-| **HeaderComponent** | `tests/integration/test_header_component_integration.py` | 14 | Chrome | ✅ Completo |
-| **InventoryPage (ordenación)** | `tests/integration/test_inventory_sorting_integration.py` | 1 | Chrome | ✅ Completo |
-| **CartPage** | `tests/integration/test_cart_page_integration.py` | 10 | Chrome | ✅ Completo |
-| **ProductDetailsPage** | `tests/integration/test_product_details_integration.py` | 9 | Chrome | ✅ Completo |
-| **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 16 | Chrome | ✅ Completo |
-| **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 14 | Chrome | ✅ Completo |
-| **Sincronización de la navegación** | `tests/integration/test_navigation_integration.py` | 13 | Chrome | ✅ Completo |
-| **Sesión en Selenium Grid** | `tests/integration/test_remote_driver_integration.py` | 1 | Chrome (Grid) | ✅ Completo |
+| **LoginPage** | `tests/integration/test_login_page_integration.py` | 11 | Chrome, Firefox | ✅ Completo |
+| **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 7 | Chrome, Firefox | ✅ Completo |
+| **HeaderComponent** | `tests/integration/test_header_component_integration.py` | 14 | Chrome, Firefox | ✅ Completo |
+| **InventoryPage (ordenación)** | `tests/integration/test_inventory_sorting_integration.py` | 1 | Chrome, Firefox | ✅ Completo |
+| **CartPage** | `tests/integration/test_cart_page_integration.py` | 10 | Chrome, Firefox | ✅ Completo |
+| **ProductDetailsPage** | `tests/integration/test_product_details_integration.py` | 9 | Chrome, Firefox | ✅ Completo |
+| **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 16 | Chrome, Firefox | ✅ Completo |
+| **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 14 | Chrome, Firefox | ✅ Completo |
+| **Sincronización de la navegación** | `tests/integration/test_navigation_integration.py` | 13 | Chrome, Firefox | ✅ Completo |
+| **Sesión en Selenium Grid** | `tests/integration/test_remote_driver_integration.py` | 1 | Chrome, Firefox (Grid) | ✅ Completo |
 | **TOTAL** | | **96** | **Real** | **Completo** |
 
 **Diferencias con las Pruebas Unitarias:**

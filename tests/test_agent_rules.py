@@ -9,7 +9,7 @@ Each tool reads path-scoped rules from its own directory and frontmatter
 (Claude: ``.claude/rules/*.md`` with ``paths:``; Copilot:
 ``.github/instructions/*.instructions.md`` with ``applyTo``). The two copies
 must stay identical, or one agent silently follows outdated rules.
-See docs/AGENT_TOKEN_SPEND.md.
+See docs/ai-workflow/AGENT_TOKEN_SPEND.md.
 """
 
 import json
@@ -144,7 +144,8 @@ class TestSkills:
         "name, procedure",
         [
             ("ship-pr", "scripts/merge_when_green.py"),
-            ("close-mission", "Fila de PRs vazia"),
+            # the session record rides in the mission PR (#126)
+            ("close-mission", "nunca abra PR separado de registro"),
         ],
     )
     def test_procedure_lives_only_in_its_skill(self, name, procedure):
@@ -238,7 +239,7 @@ class TestCodeIntelligence:
     dependency. Installed outside the project, pyright only resolves the
     project's imports (selenium, behave) if pointed at its virtualenv, and that
     path only exists for every collaborator if Poetry creates it in-project.
-    See docs/AGENT_TOKEN_SPEND.md.
+    See docs/ai-workflow/AGENT_TOKEN_SPEND.md.
     """
 
     def test_plugin_is_enabled_for_the_project(self):

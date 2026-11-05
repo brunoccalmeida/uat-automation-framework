@@ -20,14 +20,14 @@ Toda decisão (código, testes, CI, ambiente, processo) segue as melhores práti
 Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** (objetivo coeso, normalmente uma GitHub Issue) e **o estado do projeto mora no repositório, não na conversa**. O handoff é parte do trabalho: nunca depende de o usuário pedir (só o merge depende: `/ship-pr`).
 
 **Início de cada chat** (automático):
-1. Ler `docs/PROJECT_SESSION_SUMMARY.md` (estado atual e próxima missão recomendada).
+1. Ler `docs/ai-workflow/PROJECT_SESSION_SUMMARY.md` (estado atual e próxima missão recomendada).
 2. Listar issues e PRs abertos (`gh issue list`, `gh pr list`).
 3. Propor a missão de maior prioridade e confirmar com o usuário. Prioridade: bloqueio → segurança → visibilidade → dívida técnica (labels `priority: P0/P1/P2`).
 
-**Fechamento da missão** (automático): skill `/close-mission`, a Definition of Done.
+**Fechamento da missão** (automático): skill `/close-mission`, a Definition of Done; o registro de sessão vai no PR da própria missão.
 
 ## Gasto de tokens (contexto)
-Cada turno reenvia todo o contexto; contexto longo custa mais e piora a aderência às regras. Fontes, porquês e medição: `docs/AGENT_TOKEN_SPEND.md`.
+Cada turno reenvia todo o contexto; contexto longo custa mais e piora a aderência às regras. Fontes, porquês e medição: `docs/ai-workflow/AGENT_TOKEN_SPEND.md`.
 
 - **Regras sempre carregadas < 200 linhas**, só o que vale em todo chat. `@import` não economiza; regra de uma parte do código vai para arquivo com escopo de caminho.
 - **Não repita o que linter/teste já impõe**; regra sem exceção vira teste ou hook, não ênfase.

@@ -12,10 +12,11 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 
 ## ⚡ At a Glance
 
-- **Tests:** 538 unit · 96 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
+- **Tests:** 560 unit · 96 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
 - **Real browsers:** integration and smoke suites run on Chrome and Firefox in CI, inside docker-selenium containers
 - **Quality gates:** `master` only accepts a PR with green CI and a clean `pip-audit`; every GitHub Action is pinned to a commit SHA
 - **Live report:** Allure, republished on every merge to `master`: 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
+- **AI-assisted, same gates:** built with an AI coding agent that gets no shortcut past CI, tests-first and review: [How This Project Is Built](#-how-this-project-is-built)
 
 [![Allure report overview: pass rate, trend and features](docs/images/allure-report-overview.png)](https://brunoccalmeida.github.io/uat-automation-framework/)
 
@@ -27,6 +28,7 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 - [Testing Strategy](#-testing-strategy)
 - [Technology Stack](#️-technology-stack)
 - [CI/CD](#-cicd)
+- [How This Project Is Built](#-how-this-project-is-built)
 - [Project History](#-project-history)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -318,6 +320,7 @@ The reports include:
 - Detailed test results with screenshots on failure
 - Duration metrics and performance tracking
 - Categorization by features and scenarios
+- Environment and executor: browser, Selenium Grid, Python and Selenium versions, with a link to the CI run
 
 See [.github/workflows/tests.yml](.github/workflows/tests.yml) and [.github/workflows/security.yml](.github/workflows/security.yml) for pipeline configuration.
 
@@ -329,6 +332,18 @@ poetry run pip-audit --strict    # fails on any known vulnerability or unauditab
 ```
 
 Any known vulnerability fails the `pip-audit` check. To accept one, add `--ignore-vuln <ID>` in `security.yml` with the justification and the issue that tracks its removal.
+
+## 🤖 How This Project Is Built
+
+AI-assisted, behind the same gates as any other change. The work is done with an AI coding agent (Claude Code; GitHub Copilot reads the same rules), and its commits carry a `Co-authored-by: Claude` trailer. The agent gets no shortcut:
+
+- **Same CI gates:** `master` accepts only a PR with `ci-passed` and `pip-audit` green on its head commit; the ruleset has no bypass, not even for the owner.
+- **Tests first:** every test is seen failing before the code that makes it pass; when that was not observed, a mutation (undo the fix, watch the test fail) confirms it.
+- **Independent review:** before each PR, a read-only reviewer agent checks the diff against its GitHub issue.
+- **A human merges:** the agent opens the PR; only the owner triggers the merge, because a merge to `master` publishes the report.
+- **Rules as code:** the agent rules live in the repository ([.github/copilot-instructions.md](.github/copilot-instructions.md)), and a rule without exceptions becomes a test (for example `tests/test_agent_rules.py`), not a reminder.
+
+Working notes (session handoff, token-spend measurements; in Portuguese): [docs/ai-workflow/](docs/ai-workflow/).
 
 ## 🛠️ Technology Stack
 
@@ -355,10 +370,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 538 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 560 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 96 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 634 unit/integration tests + 73 E2E scenarios
+- **Total**: 656 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -407,6 +422,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Codecov upload (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Complete |
 | **Allure environment and executor (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Complete |
 | **Agent rules (size, sync, skills, reviewer subagent, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Complete |
+| **Doc links (every referenced path exists)** | `tests/test_doc_links.py` | 22 | N/A | ✅ Complete |
 | **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
 | **Merge when green (`/ship-pr`: required checks from the ruleset, allowlist)** | `tests/test_merge_when_green.py` | 24 | N/A | ✅ Complete |
 | **Lint gate (pre-commit + CI + editor import order, ruff replaces flake8, no rule in two linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Complete |
@@ -414,7 +430,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Complete |
-| **TOTAL** | | **538** | **100%** | **Complete** |
+| **TOTAL** | | **560** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 469

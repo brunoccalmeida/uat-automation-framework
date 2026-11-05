@@ -18,7 +18,7 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 - **Live report:** Allure, republished on every merge to `master`: 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
 - **AI-assisted, same gates:** built with an AI coding agent that gets no shortcut past CI, tests-first and review: [How This Project Is Built](#-how-this-project-is-built)
 
-[![Allure report overview: pass rate, trend and features](docs/images/allure-report-overview.png)](https://brunoccalmeida.github.io/uat-automation-framework/)
+[![Allure report overview: pass rate, trend, environment, CI run and features](docs/images/allure-report-overview.png)](https://brunoccalmeida.github.io/uat-automation-framework/)
 
 ## 📑 Table of Contents
 

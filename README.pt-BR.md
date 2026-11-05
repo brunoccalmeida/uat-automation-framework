@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:85f958683c26cbbe2c9d90cf4918c01d7d2c936c2de0922023b4c15025e6e971 -->
+<!-- translation-source: README.md sha256:a161b516820074fd643d65534d29fe0ee94a362eeb99e35ac0c501a8fa3a9627 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -20,7 +20,7 @@ Framework completo de automação UAT usando Python, Behave (BDD) e Selenium par
 - **Relatório ao vivo:** Allure, republicado a cada merge no `master`: 📊 **[Ver o Relatório de Testes Mais Recente](https://brunoccalmeida.github.io/uat-automation-framework/)**
 - **Feito com IA, mesmos portões:** construído com um agente de IA que não tem atalho no CI, no teste primeiro nem na revisão: [Como Este Projeto É Feito](#-como-este-projeto-é-feito)
 
-[![Visão geral do relatório Allure: taxa de aprovação, tendência e features](docs/images/allure-report-overview.png)](https://brunoccalmeida.github.io/uat-automation-framework/)
+[![Visão geral do relatório Allure: taxa de aprovação, tendência, ambiente, execução do CI e features](docs/images/allure-report-overview.png)](https://brunoccalmeida.github.io/uat-automation-framework/)
 
 ## 📑 Índice
 

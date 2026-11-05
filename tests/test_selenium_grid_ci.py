@@ -11,7 +11,8 @@ single source; the checks:
   is ready, so tests never start against a Grid still booting;
 - the browser jobs start the Grid through Compose (no copy of the image in
   the workflow) and point SELENIUM_REMOTE_URL at it;
-- Dependabot watches compose.yaml, so the pinned digest does not go stale.
+- Dependabot watches compose.yaml, so the pinned digest does not go stale;
+- the integration suite runs in every supported browser (#118).
 """
 
 import re
@@ -24,8 +25,9 @@ ROOT = Path(__file__).resolve().parent.parent
 COMPOSE = ROOT / "compose.yaml"
 WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
 DEPENDABOT = ROOT / ".github" / "dependabot.yml"
+CONFIG = ROOT / "config.yaml"
 BROWSERS = ("chrome", "firefox")
-BROWSER_JOBS = ("smoke-matrix", "test")
+BROWSER_JOBS = ("smoke-matrix", "test", "integration-matrix")
 PINNED_IMAGE = re.compile(
     r"^selenium/standalone-(?P<browser>chrome|firefox)"
     r":\d+\.\d+\.\d+-\d{8}@sha256:[0-9a-f]{64}$"
@@ -39,6 +41,7 @@ def _load(path):
 
 SERVICES = _load(COMPOSE)["services"]
 JOBS = _load(WORKFLOW)["jobs"]
+DEFAULT_BROWSER = _load(CONFIG)["browser"]["name"]
 
 
 def _host_port(browser):
@@ -69,6 +72,37 @@ def _compose_up_browser(job_name, variant):
         if found:
             return found.group(1)
     return None
+
+
+def _integration_runs():
+    """Yield (job, variant, browser used, Grid started) per integration run.
+
+    The browser used is what the helper reads (#118): BROWSER from the step
+    or job env, else config.yaml.
+    """
+    for job_name, job in JOBS.items():
+        for variant in _variants(job_name):
+            for step in job.get("steps", []):
+                if "pytest tests/integration" not in step.get("run", ""):
+                    continue
+                env = {**job.get("env", {}), **step.get("env", {})}
+                used = _resolve(str(env.get("BROWSER", DEFAULT_BROWSER)), variant)
+                yield job_name, variant, used, _compose_up_browser(job_name, variant)
+
+
+def test_integration_suite_runs_in_every_supported_browser():
+    """Page Objects are checked against each browser's driver, not only Chrome.
+
+    MDN ("Strategies for carrying out testing"): a supported, common browser
+    is tested thoroughly; the README supports Chrome and Firefox.
+    """
+    assert {used for _, _, used, _ in _integration_runs()} == set(BROWSERS)
+
+
+def test_integration_runs_in_the_browser_of_its_grid():
+    """A job that starts Firefox's Grid must ask the helper for Firefox."""
+    for job_name, variant, used, grid in _integration_runs():
+        assert used == grid, f"{job_name} {variant}: uses {used}, Grid is {grid}"
 
 
 @pytest.mark.parametrize("browser", BROWSERS)

@@ -5,11 +5,14 @@ Uses mocks to isolate the logic from Selenium WebDriver.
 """
 
 import ast
+import itertools
 from pathlib import Path
 from unittest.mock import Mock, call, patch
 
-from selenium.common.exceptions import TimeoutException
+import pytest
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 from pages.base_page import BasePage
 
@@ -438,6 +441,58 @@ class TestWaitUntilStable:
             results = [condition(page.driver) for _ in range(4)]
 
         assert results == [False, False, False, shown]
+
+    def test_timeout_on_a_hidden_element_says_it_did_not_become_visible(self):
+        """A timeout must tell "never visible" apart from "still moving" (#129).
+
+        Both used to say "did not stop moving", hiding which one happened.
+        """
+        page = BasePage(Mock(), timeout=0)
+
+        with patch("pages.base_page.EC") as mock_ec:
+            mock_ec.visibility_of_element_located.return_value.return_value = False
+            with pytest.raises(TimeoutException) as raised:
+                page.wait_until_stable(self.LOCATOR)
+
+        assert raised.value.msg == f"{self.LOCATOR} did not become visible"
+
+    def test_timeout_after_the_element_left_the_dom_says_it_did_not_become_visible(
+        self,
+    ):
+        """Seen once, then gone from the DOM: the last poll saw no element.
+
+        The wait ignores NoSuchElementException, which skips the rest of the
+        poll; a box remembered from before must not survive it.
+        """
+        page = BasePage(Mock())
+        page.wait = WebDriverWait(page.driver, 0.2, poll_frequency=0.01)
+        polls = itertools.count()
+
+        def seen_then_removed(_driver):
+            if next(polls) == 0:
+                return self._element_at(24)
+            raise NoSuchElementException("removed")
+
+        with patch("pages.base_page.EC") as mock_ec:
+            visible = mock_ec.visibility_of_element_located.return_value
+            visible.side_effect = seen_then_removed
+            with pytest.raises(TimeoutException) as raised:
+                page.wait_until_stable(self.LOCATOR)
+
+        assert raised.value.msg == f"{self.LOCATOR} did not become visible"
+
+    def test_timeout_on_a_moving_element_says_it_did_not_stop_moving(self):
+        """An element seen visible but still moving keeps the moving message."""
+        page = BasePage(Mock(), timeout=0)
+        positions = itertools.count()
+
+        with patch("pages.base_page.EC") as mock_ec:
+            visible = mock_ec.visibility_of_element_located.return_value
+            visible.side_effect = lambda _driver: self._element_at(next(positions))
+            with pytest.raises(TimeoutException) as raised:
+                page.wait_until_stable(self.LOCATOR)
+
+        assert raised.value.msg == f"{self.LOCATOR} did not stop moving"
 
 
 class _FormPage(_LoadablePage):

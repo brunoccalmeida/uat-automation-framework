@@ -70,21 +70,33 @@ class BasePage:
             WebElement once visible and stable.
 
         Raises:
-            TimeoutException: If element is not stable within timeout.
+            TimeoutException: If element is not stable within timeout. The
+                message says whether it was hidden at the end ("did not
+                become visible") or still moving ("did not stop moving").
         """
         last_rect = None
 
         def has_stopped_moving(driver):
             nonlocal last_rect
+            # Cleared before the lookup: the wait ignores NoSuchElementException,
+            # which ends this poll early, and an element gone from the DOM must
+            # not keep the box it had while visible.
+            previous, last_rect = last_rect, None
             element = EC.visibility_of_element_located(locator)(driver)
-            rect = element.rect if element else None
-            stopped = rect is not None and rect == last_rect
-            last_rect = rect
+            last_rect = element.rect if element else None
+            stopped = last_rect is not None and last_rect == previous
             return element if stopped else False
 
-        return self.wait.until(
-            has_stopped_moving, message=f"{locator} did not stop moving"
-        )
+        try:
+            return self.wait.until(
+                has_stopped_moving, message=f"{locator} did not stop moving"
+            )
+        except TimeoutException as exc:
+            # until() fixes its message before waiting; only the last poll
+            # knows which of the two failures happened.
+            if last_rect is None:
+                raise TimeoutException(f"{locator} did not become visible") from exc
+            raise
 
     def submit_and_wait_for_outcome(
         self, submit_button: tuple[str, str], success_page: type["BasePage"]

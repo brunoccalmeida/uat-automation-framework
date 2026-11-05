@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:c55f2820c99455166a7aa5ccf7f8c0056648b6c449955f9e8187868c7bf8698f -->
+<!-- translation-source: README.md sha256:8de76f96a75c28418d5cbcc5a576b4ee6ca7671f499206a83117bd7fb22846b3 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -10,9 +10,16 @@
 
 **[English](README.md)** | **[Português (Brasil)]** | **[Español](README.es.md)**
 
-📊 **[Ver o Relatório de Testes Mais Recente](https://brunoccalmeida.github.io/uat-automation-framework/)**
-
 Framework completo de automação UAT usando Python, Behave (BDD) e Selenium para testar a aplicação de e-commerce **Sauce Demo**.
+
+## ⚡ Em Resumo
+
+- **Testes:** 530 unitários · 96 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
+- **Navegadores reais:** as suítes de integração e smoke rodam no Chrome e no Firefox no CI, em contêineres docker-selenium
+- **Portões de qualidade:** o `master` só aceita PR com CI verde e `pip-audit` limpo; toda GitHub Action é fixada por SHA de commit
+- **Relatório ao vivo:** Allure, republicado a cada merge no `master`: 📊 **[Ver o Relatório de Testes Mais Recente](https://brunoccalmeida.github.io/uat-automation-framework/)**
+
+[![Visão geral do relatório Allure: taxa de aprovação, tendência e features](docs/images/allure-report-overview.png)](https://brunoccalmeida.github.io/uat-automation-framework/)
 
 ## 📑 Índice
 
@@ -25,8 +32,6 @@ Framework completo de automação UAT usando Python, Behave (BDD) e Selenium par
 - [Histórico do Projeto](#-histórico-do-projeto)
 - [Contribuindo](#-contribuindo)
 - [Licença](#-licença)
-
-> **Nota**: Desenvolvido originalmente para o Parabank (demo bancário), foi migrado para o Sauce Demo por causa da instabilidade da instância pública do Parabank. A arquitetura do framework continua intacta e demonstra práticas profissionais de teste.
 
 ## 🎯 Objetivo
 
@@ -352,10 +357,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 528 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes Unitários**: 530 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
 - **Testes de Integração**: 96 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 73 cenários, 463 steps (jornadas completas de usuário)
-- **Total**: 624 testes unitários/de integração + 73 cenários E2E
+- **Total**: 626 testes unitários/de integração + 73 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -406,11 +411,11 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Hook de saída de testes do agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
 | **Merge com checks verdes (`/ship-pr`: checks obrigatórios do ruleset, lista de permissão)** | `tests/test_merge_when_green.py` | 24 | N/A | ✅ Completo |
 | **Portão de lint (pre-commit + CI + ordem de imports no editor, ruff no lugar do flake8, nenhuma regra em dois linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Completo |
-| **Métricas dos READMEs (sincronia por linha pela coluna Fonte, traduções)** | `tests/test_validate_readme_metrics.py` | 49 | N/A | ✅ Completo |
+| **Métricas dos READMEs (sincronia por linha pela coluna Fonte, traduções)** | `tests/test_validate_readme_metrics.py` | 51 | N/A | ✅ Completo |
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
 | **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
-| **TOTAL** | | **528** | **100%** | **Completo** |
+| **TOTAL** | | **530** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 469

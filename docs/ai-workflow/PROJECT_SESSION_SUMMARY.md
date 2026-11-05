@@ -13,7 +13,7 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | ✅ Verde em todas as camadas (unit, integration **Chrome + Firefox** (#118), E2E Chrome, smoke Chrome + Firefox, lint, report); **navegadores no docker-selenium** (#116); teste de integração que falha deixa **screenshot + HTML (com URL)** em `reports/integration-failures/`, publicado como artefato (`test-results` no Chrome, `integration-failures-firefox`) (#129) |
-| Testes | 656 unit · 96 integration · 73 cenários E2E (463 steps) · cobertura 99% (469 statements) |
+| Testes | 656 unit · 96 integration · 73 cenários E2E (463 steps) · cobertura 99% (474 statements) |
 | Relatório público | ✅ <https://brunoccalmeida.github.io/uat-automation-framework/> (Allure, publicado só em push no `master`); painéis **Environment** (navegador, Grid, Python, Selenium, lidos do Grid em execução) e **Executor** (run do GitHub Actions) preenchidos pelo `scripts/write_allure_metadata.py` (#130) |
 | Cobertura (Codecov) | ✅ Upload via **OIDC** (sem secret), `fail_ci_if_error: true`; pulado só onde o GitHub nega o token OIDC (Dependabot, PR de fork). `tests/test_codecov_upload.py` |
 | Proteção do `master` | Ruleset "Protect master": PR obrigatório, **2 checks obrigatórios com nome estável: `ci-passed`** (gate que depende de todos os jobs do `Tests`, `tests/test_ci_gate.py`) **e `pip-audit`**, branch atualizada, histórico linear, sem force push, sem bypass |

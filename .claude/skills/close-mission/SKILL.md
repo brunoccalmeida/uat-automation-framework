@@ -8,6 +8,6 @@ Feche a missão; cada item é verificado, não presumido. O registro de sessão 
 1. **Issues em dia:** as resolvidas citadas no PR (`Closes #N`); pendências descobertas viram issues novas com label `priority: P0/P1/P2`.
 2. **`docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`**, na branch da missão: estado atual (tabela, com a fila de PRs como ficará após o merge), um parágrafo "Do #N" com decisões, fontes consultadas, como o RED foi visto (ou a mutação) e achados; próxima missão recomendada pela prioridade das regras. Cite issues, não o número do PR (ele ainda não existe).
 3. **README.md e traduções** (`README.pt-BR.md`, `README.es.md`): o hook `validate-readme-metrics` corrige as métricas e reprova tradução defasada; texto novo é traduzido.
-4. **Revisor** (`reviewer`) sobre o diff completo, resumo incluído; corrija os achados que procedem e registre os descartados com o porquê.
+4. **Revisor** (`reviewer`) sobre o diff completo, resumo incluído; corrija os achados que procedem e registre os descartados com o porquê; atualize o resumo com o que as correções mudaram (o hook só corrige os READMEs).
 5. Commit, PR e peça ao usuário `/ship-pr <n>`.
 6. Com o PR integrado: confirme as issues fechadas (`gh issue view <n> --json state`) e o `master` local atualizado; avise que a missão terminou e que o próximo chat pode começar. Fato surgido no merge (ex.: check intermitente) vira issue e entra no resumo da próxima missão, não em PR novo.

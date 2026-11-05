@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:a161b516820074fd643d65534d29fe0ee94a362eeb99e35ac0c501a8fa3a9627 -->
+<!-- translation-source: README.md sha256:fba3993d5b53365cadeff6f35e3230e16d8ffd1638789bedd35d33e3d8f05892 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -14,7 +14,7 @@ Framework completo de automação UAT usando Python, Behave (BDD) e Selenium par
 
 ## ⚡ Em Resumo
 
-- **Testes:** 560 unitários · 96 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
+- **Testes:** 640 unitários · 96 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
 - **Navegadores reais:** as suítes de integração e smoke rodam no Chrome e no Firefox no CI, em contêineres docker-selenium
 - **Portões de qualidade:** o `master` só aceita PR com CI verde e `pip-audit` limpo; toda GitHub Action é fixada por SHA de commit
 - **Relatório ao vivo:** Allure, republicado a cada merge no `master`: 📊 **[Ver o Relatório de Testes Mais Recente](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -337,7 +337,7 @@ Qualquer vulnerabilidade conhecida reprova o check `pip-audit`. Para aceitar uma
 
 ## 🤖 Como Este Projeto É Feito
 
-Com IA, atrás dos mesmos portões de qualquer outra mudança. O trabalho é feito com um agente de IA (Claude Code; o GitHub Copilot lê as mesmas regras), e os commits dele levam o trailer `Co-authored-by: Claude`. O agente não tem atalho:
+Com IA, atrás dos mesmos portões de qualquer outra mudança. O trabalho é feito com um agente de IA (Claude Code; o GitHub Copilot lê as mesmas regras), e os commits dele levam o Claude como coautor (trailer `Co-Authored-By`). O agente não tem atalho:
 
 - **Mesmos portões de CI:** o `master` só aceita PR com `ci-passed` e `pip-audit` verdes no commit da head; o ruleset não tem bypass, nem para o dono.
 - **Teste primeiro:** todo teste é visto falhando antes do código que o faz passar; quando isso não foi observado, uma mutação (desfazer a correção e ver o teste falhar) confirma.
@@ -372,10 +372,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 560 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes Unitários**: 640 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
 - **Testes de Integração**: 96 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 73 cenários, 463 steps (jornadas completas de usuário)
-- **Total**: 656 testes unitários/de integração + 73 cenários E2E
+- **Total**: 736 testes unitários/de integração + 73 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -424,7 +424,7 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Upload para o Codecov (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Completo |
 | **Ambiente e executor do Allure (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Completo |
 | **Regras do agente (tamanho, sincronia, skills, subagente revisor, diagnósticos do editor, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Completo |
-| **Links da documentação (todo caminho citado existe)** | `tests/test_doc_links.py` | 22 | N/A | ✅ Completo |
+| **Links da documentação (todo caminho citado existe)** | `tests/test_doc_links.py` | 102 | N/A | ✅ Completo |
 | **Hook de saída de testes do agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
 | **Merge com checks verdes (`/ship-pr`: checks obrigatórios do ruleset, lista de permissão)** | `tests/test_merge_when_green.py` | 24 | N/A | ✅ Completo |
 | **Portão de lint (pre-commit + CI + ordem de imports no editor, ruff no lugar do flake8, nenhuma regra em dois linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Completo |
@@ -432,7 +432,7 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
 | **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
-| **TOTAL** | | **560** | **100%** | **Completo** |
+| **TOTAL** | | **640** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 469

@@ -7,6 +7,11 @@ import pytest
 
 from core.config import get_base_url, get_default_password, load_config
 from tests.helpers.driver_setup import make_driver_manager
+from tests.helpers.failure_artifacts import (
+    PHASE_REPORT_KEY,
+    call_failed,
+    save_failure_artifacts,
+)
 from tests.helpers.navigation import (
     go_to_cart,
     go_to_inventory,
@@ -15,17 +20,35 @@ from tests.helpers.navigation import (
 )
 
 
+@pytest.hookimpl(wrapper=True, tryfirst=True)
+def pytest_runtest_makereport(item, call):  # pylint: disable=unused-argument
+    """Store each phase's report on the item, for the driver fixture.
+
+    pytest docs, "Making test result information available in fixtures";
+    ``call`` is part of the hook's signature.
+    """
+    report = yield
+    item.stash.setdefault(PHASE_REPORT_KEY, {})[report.when] = report
+    return report
+
+
 @pytest.fixture(name="driver", scope="function")
-def fixture_driver():
+def fixture_driver(request):
     """Create WebDriver instance for integration tests.
+
+    On a failed test, saves its screenshot and page source before quitting
+    (#129): the CI log alone cannot show the browser state.
 
     Yields:
         WebDriver instance configured for integration testing.
     """
     dm = make_driver_manager()
-    yield dm.get_driver()
+    driver = dm.get_driver()
+    yield driver
 
     # Teardown
+    if call_failed(request.node):
+        save_failure_artifacts(driver, request.node.nodeid)
     dm.quit()
 
 

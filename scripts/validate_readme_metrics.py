@@ -13,7 +13,8 @@ fails when it changed something, so the fix shows up as a diff to review.
   fails (#87). The hook never reads coverage.xml (#133): it is gitignored, and
   pre-commit checks the staged contents only, since anything else gives
   "false-positives and false-negatives"; a report left from an older run did.
-  Locally: `pytest --cov --cov-report=xml`, then the same `--coverage` call.
+  Locally, measure what CI measures (unit and integration, appended, with
+  `--cov=core --cov=pages --cov-report=xml`), then the same `--coverage` call.
 - Translations (#39): the same rewrite, with each language's labels. Each one
   records the fingerprint of the README.md it was translated from (as MDN's
   l10n.sourceCommit) and fails once README.md changes after it.

@@ -318,7 +318,7 @@ class TestLocalizedSummary:
 
 
 class TestCheckCoverage:
-    """Coverage is only checked (it needs a coverage.xml), never rewritten."""
+    """Coverage is only checked (against a coverage.xml), never rewritten."""
 
     README = "- **Total statements:** 346\n- **Covered:** 345 (99%)\n"
 
@@ -332,10 +332,6 @@ class TestCheckCoverage:
             "Total statements: README shows 346, actual is 350",
             "Covered statements: README shows 345, actual is 349",
         ]
-
-    def test_missing_coverage_report_is_skipped(self):
-        """get_coverage_statements returns (0, 0) without a coverage.xml."""
-        assert not validator.check_coverage(self.README, (0, 0))
 
 
 class TestLocalizedCoverage:
@@ -426,10 +422,7 @@ class TestMain:
 
     @staticmethod
     def _main(counts=None):
-        with (
-            patch.object(validator, "collect_counts", return_value=counts or COUNTS),
-            patch.object(validator, "get_coverage_statements", return_value=(0, 0)),
-        ):
+        with patch.object(validator, "collect_counts", return_value=counts or COUNTS):
             return validator.main([])
 
     def test_accurate_readme_passes_untouched(self, readme_path):
@@ -437,6 +430,21 @@ class TestMain:
 
         assert self._main() == 0
         assert readme_path.read_text(encoding="utf-8") == _readme()
+
+    def test_local_coverage_report_is_ignored(self, readme_path):
+        """A coverage.xml is gitignored, never part of the commit (#133).
+
+        pre-commit runs hooks on the staged contents only, since anything else
+        gives "false-positives and false-negatives"; a report left from an
+        older run is that. CI checks the coverage where it measures it (#87).
+        """
+        readme_path.write_text(_readme(), encoding="utf-8")
+        Path("coverage.xml").write_text(
+            COVERAGE_XML.format(total=469, covered=465), encoding="utf-8"
+        )
+
+        with patch.object(validator, "collect_counts", return_value=COUNTS):
+            assert validator.main([]) == 0
 
     def test_outdated_readme_is_rewritten_and_fails(self, readme_path, capsys):
         readme_path.write_text(_readme(base=30), encoding="utf-8")
@@ -500,10 +508,9 @@ COVERAGE_XML = '<coverage lines-valid="{total}" lines-covered="{covered}"/>'
 
 
 class TestCoverageMode:
-    """CI checks the coverage where coverage.xml exists: the test job (#87).
+    """CI checks the coverage where coverage.xml is written: the test job (#87).
 
-    The hook runs in the lint job, which has no coverage.xml, so there it
-    skips the check; with --coverage a missing report fails instead.
+    The hook never checks it (#133); with --coverage a missing report fails.
     """
 
     EN_COVERAGE = "- **Total statements:** 346\n- **Covered:** 345 (99%)\n"

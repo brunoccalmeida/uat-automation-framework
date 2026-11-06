@@ -240,9 +240,9 @@ jobs:
         env:
           HEADLESS: true
 
-      # The pre-commit hook skips the coverage check where there is no
-      # coverage.xml (the lint job); check it here, where the report is
-      # written, and fail if it is missing (#87).
+      # The pre-commit hook never checks the coverage: coverage.xml is
+      # gitignored, so a local one may come from an older run (#133). Check
+      # it here, where the report is written, and fail if it is missing (#87).
       - name: Check README coverage
         if: ${{ !cancelled() }}
         run: poetry run python scripts/validate_readme_metrics.py --coverage coverage.xml

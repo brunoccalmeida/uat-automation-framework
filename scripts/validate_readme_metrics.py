@@ -8,9 +8,12 @@ fails when it changed something, so the fix shows up as a diff to review.
   rewrites the Tests/Scenarios/Steps of each row and of the TOTAL row from
   `pytest --co` and `behave --dry-run`. A file in no row, or in two, fails.
 - Layer summary: the unit/integration/E2E totals.
-- Coverage statements (from coverage.xml): only checked, skipped without it.
-  CI runs `--coverage coverage.xml` in the job that writes the report, where
-  a missing report fails (#87).
+- Coverage statements: only checked, and only with `--coverage coverage.xml`,
+  which CI runs in the job that writes the report, where a missing report
+  fails (#87). The hook never reads coverage.xml (#133): it is gitignored, and
+  pre-commit checks the staged contents only, since anything else gives
+  "false-positives and false-negatives"; a report left from an older run did.
+  Locally: `pytest --cov --cov-report=xml`, then the same `--coverage` call.
 - Translations (#39): the same rewrite, with each language's labels. Each one
   records the fingerprint of the README.md it was translated from (as MDN's
   l10n.sourceCommit) and fails once README.md changes after it.
@@ -300,22 +303,6 @@ def update_summary(
     return text, errors
 
 
-def get_coverage_statements() -> tuple[int, int]:
-    """Get total statements and covered from coverage.xml.
-
-    Returns:
-        Tuple of (total_statements, covered_statements); (0, 0) without it.
-    """
-    coverage_file = Path("coverage.xml")
-    if not coverage_file.exists():
-        print(
-            "WARN: coverage.xml not found, skipping coverage validation",
-            file=sys.stderr,
-        )
-        return (0, 0)
-    return read_coverage(coverage_file)
-
-
 def read_coverage(coverage_file: Path) -> tuple[int, int]:
     """Read (total_statements, covered_statements) from a coverage.xml."""
     root = ET.parse(coverage_file).getroot()
@@ -329,8 +316,6 @@ def check_coverage(
     text: str, actual: tuple[int, int], locale: Locale = EN
 ) -> list[str]:
     """Compare the README coverage statements with coverage.xml."""
-    if actual == (0, 0):
-        return []
     errors = []
     checks = (
         ("Total statements", locale.statements, actual[0]),
@@ -372,15 +357,13 @@ def check_translation_source(path: str, text: str, fingerprint: str) -> list[str
     return []
 
 
-def _update_readme(
-    path: str, counts: Counts, locale: Locale, coverage: tuple[int, int]
-) -> tuple[str, list[str]]:
+def _update_readme(path: str, counts: Counts, locale: Locale) -> tuple[str, list[str]]:
     """Rewrite one README file; return its new text and what needs a human."""
     readme_path = Path(path)
     original = readme_path.read_text(encoding="utf-8")
     text, errors = update_tables(original, counts, locale)
     text, summary_errors = update_summary(text, counts, locale)
-    errors += summary_errors + check_coverage(text, coverage, locale)
+    errors += summary_errors
     errors = [f"{path}: {error}" for error in errors]
     if text != original:
         readme_path.write_text(text, encoding="utf-8")
@@ -393,9 +376,8 @@ def _update_readme(
 def check_coverage_report(coverage_file: Path) -> list[str]:
     """Check the coverage lines of every README against a required report.
 
-    For CI (#87): the hook runs where there is no coverage.xml and skips the
-    check, so the job that writes the report checks it, and a missing report
-    fails instead of skipping.
+    For CI (#87): the hook never checks the coverage (#133), so the job that
+    writes the report checks it, and a missing report fails.
     """
     if not coverage_file.exists():
         return [f"{coverage_file} not found: run the tests with --cov-report=xml"]
@@ -436,14 +418,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1
 
-    coverage = get_coverage_statements()
-    readme, errors = _update_readme(README, counts, EN, coverage)
+    readme, errors = _update_readme(README, counts, EN)
     fingerprint = source_fingerprint(readme, counts)
     for path, locale in TRANSLATIONS.items():
         if not Path(path).exists():
             errors.append(f"{path} not found")
             continue
-        text, translation_errors = _update_readme(path, counts, locale, coverage)
+        text, translation_errors = _update_readme(path, counts, locale)
         errors += translation_errors + check_translation_source(path, text, fingerprint)
     return _report(errors)
 

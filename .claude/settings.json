@@ -1,4 +1,36 @@
 {
+  "permissions": {
+    "deny": [
+      "Bash(gh pr merge *--admin*)",
+      "Bash(git push *--force*)",
+      "Bash(git push -f *)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)",
+      "Bash(git push * +*)",
+      "Bash(git push * master)",
+      "Bash(git push * master *)",
+      "Bash(git push *:master)",
+      "Bash(git push *:master *)",
+      "Bash(git push *refs/heads/master)",
+      "Bash(git push *refs/heads/master *)",
+      "PowerShell(gh pr merge *--admin*)",
+      "PowerShell(git push *--force*)",
+      "PowerShell(git push -f *)",
+      "PowerShell(git push * -f)",
+      "PowerShell(git push * -f *)",
+      "PowerShell(git push * +*)",
+      "PowerShell(git push * master)",
+      "PowerShell(git push * master *)",
+      "PowerShell(git push *:master)",
+      "PowerShell(git push *:master *)",
+      "PowerShell(git push *refs/heads/master)",
+      "PowerShell(git push *refs/heads/master *)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Edit(.env)",
+      "Edit(.env.*)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {

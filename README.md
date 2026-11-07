@@ -12,7 +12,7 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 
 ## ⚡ At a Glance
 
-- **Tests:** 678 unit · 96 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
+- **Tests:** 680 unit · 96 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
 - **Real browsers:** integration and smoke suites run on Chrome and Firefox in CI, inside docker-selenium containers
 - **Quality gates:** `master` only accepts a PR with green CI and a clean `pip-audit`; every GitHub Action is pinned to a commit SHA
 - **Live report:** Allure, republished on every merge to `master`: 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -370,10 +370,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 678 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 680 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 96 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 774 unit/integration tests + 73 E2E scenarios
+- **Total**: 776 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -404,7 +404,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **LoginPage** | `tests/test_login_page.py` | 16 | 100% | ✅ Complete |
 | **CartPage** | `tests/test_cart_page.py` | 13 | 100% | ✅ Complete |
 | **InventoryPage** | `tests/test_inventory_page.py` | 26 | 100% | ✅ Complete |
-| **HeaderComponent** | `tests/test_header_component.py` | 18 | 100% | ✅ Complete |
+| **HeaderComponent** | `tests/test_header_component.py` | 20 | 100% | ✅ Complete |
 | **ProductDetailsPage** | `tests/test_product_details_page.py` | 15 | 100% | ✅ Complete |
 | **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 15 | 100% | ✅ Complete |
 | **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 16 | 100% | ✅ Complete |
@@ -432,11 +432,11 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Complete |
-| **TOTAL** | | **678** | **100%** | **Complete** |
+| **TOTAL** | | **680** | **100%** | **Complete** |
 
 **Code Coverage:**
-- **Total statements:** 474
-- **Covered:** 473 (99%)
+- **Total statements:** 479
+- **Covered:** 478 (99%)
 - **Pages Module**: 100%
 - **Core Module**: 99% (1 uncovered line in `core/config.py`)
 

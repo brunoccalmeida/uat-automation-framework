@@ -5,6 +5,7 @@ link and burger menu.
 """
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 from pages import cart_page, login_page
 from pages.base_page import BasePage
@@ -24,6 +25,7 @@ class HeaderComponent(BasePage):
     SHOPPING_CART_LINK = (By.CLASS_NAME, "shopping_cart_link")
     MENU_BUTTON = (By.ID, "react-burger-menu-btn")
     LOGOUT_LINK = (By.ID, "logout_sidebar_link")
+    MENU_PANEL = (By.CLASS_NAME, "bm-menu-wrap")
 
     def get_cart_item_count(self) -> int:
         """Get number of items in shopping cart.
@@ -45,12 +47,31 @@ class HeaderComponent(BasePage):
         self.click(self.SHOPPING_CART_LINK)
         return cart_page.CartPage(self.driver).wait_until_loaded()
 
+    def wait_until_menu_is_closed(self) -> None:
+        """Wait until the burger menu has settled closed.
+
+        The menu (react-burger-menu) starts a 500 ms timer when it mounts or
+        closes; the timer then hides the panel (``hidden``) if the menu was
+        closed when the timer started. A click before the timer fires opens a
+        menu that the timer hides again (#129), so ``hidden`` marks the state
+        that is safe to click from.
+
+        Raises:
+            TimeoutException: If the menu panel never carries ``hidden``.
+        """
+        self.wait.until(
+            EC.element_attribute_to_include(self.MENU_PANEL, "hidden"),
+            message="the burger menu did not settle closed",
+        )
+
     def open_menu(self) -> None:
         """Open the burger menu.
 
-        Returns once the menu has finished sliding in: its links count as
-        clickable while still off screen.
+        Clicks only once the menu has settled closed, and returns once the
+        menu has finished sliding in: its links count as clickable while
+        still off screen.
         """
+        self.wait_until_menu_is_closed()
         self.click(self.MENU_BUTTON)
         self.wait_until_stable(self.LOGOUT_LINK)
 

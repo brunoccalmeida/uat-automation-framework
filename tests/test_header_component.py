@@ -115,11 +115,11 @@ class TestOpenMenu:
     def test_open_menu_waits_until_closed_clicks_then_waits_until_stable(self):
         """open_menu clicks only once the menu has settled closed (#129).
 
-        The menu hides itself (``hidden``) 500 ms after it mounts; a click just
-        before that timer fires opens the menu, which the timer then hides, so
-        the click must wait for that state. The Logout link counts as clickable
-        while it still slides in from off screen, so the click must be followed
-        by a wait for it to stop moving.
+        The menu hides itself (``hidden``) 500 ms after it mounts; if that
+        timer fires between a click and the effect that cancels it, it hides
+        the menu just opened, so the click must wait for ``hidden``. The Logout
+        link counts as clickable while it still slides in from off screen, so
+        the click must be followed by a wait for it to stop moving.
         """
         header = HeaderComponent(Mock())
 

@@ -51,10 +51,11 @@ class HeaderComponent(BasePage):
         """Wait until the burger menu has settled closed.
 
         The menu (react-burger-menu) starts a 500 ms timer when it mounts or
-        closes; the timer then hides the panel (``hidden``) if the menu was
-        closed when the timer started. A click before the timer fires opens a
-        menu that the timer hides again (#129), so ``hidden`` marks the state
-        that is safe to click from.
+        closes; the timer hides the panel (``hidden``) if the menu was closed
+        when the timer started. Opening the menu cancels that timer, but only
+        once React has run the effect of the click: if the timer fires in
+        between, it hides the menu that has just opened (#129). Once the panel
+        carries ``hidden``, no such timer is pending, so the click is safe.
 
         Raises:
             TimeoutException: If the menu panel never carries ``hidden``.

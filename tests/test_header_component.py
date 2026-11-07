@@ -58,6 +58,10 @@ class TestHeaderComponentLocators:
         """LOGOUT_LINK locator should use correct ID."""
         assert HeaderComponent.LOGOUT_LINK == (By.ID, "logout_sidebar_link")
 
+    def test_menu_panel_locator(self):
+        """MENU_PANEL locator should use the burger menu's wrapper class."""
+        assert HeaderComponent.MENU_PANEL == (By.CLASS_NAME, "bm-menu-wrap")
+
 
 class TestGetCartItemCount:
     """Test get_cart_item_count method."""
@@ -108,27 +112,53 @@ class TestClickShoppingCart:
 class TestOpenMenu:
     """Test open_menu method."""
 
-    def test_open_menu_clicks_then_waits_for_the_menu_to_stop_sliding(self):
-        """open_menu returns only once the sliding menu has opened.
+    def test_open_menu_waits_until_closed_clicks_then_waits_until_stable(self):
+        """open_menu clicks only once the menu has settled closed (#129).
 
-        The Logout link counts as clickable while it still slides in from off
-        screen, so the click must be followed by a wait for it to stop moving.
+        The menu hides itself (``hidden``) 500 ms after it mounts; if that
+        timer fires between a click and the effect that cancels it, it hides
+        the menu just opened, so the click must wait for ``hidden``. The Logout
+        link counts as clickable while it still slides in from off screen, so
+        the click must be followed by a wait for it to stop moving.
         """
         header = HeaderComponent(Mock())
 
         with (
+            patch.object(header, "wait_until_menu_is_closed") as mock_closed,
             patch.object(header, "click") as mock_click,
             patch.object(header, "wait_until_stable") as mock_stable,
         ):
             calls = Mock()
+            calls.attach_mock(mock_closed, "wait_until_menu_is_closed")
             calls.attach_mock(mock_click, "click")
             calls.attach_mock(mock_stable, "wait_until_stable")
             header.open_menu()
 
         assert calls.mock_calls == [
+            call.wait_until_menu_is_closed(),
             call.click(HeaderComponent.MENU_BUTTON),
             call.wait_until_stable(HeaderComponent.LOGOUT_LINK),
         ]
+
+
+class TestWaitUntilMenuIsClosed:
+    """Test wait_until_menu_is_closed method."""
+
+    def test_waits_for_the_menu_panel_to_carry_the_hidden_attribute(self):
+        """Closed means settled: the panel carries ``hidden``, not just off screen."""
+        header = HeaderComponent(Mock())
+        header.wait = Mock()
+
+        with patch("pages.header_component.EC") as mock_ec:
+            header.wait_until_menu_is_closed()
+
+            mock_ec.element_attribute_to_include.assert_called_once_with(
+                HeaderComponent.MENU_PANEL, "hidden"
+            )
+            header.wait.until.assert_called_once_with(
+                mock_ec.element_attribute_to_include.return_value,
+                message="the burger menu did not settle closed",
+            )
 
 
 class TestClickLogout:

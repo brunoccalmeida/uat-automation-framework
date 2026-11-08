@@ -397,17 +397,20 @@ jobs:
 
   # Secret scanning with gitleaks over the history of the tested commit (on a
   # PR, the merge commit: what master would become). A key pushed to a public
-  # repository is leaked even if a later commit deletes it, so every commit
-  # is scanned, not only the last diff. The binary instead of gitleaks-action
+  # repository is leaked even if a later commit deletes it, so every commit's
+  # diff is scanned, not only the last one (a merge commit has no diff in git
+  # log: a secret added only in a conflict resolution is seen once the squash
+  # reaches master). The binary instead of gitleaks-action
   # (same job as playwright-qa-starter-kit): since v2 the action has its own
   # licence and needs a registered key under organizations, while the scanner
   # is MIT and needs neither. The release is pinned by version and SHA-256
   # (from the release's checksums file); Dependabot does not track it, so bump
   # both by hand.
   #
-  # Triage a false positive with a "gitleaks:allow" comment on the line or its
-  # fingerprint in .gitleaksignore; a real secret is rotated first, then
-  # removed. --redact keeps a found secret out of this public run's log.
+  # Triage a false positive with a "gitleaks:allow" comment on the line. A
+  # fingerprint in .gitleaksignore embeds the commit SHA, so use it only for a
+  # commit already on master: the squash merge gives a PR's commits a new SHA.
+  # A real secret is rotated first, then removed. --redact keeps a found secret out of this public run's log.
   secret-scan:
     runs-on: ubuntu-latest
     timeout-minutes: 5  # the minimum of the rule: the full scan takes seconds

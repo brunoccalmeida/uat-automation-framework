@@ -57,9 +57,11 @@ class TestSecretScan:
         assert checkout["with"]["fetch-depth"] == 0
 
     def test_scan_reads_the_git_history_of_the_tested_commit(self):
-        """``git`` mode reads commits; ``HEAD`` keeps other branches out."""
+        """``git`` mode reads commits; bare ``HEAD`` keeps other branches out."""
         run = _step_running(SECRET_SCAN, "--log-opts=HEAD")["run"]
         assert '/gitleaks" git ' in run
+        # A range such as HEAD~1..HEAD still contains the text above
+        assert re.search(r"--log-opts=HEAD(\s|$)", run), "scan must not take a range"
 
     def test_scan_keeps_found_secrets_out_of_the_public_log(self):
         assert "--redact" in _step_running(SECRET_SCAN, "--log-opts=HEAD")["run"]

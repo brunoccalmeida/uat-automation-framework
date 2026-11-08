@@ -395,6 +395,78 @@ jobs:
       - name: Run pre-commit hooks
         run: poetry run pre-commit run --all-files --show-diff-on-failure
 
+  # Secret scanning with gitleaks over the history of the tested commit (on a
+  # PR, the merge commit: what master would become). A key pushed to a public
+  # repository is leaked even if a later commit deletes it, so every commit's
+  # diff is scanned, not only the last one (a merge commit has no diff in git
+  # log: a secret added only in a conflict resolution is seen once the squash
+  # reaches master). The binary instead of gitleaks-action
+  # (same job as playwright-qa-starter-kit): since v2 the action has its own
+  # licence and needs a registered key under organizations, while the scanner
+  # is MIT and needs neither. The release is pinned by version and SHA-256
+  # (from the release's checksums file); Dependabot does not track it, so bump
+  # both by hand.
+  #
+  # Triage a false positive with a "gitleaks:allow" comment on the line. A
+  # fingerprint in .gitleaksignore embeds the commit SHA, so use it only for a
+  # commit already on master: the squash merge gives a PR's commits a new SHA.
+  # A real secret is rotated first, then removed. --redact keeps a found secret out of this public run's log.
+  secret-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5  # the minimum of the rule: the full scan takes seconds
+
+    steps:
+      # fetch-depth 0: the default shallow clone holds one commit, so a secret
+      # added and deleted within a PR would go unseen
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tar.gz" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+
+      # --log-opts=HEAD: without it gitleaks runs "git log --all", and with
+      # fetch-depth 0 a secret on any other branch would fail every PR. This
+      # check judges what master would contain. Exits 1 on any leak.
+      - name: Scan the git history for secrets
+        run: '"$RUNNER_TEMP/gitleaks" git --log-opts=HEAD --redact --verbose .'
+
+  # Security audit of the workflows and dependabot.yml with zizmor (run it
+  # locally on ".", the same scope; docs.zizmor.sh): template injection,
+  # excessive permissions, persisted credentials, any action not pinned by
+  # full commit SHA and Dependabot cooldown. Regular persona (the default, "best for ordinary
+  # local use as well as use in CI"); ignore a finding only inline, with a
+  # reason: "# zizmor: ignore[rule]".
+  workflow-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5  # the minimum of the rule: the audit takes seconds
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      # advanced-security: false prints the findings and fails the job; true
+      # would upload SARIF to code scanning and always pass, which ci-passed
+      # could not see. version is pinned (default: latest) so a new zizmor
+      # release cannot fail a PR that changed nothing; Dependabot bumps the
+      # action, not this input, so bump it by hand.
+      - name: Audit the workflows
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd  # v0.8.1
+        with:
+          advanced-security: false
+          annotations: true
+          version: 1.32.0
+
   # The single required check of this workflow (ruleset "Protect master").
   # Matrix jobs are named after their values ("smoke-matrix (chrome)"): requiring them
   # by name would block every PR after a version bump, waiting for a check
@@ -405,7 +477,7 @@ jobs:
   ci-passed:
     runs-on: ubuntu-latest
     timeout-minutes: 5  # ~3x the slowest recent run (0.1 min)
-    needs: [smoke-matrix, integration-matrix, test, build-report, lint]
+    needs: [smoke-matrix, integration-matrix, test, build-report, lint, secret-scan, workflow-audit]
     if: ${{ always() }}
 
     steps:

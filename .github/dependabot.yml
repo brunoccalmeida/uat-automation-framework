@@ -3,7 +3,11 @@
 # merges (master requires up-to-date branches), so fewer PRs means fewer CI
 # cycles and reviews. Only updates likely to break (Python majors) get their
 # own PR, so a failure is easy to isolate. Security updates are enabled in
-# repository settings.
+# repository settings and ignore the cooldown below (a fix must not wait).
+#
+# Cooldown: a compromised release is usually taken down within days, so
+# version updates wait 7 days (Dependabot's default is 3; 7 is what zizmor's
+# dependabot-cooldown audit in the workflow-audit job requires).
 version: 2
 updates:
   # Reads pyproject.toml + poetry.lock
@@ -11,6 +15,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     commit-message:
       prefix: "build"
@@ -26,6 +32,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "ci"
       include: "scope"
@@ -41,6 +49,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "build"
       include: "scope"

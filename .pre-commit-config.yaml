@@ -59,10 +59,13 @@ repos:
         language: system
         types: [text]
 
-  # Trailing whitespace removal
+  # Pinned by commit SHA, because a tag can be moved to other code. The
+  # "frozen" comment is what Dependabot reads to pick the next release
+  # (tests/test_precommit_pinning.py, #140).
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
     hooks:
+      # File hygiene
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
@@ -70,11 +73,7 @@ repos:
         args: ['--maxkb=1000']
       - id: check-merge-conflict
       - id: detect-private-key
-
-  # Python-specific checks
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
+      # Python-specific checks
       - id: check-ast
       - id: check-docstring-first
       - id: debug-statements

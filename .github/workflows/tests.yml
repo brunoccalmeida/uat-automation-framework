@@ -7,6 +7,13 @@ on:
     branches: [ master, main ]
   workflow_dispatch:
 
+# A new push to a PR cancels its previous run. head_ref is empty outside a PR,
+# so run_id gives each of those runs its own group: a push to master is never
+# cancelled (tests/test_workflow_hardening.py, #140).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 # Least privilege: read-only by default; jobs that publish ask for more
 permissions:
   contents: read

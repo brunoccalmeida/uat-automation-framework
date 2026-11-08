@@ -12,6 +12,13 @@ token on disk so later steps can run authenticated git commands. Any later
 step can then read it. No job here pushes with git (``deploy-report`` passes
 its own ``github_token`` to the deploy action and has no checkout), so every
 checkout opts out.
+
+``concurrency``: a new push to a pull request makes the previous run useless,
+so it is cancelled. The group combines two examples from the GitHub docs:
+``github.workflow`` keeps ``Tests`` and ``Security`` from cancelling each other
+and ``github.run_id`` is unique, so runs outside a pull request (``head_ref``
+is empty there) never share a group and a push to master is never cancelled.
+The deploy job has its own group, which queues and never cancels (#140).
 """
 
 from pathlib import Path
@@ -21,16 +28,25 @@ import yaml
 
 WORKFLOWS_DIR = Path(__file__).resolve().parent.parent / ".github" / "workflows"
 CHECKOUT_ACTION = "actions/checkout@"
+CONCURRENCY_GROUP = "${{ github.workflow }}-${{ github.head_ref || github.run_id }}"
+DEPLOY_JOB = "tests.yml::deploy-report"
 
 
-def _load_jobs():
+def _load_workflows():
+    """Return (file name, parsed content) for every workflow."""
+    return [
+        (path.name, yaml.safe_load(path.read_text(encoding="utf-8")))
+        for path in sorted(WORKFLOWS_DIR.glob("*.y*ml"))
+    ]
+
+
+def _load_jobs(workflows):
     """Return (id, job) for every job of every workflow."""
-    jobs = []
-    for workflow in sorted(WORKFLOWS_DIR.glob("*.y*ml")):
-        content = yaml.safe_load(workflow.read_text(encoding="utf-8"))
-        for job_id, job in content["jobs"].items():
-            jobs.append((f"{workflow.name}::{job_id}", job))
-    return jobs
+    return [
+        (f"{name}::{job_id}", job)
+        for name, content in workflows
+        for job_id, job in content["jobs"].items()
+    ]
 
 
 def _load_checkouts(jobs):
@@ -43,12 +59,14 @@ def _load_checkouts(jobs):
     ]
 
 
-JOBS = _load_jobs()
+WORKFLOWS = _load_workflows()
+JOBS = _load_jobs(WORKFLOWS)
 CHECKOUTS = _load_checkouts(JOBS)
 
 
 def test_workflows_have_jobs_and_checkouts():
     """Guard against a vacuous pass (wrong path or parsing finds nothing)."""
+    assert WORKFLOWS, f"no workflows found under {WORKFLOWS_DIR}"
     assert JOBS, f"no jobs found under {WORKFLOWS_DIR}"
     assert CHECKOUTS, f"no '{CHECKOUT_ACTION}' step found under {WORKFLOWS_DIR}"
 
@@ -101,6 +119,60 @@ def test_job_has_timeout(job):
     """Each job must cap its run time with a positive ``timeout-minutes``."""
     problem = timeout_problem(job)
     assert problem is None, problem
+
+
+def concurrency_problem(workflow):
+    """Return why ``workflow`` breaks the concurrency rule, or None if it complies."""
+    concurrency = workflow.get("concurrency")
+    if not isinstance(concurrency, dict):
+        return f"workflow has no 'concurrency' mapping (got {concurrency!r})"
+    if concurrency.get("group") != CONCURRENCY_GROUP:
+        return f"concurrency group must be '{CONCURRENCY_GROUP}'"
+    # "is True": an expression here would hide which runs get cancelled
+    if concurrency.get("cancel-in-progress") is not True:
+        return "concurrency must set 'cancel-in-progress: true'"
+    return None
+
+
+@pytest.mark.parametrize(
+    "workflow,expected",
+    [
+        (
+            {"concurrency": {"group": CONCURRENCY_GROUP, "cancel-in-progress": True}},
+            None,
+        ),
+        ({}, "no 'concurrency'"),
+        ({"concurrency": "some-group"}, "no 'concurrency'"),
+        (
+            {"concurrency": {"group": "${{ github.ref }}", "cancel-in-progress": True}},
+            "concurrency group must be",
+        ),
+        ({"concurrency": {"group": CONCURRENCY_GROUP}}, "cancel-in-progress"),
+    ],
+    ids=["valid", "missing", "short-form", "group-cancels-master", "no-cancel"],
+)
+def test_concurrency_problem(workflow, expected):
+    """The rule itself, on synthetic workflows (including cases absent today)."""
+    problem = concurrency_problem(workflow)
+    if expected is None:
+        assert problem is None
+    else:
+        assert problem is not None and expected in problem
+
+
+@pytest.mark.parametrize(
+    "workflow", [content for _, content in WORKFLOWS], ids=[n for n, _ in WORKFLOWS]
+)
+def test_workflow_cancels_superseded_runs(workflow):
+    """Each workflow must cancel the previous run of the same pull request."""
+    problem = concurrency_problem(workflow)
+    assert problem is None, problem
+
+
+def test_deploy_is_never_cancelled():
+    """Cancelling a deploy midway could leave the public report half published."""
+    deploy = dict(JOBS)[DEPLOY_JOB]
+    assert deploy["concurrency"]["cancel-in-progress"] is False
 
 
 @pytest.mark.parametrize(

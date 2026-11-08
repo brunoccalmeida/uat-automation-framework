@@ -42,6 +42,18 @@ updates:
       github-actions:
         patterns: ["*"]
 
+  # Hooks in .pre-commit-config.yaml, frozen by commit SHA (#140): without
+  # this entry a frozen hook would silently stop receiving fixes.
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "build"
+      include: "scope"
+
   # Selenium Grid images in compose.yaml, pinned by digest (#116). Chrome and
   # Firefox come from the same docker-selenium release and must move together
   # (tests/test_selenium_grid_ci.py): one PR for both.

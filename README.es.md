@@ -1,5 +1,5 @@
 <!-- LTeX: language=es -->
-<!-- translation-source: README.md sha256:aca7151df1233ffaa83a1cffd5ddb240a87b13a7d88e56d1ec547d0155c308c7 -->
+<!-- translation-source: README.md sha256:8d4677f0750fe8ad20e0d3b5cfcd8854c202b1315db68e00376268c4f4ac81e8 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -14,7 +14,7 @@ Framework completo de automatización UAT con Python, Behave (BDD) y Selenium pa
 
 ## ⚡ De un Vistazo
 
-- **Pruebas:** 742 unitarias · 96 de integración · 73 escenarios E2E, construidas con TDD de doble ciclo (los escenarios de Behave guían las pruebas unitarias de pytest)
+- **Pruebas:** 760 unitarias · 96 de integración · 73 escenarios E2E, construidas con TDD de doble ciclo (los escenarios de Behave guían las pruebas unitarias de pytest)
 - **Navegadores reales:** las suites de integración y smoke corren en Chrome y Firefox en el CI, dentro de contenedores docker-selenium
 - **Controles de calidad:** `master` solo acepta un PR con CI en verde y `pip-audit` limpio; cada GitHub Action está fijada por SHA de commit
 - **Informe en vivo:** Allure, republicado en cada merge a `master`: 📊 **[Ver el Informe de Pruebas Más Reciente](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -314,6 +314,7 @@ El proyecto usa **GitHub Actions** para la integración continua:
 - ✅ **Artefactos de prueba** subidos para revisión
 - ✅ **Informes Allure** publicados en GitHub Pages con historial
 - ✅ **Auditoría de vulnerabilidades** con `pip-audit` (PyPI/OSV) en cada pull request y a diario, como segunda fuente junto a Dependabot (GitHub Advisory Database)
+- ✅ **Búsqueda de secretos** en todo el historial de git con `gitleaks` y **auditoría de los workflows** con `zizmor` (inyección de plantillas, permisos excesivos, actions sin fijar por SHA), ambas en cada pull request
 
 **Ver los Informes de Prueba:** [https://brunoccalmeida.github.io/uat-automation-framework/](https://brunoccalmeida.github.io/uat-automation-framework/)
 
@@ -372,10 +373,10 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 ```
 
 **Distribución por Capa:**
-- **Pruebas Unitarias**: 742 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
+- **Pruebas Unitarias**: 760 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
 - **Pruebas de Integración**: 96 pruebas (Page Objects + navegador real, incluida la sincronización de la navegación)
 - **Pruebas E2E**: 73 escenarios, 463 steps (jornadas completas de usuario)
-- **Total**: 838 pruebas unitarias/de integración + 73 escenarios E2E
+- **Total**: 856 pruebas unitarias/de integración + 73 escenarios E2E
 
 **Cuándo Usar Cada Capa:**
 | Tipo de Prueba | Propósito | Velocidad | Navegador | Ejemplo |
@@ -418,15 +419,16 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **Step definitions (lógica O, contraseña de la config, page objects locales)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 20 | N/A | ✅ Completo |
 | **Hooks de Behave (captura y URL del fallo en Allure)** | `tests/test_environment.py` | 9 | N/A | ✅ Completo |
 | **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Completo |
-| **Fijación de las actions (CI)** | `tests/test_workflow_pinning.py` | 29 | N/A | ✅ Completo |
-| **Endurecimiento de los workflows (CI)** | `tests/test_workflow_hardening.py` | 21 | N/A | ✅ Completo |
+| **Comentarios de versión de las actions (CI)** | `tests/test_workflow_version_comments.py` | 32 | N/A | ✅ Completo |
+| **Controles de seguridad: gitleaks y zizmor (CI)** | `tests/test_security_gates_ci.py` | 10 | N/A | ✅ Completo |
+| **Endurecimiento de los workflows (CI)** | `tests/test_workflow_hardening.py` | 25 | N/A | ✅ Completo |
 | **Puerta del CI (check obligatorio)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Completo |
 | **Selenium Grid en Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 19 | N/A | ✅ Completo |
 | **Subida a Codecov (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Completo |
 | **Entorno y ejecutor de Allure (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Completo |
 | **Captura y HTML de los fallos de integración (CI)** | `tests/test_failure_artifacts.py` | 10 | N/A | ✅ Completo |
 | **Reglas del agente (tamaño, sincronía, skills, subagente revisor, diagnósticos del editor, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Completo |
-| **Enlaces de la documentación (toda ruta citada existe)** | `tests/test_doc_links.py` | 106 | N/A | ✅ Completo |
+| **Enlaces de la documentación (toda ruta citada existe)** | `tests/test_doc_links.py` | 107 | N/A | ✅ Completo |
 | **Hook de salida de pruebas del agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
 | **Protecciones del agente (reglas de deny)** | `tests/test_agent_guardrails.py` | 61 | N/A | ✅ Completo |
 | **Merge con checks en verde (`/ship-pr`: checks obligatorios del ruleset, lista de permitidos)** | `tests/test_merge_when_green.py` | 24 | N/A | ✅ Completo |
@@ -435,7 +437,7 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **Puerta de codificación (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Clave de caché del venv (CI, versión exacta de Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
 | **Fuente de la versión de Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
-| **TOTAL** | | **742** | **100%** | **Completo** |
+| **TOTAL** | | **760** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 479

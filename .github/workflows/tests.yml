@@ -436,9 +436,10 @@ jobs:
       - name: Scan the git history for secrets
         run: '"$RUNNER_TEMP/gitleaks" git --log-opts=HEAD --redact --verbose .'
 
-  # Security audit of the workflows with zizmor (docs.zizmor.sh): template
-  # injection, excessive permissions, persisted credentials and any action not
-  # pinned by full commit SHA. Regular persona (the default, "best for ordinary
+  # Security audit of the workflows and dependabot.yml with zizmor (run it
+  # locally on ".", the same scope; docs.zizmor.sh): template injection,
+  # excessive permissions, persisted credentials, any action not pinned by
+  # full commit SHA and Dependabot cooldown. Regular persona (the default, "best for ordinary
   # local use as well as use in CI"); ignore a finding only inline, with a
   # reason: "# zizmor: ignore[rule]".
   workflow-audit:

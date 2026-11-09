@@ -121,9 +121,9 @@ A recomendação "Trim CLAUDE.md" não apareceu. Este chat inclui ~14 KB das pr�
 | `PROJECT_SESSION_SUMMARY.md` | Bytes | Tokens |
 | --- | ---: | ---: |
 | Antes | 77.981 | **30.307** (contador do `Read`, ao recusar o arquivo acima do limite de 25 mil) |
-| Depois | ~9.300 | ~3.600 (estimativa: bytes ÷ 2,57, a proporção do "antes") |
+| Depois | 8.877 | ≤ 15,1 mil (`/context`, *Messages* de 10 para 15,1 mil em chat novo); ~3.500 só do arquivo (estimativa: bytes ÷ 2,57, a proporção do "antes") |
 
-O "depois" em `/context` falta: rode em chat novo, logo após ler o resumo, e compare a linha *Messages*. O arquivo não é `@import`, então não aparece em *Memory files*, e sem a leitura a diferença seria zero. O `/context` tirado no chat desta missão (*Messages* 26,1 mil) não serve de "antes": ali o arquivo foi lido em trecho e com as linhas cortadas.
+Os 15,1 mil são teto, não o custo do arquivo: o `/context` anterior ao primeiro turno não inclui a resposta do agente nem, por suposição, o que o sistema anexa à primeira mensagem. Separar exigiria um chat de controle (só um "ok", sem ler o arquivo), dispensado porque não mudaria nenhuma decisão: os bytes caíram 89%. Os dois números de tokens vêm de instrumentos diferentes, e não há "antes" pelo mesmo protocolo: o arquivo antigo não cabia em um `Read`, e no chat desta missão (*Messages* 26,1 mil) foi lido em trecho. O arquivo não é `@import`, então não aparece em *Memory files*; sem a leitura, a diferença seria zero.
 
 ### Registro por missão (`/usage` antes do `/clear`): encerrado
 

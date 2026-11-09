@@ -1,5 +1,5 @@
 <!-- LTeX: language=es -->
-<!-- translation-source: README.md sha256:8c3b485307ea069b443f36741a1413b745cb2549cf6f5f3ecd7863c6e8c94df0 -->
+<!-- translation-source: README.md sha256:7d31572c74d39565391958a9f14dfa0feb8d2fc5b67cc4cd1e5f7ee5f5315277 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -14,7 +14,7 @@ Framework completo de automatización UAT con Python, Behave (BDD) y Selenium pa
 
 ## ⚡ De un Vistazo
 
-- **Pruebas:** 786 unitarias · 96 de integración · 73 escenarios E2E, construidas con TDD de doble ciclo (los escenarios de Behave guían las pruebas unitarias de pytest)
+- **Pruebas:** 794 unitarias · 96 de integración · 73 escenarios E2E, construidas con TDD de doble ciclo (los escenarios de Behave guían las pruebas unitarias de pytest)
 - **Navegadores reales:** las suites de integración y smoke corren en Chrome y Firefox en el CI, dentro de contenedores docker-selenium
 - **Controles de calidad:** `master` solo acepta un PR con CI en verde y `pip-audit` limpio; cada GitHub Action está fijada por SHA de commit
 - **Informe en vivo:** Allure, republicado en cada merge a `master`: 📊 **[Ver el Informe de Pruebas Más Reciente](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -373,10 +373,10 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 ```
 
 **Distribución por Capa:**
-- **Pruebas Unitarias**: 786 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
+- **Pruebas Unitarias**: 794 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
 - **Pruebas de Integración**: 96 pruebas (Page Objects + navegador real, incluida la sincronización de la navegación)
 - **Pruebas E2E**: 73 escenarios, 463 steps (jornadas completas de usuario)
-- **Total**: 882 pruebas unitarias/de integración + 73 escenarios E2E
+- **Total**: 890 pruebas unitarias/de integración + 73 escenarios E2E
 
 **Cuándo Usar Cada Capa:**
 | Tipo de Prueba | Propósito | Velocidad | Navegador | Ejemplo |
@@ -428,17 +428,17 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **Subida a Codecov (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Completo |
 | **Entorno y ejecutor de Allure (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Completo |
 | **Captura y HTML de los fallos de integración (CI)** | `tests/test_failure_artifacts.py` | 10 | N/A | ✅ Completo |
-| **Reglas del agente (tamaño, sincronía, skills, subagente revisor, diagnósticos del editor, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Completo |
+| **Reglas del agente (tamaño, sincronía, skills, subagente revisor, diagnósticos del editor, code intelligence)** | `tests/test_agent_rules.py` | 48 | N/A | ✅ Completo |
 | **Enlaces de la documentación (toda ruta citada existe)** | `tests/test_doc_links.py` | 108 | N/A | ✅ Completo |
 | **Hook de salida de pruebas del agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
 | **Protecciones del agente (reglas de deny)** | `tests/test_agent_guardrails.py` | 61 | N/A | ✅ Completo |
-| **Merge con checks en verde (`/ship-pr`: checks obligatorios del ruleset, lista de permitidos)** | `tests/test_merge_when_green.py` | 24 | N/A | ✅ Completo |
+| **Espera del auto-merge nativo (`/ship-pr`: resultado y checks extra)** | `tests/test_wait_for_merge.py` | 29 | N/A | ✅ Completo |
 | **Puerta de lint (pre-commit + CI + orden de imports en el editor, ruff en lugar de flake8, ninguna regla en dos linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Completo |
 | **Métricas de los READMEs (sincronía por fila desde la columna Fuente, traducciones)** | `tests/test_validate_readme_metrics.py` | 51 | N/A | ✅ Completo |
 | **Puerta de codificación (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Clave de caché del venv (CI, versión exacta de Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
 | **Fuente de la versión de Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
-| **TOTAL** | | **786** | **100%** | **Completo** |
+| **TOTAL** | | **794** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 479

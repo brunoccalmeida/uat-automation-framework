@@ -143,7 +143,7 @@ class TestSkills:
     @pytest.mark.parametrize(
         "name, procedure",
         [
-            ("ship-pr", "scripts/merge_when_green.py"),
+            ("ship-pr", "scripts/wait_for_merge.py"),
             # the session record rides in the mission PR (#126)
             ("close-mission", "nunca abra PR separado de registro"),
         ],
@@ -157,8 +157,21 @@ class TestSkills:
         "step", ["--match-head-commit", "gh run watch", "gh pr checks --watch"]
     )
     def test_merge_steps_left_the_always_loaded_rules(self, step):
-        # scripts/merge_when_green.py waits and merges; its docstring says why
+        # the /ship-pr skill holds them; scripts/wait_for_merge.py says why
         assert step not in _always_loaded_text()
+
+    def test_ship_pr_enables_native_auto_merge_bound_to_the_head(self):
+        _, body = _split_frontmatter(SKILLS / "ship-pr" / "SKILL.md")
+        assert "gh pr merge <n> --auto --squash --match-head-commit <sha>" in body
+
+    def test_ship_pr_cleans_up_only_after_confirming_merged(self):
+        _, body = _split_frontmatter(SKILLS / "ship-pr" / "SKILL.md")
+        confirm = body.index("`MERGED`")
+        assert confirm < body.index("git pull --ff-only")
+
+    def test_ship_pr_reads_live_state_when_a_wait_stops(self):
+        _, body = _split_frontmatter(SKILLS / "ship-pr" / "SKILL.md")
+        assert "estado real" in body
 
 
 class TestReviewerSubagent:

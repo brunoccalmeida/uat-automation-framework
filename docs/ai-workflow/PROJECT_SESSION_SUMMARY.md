@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 09/11/2026, missão #144 (configuração por ambiente validado).
+**Última atualização:** 09/11/2026, missão #160 (`wait_for_merge` confirma `BEHIND` e `DIRTY` em segunda leitura).
 
 ---
 
@@ -32,7 +32,7 @@
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido: #160** (P2, visibilidade: o `wait_for_merge` reporta como `BEHIND` um PR já integrado). Depois, as demais P2 por `gh issue list`. A #145 cita a lição do #129: fontes no corpo do PR #139 e no registro apontado no topo.
+**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica). A #145 cita a lição do #129: fontes no corpo do PR #139 e no registro apontado no topo.
 
 **Ordem combinada (06/11/2026), item que falta:** bugs conhecidos no estilo do `playwright-qa-starter-kit` (afirmar o comportamento correto, marcar como falha esperada, apontar para um `KNOWN_ISSUES.md`).
 
@@ -84,6 +84,7 @@ O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos 
 - Em PR, triagem do gitleaks com `gitleaks:allow`: o fingerprint do `.gitleaksignore` contém o SHA, que o squash troca (#147).
 - `test_doc_links` parametriza por arquivo versionado: a contagem do README muda ao dar `git add` em arquivo novo (#147).
 - `gh` com 5xx: antes de repetir uma escrita, confira se ela ocorreu (#125).
+- `gh --jq` com aspas duplas internas quebra no PowerShell 5.1, que as remove ao chamar executável nativo: rode pelo Bash tool (#160).
 - O `permissions.deny` `Edit(.env.*)` também pega o `.env.example`: variável nova nele é edição humana (#144).
 - Subagente criado no meio da sessão só carrega no próximo chat; skill em pasta nova pede `/reload-skills` (#101).
 

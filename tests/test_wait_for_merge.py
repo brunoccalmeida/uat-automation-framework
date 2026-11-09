@@ -202,12 +202,34 @@ class TestOutcome:
         assert "no required checks" in captured.out
 
     @pytest.mark.parametrize("state", ["BEHIND", "DIRTY"])
-    def test_state_that_never_merges_by_itself_stops(self, state, capsys):
+    def test_state_that_never_merges_by_itself_stops_once_confirmed(
+        self, state, capsys
+    ):
         clock = Clock()
         gh = FakeGh(prs=[_pr(merge_state=state)], check_runs=[PENDING])
         assert _main(gh, clock=clock) == 1
-        assert state in capsys.readouterr().err
-        assert clock.sleeps == 0
+        assert f"not merged: merge state is {state}" in capsys.readouterr().err
+        assert clock.sleeps == 1
+
+    @pytest.mark.parametrize("state", ["BEHIND", "DIRTY"])
+    def test_single_read_of_a_stopping_state_does_not_end_the_wait(self, state):
+        gh = FakeGh(prs=[_pr(merge_state=state), MERGED], check_runs=[PENDING])
+        assert _main(gh) == 0
+
+    def test_merge_seen_after_behind_still_reports_extra_checks(self, capsys):
+        failed = [*GREEN, _run("codecov/patch", conclusion="failure")]
+        gh = FakeGh(prs=[_pr(merge_state="BEHIND"), MERGED], check_runs=[failed])
+        assert _main(gh) == 0
+        assert "WARNING: codecov/patch: failure" in capsys.readouterr().out
+
+    def test_confirmation_needs_two_reads_in_a_row(self):
+        behind = _pr(merge_state="BEHIND")
+        gh = FakeGh(prs=[behind, _pr(), behind, MERGED], check_runs=[PENDING])
+        assert _main(gh) == 0
+
+    def test_a_different_stopping_state_does_not_confirm_the_first(self):
+        prs = [_pr(merge_state="BEHIND"), _pr(merge_state="DIRTY"), MERGED]
+        assert _main(FakeGh(prs=prs, check_runs=[PENDING])) == 0
 
     def test_deadline_reports_the_last_state(self, capsys):
         clock = Clock()

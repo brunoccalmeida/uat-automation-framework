@@ -16,7 +16,8 @@ for what GitHub does not tell anyone:
    and ``gh pr merge --auto`` merges an ``UNSTABLE`` PR directly. After the
    merge the script waits for them for a bounded time and names any that did
    not pass, so a stuck or failed one is seen instead of passing in silence.
-   A check that was never created cannot be detected.
+   A check that does not exist yet when the script reads cannot be detected;
+   the Codecov checks have existed 1-2 min before ``ci-passed`` finishes.
 
 Exit code 0 = merged (warnings about extra checks, if any, are printed)
 Exit code 1 = not merged; the reason is printed to stderr
@@ -36,6 +37,8 @@ PASSING_CONCLUSIONS = {"success", "skipped", "neutral"}
 STOPPING_MERGE_STATES = {"BEHIND", "DIRTY"}
 # GitHub's maximum page size; more runs than this fail loudly, not silently
 PER_PAGE = 100
+# A hung gh call would otherwise outlive every deadline of the wait
+GH_TIMEOUT_SECONDS = 60
 STUCK_CHECK_REMEDY = (
     "Remedy: re-run the `test` job of the head commit "
     "(gh run rerun <run-id> --job <job-id>); it uploads the coverage again "
@@ -44,7 +47,7 @@ STUCK_CHECK_REMEDY = (
 
 
 class NotMerged(Exception):
-    """The PR did not merge and will not by itself; the message says why."""
+    """The wait stopped without a merge; the message says why."""
 
 
 class WaitTimedOut(Exception):
@@ -54,7 +57,12 @@ class WaitTimedOut(Exception):
 def run_gh(*args: str) -> str:
     """Run a gh command and return its standard output."""
     result = subprocess.run(
-        ["gh", *args], check=True, capture_output=True, text=True, encoding="utf-8"
+        ["gh", *args],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=GH_TIMEOUT_SECONDS,
     )
     return result.stdout
 
@@ -114,19 +122,24 @@ class MergeWatcher:
         self.now = now
         self.interval = interval
         self.required: list[str] | None = None
+        self.auto_merge_off_seen = False
 
     def _poll(self, step: Callable[[], str | None], timeout: float) -> None:
         """Repeat step() until it returns None, meaning done, or fail at the deadline.
 
-        step() returns a description of what is still pending. A failing gh
-        call means the state is not known yet, so it is kept as that description.
+        step() returns a description of what is still pending. A gh call that
+        fails, hangs or answers garbage means the state is not known yet, so it
+        is kept as that description.
         """
         deadline = self.clock() + timeout
         while True:
             try:
                 pending = step()
             except subprocess.CalledProcessError as error:
-                pending = f"gh failed: {(error.stderr or '').strip()}"
+                command = " ".join(error.cmd)
+                pending = f"gh failed: {command}: {(error.stderr or '').strip()}"
+            except (subprocess.TimeoutExpired, json.JSONDecodeError) as error:
+                pending = f"gh failed: {error}"
             if pending is None:
                 return
             if self.clock() >= deadline:
@@ -138,6 +151,8 @@ class MergeWatcher:
         return json.loads(self.gh("pr", "view", number, "--json", fields))
 
     def _required_checks(self, base: str) -> list[str]:
+        if self.required is not None:
+            return self.required
         rules = json.loads(
             self.gh("api", f"repos/{{owner}}/{{repo}}/rules/branches/{base}")
         )
@@ -149,6 +164,7 @@ class MergeWatcher:
         ]
         if not required:
             raise NotMerged(f"the ruleset of {base} has no required checks")
+        self.required = required
         return required
 
     def _check_runs(self, sha: str) -> list[dict]:
@@ -163,8 +179,6 @@ class MergeWatcher:
 
     def _merge_step(self, number: str, sha: str) -> str | None:
         pr = self._pr(number)
-        if self.required is None:
-            self.required = self._required_checks(pr["baseRefName"])
         if pr["state"] == "MERGED":
             return None
         if pr["state"] != "OPEN":
@@ -172,16 +186,22 @@ class MergeWatcher:
         if pr["headRefOid"] != sha:
             raise NotMerged(f"the head moved from {sha} to {pr['headRefOid']}")
 
+        required = self._required_checks(pr["baseRefName"])
         check_runs = self._check_runs(sha)
-        failed = failed_checks(self.required, check_runs)
+        failed = failed_checks(required, check_runs)
         if failed:
             raise NotMerged("required checks failed: " + ", ".join(failed))
         if pr["autoMergeRequest"] is None:
-            raise NotMerged("auto-merge is off")
+            # One read may be a PR on its way to MERGED: confirm before stopping
+            if self.auto_merge_off_seen:
+                raise NotMerged("auto-merge is off")
+            self.auto_merge_off_seen = True
+            return "auto-merge off, confirming on the next read"
+        self.auto_merge_off_seen = False
         if pr["mergeStateStatus"] in STOPPING_MERGE_STATES:
             raise NotMerged(f"merge state is {pr['mergeStateStatus']}")
 
-        unfinished = _unfinished_required(self.required, check_runs)
+        unfinished = _unfinished_required(required, check_runs)
         return f"merge state {pr['mergeStateStatus']}; " + (
             ", ".join(unfinished) or "required checks passed"
         )
@@ -190,12 +210,12 @@ class MergeWatcher:
         """Return once the PR is merged, or raise saying why it will not be."""
         self._poll(lambda: self._merge_step(number, sha), timeout)
 
-    def extra_check_warnings(self, sha: str, timeout: float) -> list[str]:
+    def extra_check_warnings(self, number: str, sha: str, timeout: float) -> list[str]:
         """Wait a bounded time for checks outside the ruleset; report the bad ones."""
-        required = self.required or []
         extras: list[dict] = []
 
         def step() -> str | None:
+            required = self._required_checks(self._pr(number)["baseRefName"])
             latest = _latest(self._check_runs(sha))
             extras[:] = [run for name, run in latest.items() if name not in required]
             pending = [run["name"] for run in extras if run["status"] != "completed"]
@@ -253,7 +273,7 @@ def main(
 
     print(f"OK: PR #{args.pr} merged at {args.sha}")
     try:
-        warnings = watcher.extra_check_warnings(args.sha, args.extra_timeout)
+        warnings = watcher.extra_check_warnings(args.pr, args.sha, args.extra_timeout)
     except NotMerged as error:
         warnings = [str(error)]
     for warning in warnings:

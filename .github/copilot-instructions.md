@@ -93,7 +93,7 @@ Ao reportar um erro: **erro observado**, **causa raiz** (o porquê), **análise*
 - O `master` é protegido (ruleset): só aceita PR com os checks obrigatórios (`ci-passed` e `pip-audit`) verdes e **branch atualizada**. Cada merge desatualiza os outros PRs abertos, custando novo ciclo de CI e revisão. Por isso:
   - **Um PR aberto por vez.** Trabalho pronto espera em commit local até a fila esvaziar. Merge antes do próximo PR, sem empilhar (empilhar só se justifica com revisão demorada, em equipes).
   - **Dependabot agrupado:** GitHub Actions e Python minor/patch em um PR cada; só versões maiores do Python ficam isoladas, uma por PR.
-  - **Merge só pelo `/ship-pr`, que o usuário dispara** (o merge no `master` publica o relatório): o agente abre o PR e pede o comando. Squash, só com cada check obrigatório aprovado no SHA da head (lista de permissão). **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
+  - **Merge só pelo `/ship-pr`, que o usuário dispara** (o merge no `master` publica o relatório): o agente abre o PR e pede o comando. Squash, por auto-merge nativo preso ao SHA da head: quem decide é o ruleset. **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
 - **Antes de abrir o PR da missão**, o subagente `reviewer` revisa o diff (salvo em arquivo no scratchpad) contra a issue; corrija os achados que procedem e registre os descartados com o porquê.
 
 ## Princípios

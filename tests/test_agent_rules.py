@@ -166,7 +166,7 @@ class TestSkills:
 
     def test_ship_pr_cleans_up_only_after_confirming_merged(self):
         _, body = _split_frontmatter(SKILLS / "ship-pr" / "SKILL.md")
-        confirm = body.index("`MERGED`")
+        confirm = body.index("confirme `MERGED`")
         assert confirm < body.index("git pull --ff-only")
 
     def test_ship_pr_reads_live_state_when_a_wait_stops(self):

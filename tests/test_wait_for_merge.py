@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from scripts.wait_for_merge import failed_checks, main
+from scripts.wait_for_merge import failed_checks, main, run_gh
 
 SHA = "abc123"
 REQUIRED = ["ci-passed", "pip-audit"]
@@ -105,7 +105,7 @@ class FakeGh:
 
 
 def _gh_error(stderr):
-    return subprocess.CalledProcessError(1, ["gh"], stderr=stderr)
+    return subprocess.CalledProcessError(1, ["gh", "pr", "view"], stderr=stderr)
 
 
 def _main(gh, *extra, clock=None):
@@ -184,8 +184,22 @@ class TestOutcome:
         assert "auto-merge" in capsys.readouterr().err
 
     def test_new_head_stops_before_reading_old_checks(self, capsys):
-        assert _main(FakeGh(prs=[_pr(head="def456")])) == 1
-        assert "def456" in capsys.readouterr().err
+        failed_on_old_head = [_run("ci-passed", conclusion="failure")]
+        gh = FakeGh(prs=[_pr(head="def456")], check_runs=[failed_on_old_head])
+        assert _main(gh) == 1
+        err = capsys.readouterr().err
+        assert "def456" in err
+        assert "ci-passed" not in err
+
+    def test_auto_merge_off_is_confirmed_by_a_second_read(self):
+        gh = FakeGh(prs=[_pr(auto_merge=False), MERGED], check_runs=[PENDING])
+        assert _main(gh) == 0
+
+    def test_merged_pr_is_not_reported_as_not_merged_over_the_ruleset(self, capsys):
+        assert _main(FakeGh(required=[])) == 0
+        captured = capsys.readouterr()
+        assert "merged" in captured.out
+        assert "no required checks" in captured.out
 
     @pytest.mark.parametrize("state", ["BEHIND", "DIRTY"])
     def test_state_that_never_merges_by_itself_stops(self, state, capsys):
@@ -232,7 +246,33 @@ class TestGhErrors:
 
     def test_persistent_error_reports_stderr_at_the_deadline(self, capsys):
         assert _main(FakeGh(prs=[_gh_error("HTTP 502: bad gateway")])) == 1
-        assert "HTTP 502: bad gateway" in capsys.readouterr().err
+        err = capsys.readouterr().err
+        assert "HTTP 502: bad gateway" in err
+        assert "gh pr view" in err
+
+    def test_hung_gh_is_not_knowing_yet(self):
+        hung = subprocess.TimeoutExpired(["gh", "pr", "view"], 60)
+        assert _main(FakeGh(prs=[hung, MERGED])) == 0
+
+    def test_every_gh_call_has_its_own_deadline(self, monkeypatch):
+        seen = {}
+
+        def fake_run(*_args, **kwargs):
+            seen.update(kwargs)
+            return subprocess.CompletedProcess(["gh"], 0, stdout="{}")
+
+        monkeypatch.setattr(subprocess, "run", fake_run)
+        run_gh("pr", "view")
+        assert seen["timeout"] > 0
+
+    def test_empty_answer_is_not_knowing_yet(self):
+        gh = FakeGh()
+        first = [""]
+
+        def empty_once(*args):
+            return first.pop() if first else gh(*args)
+
+        assert _main(empty_once) == 0
 
 
 class TestExtraChecks:

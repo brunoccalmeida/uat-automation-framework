@@ -61,3 +61,28 @@ class TestUploadStep:
 
     def test_runs_only_where_oidc_is_available(self):
         assert _step().get("if") == OIDC_AVAILABLE
+
+
+class TestCoverageGate:
+    """The minimum coverage is enforced by CI itself, inside ``ci-passed``.
+
+    The Codecov checks stay outside the ruleset: they are skipped on Dependabot
+    and fork runs, and a required check that is never published blocks forever.
+    """
+
+    @staticmethod
+    def _coverage_commands():
+        runs = [step.get("run", "") for step in _job()["steps"]]
+        return [run for run in runs if "--cov=" in run]
+
+    def test_gate_measures_the_combined_coverage(self):
+        final = [run for run in self._coverage_commands() if "--cov-append" in run]
+        assert len(final) == 1
+        assert "--cov-fail-under=99" in final[0]
+
+    def test_gate_does_not_judge_a_partial_measure(self):
+        partial = [
+            run for run in self._coverage_commands() if "--cov-append" not in run
+        ]
+        assert partial
+        assert not any("--cov-fail-under" in run for run in partial)

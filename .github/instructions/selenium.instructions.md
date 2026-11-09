@@ -9,3 +9,4 @@ applyTo: "pages/**/*.py,features/**/*.py,tests/**/*.py"
 - Proibido: interagir com elemento obtido por `presence_of_element_located` (pode não estar clicável) e `time.sleep` (não determinístico).
 - Navegação em SPA retorna só após o `PAGE_LOADED` do destino (`wait_until_loaded`): a URL muda antes de a página renderizar.
 - Formulário com erro: remova o erro antigo antes de reenviar (`submit_and_wait_for_outcome`), senão o erro velho parece o resultado novo.
+- `Then` que falha usa `assert`, não uma espera (`wait_until_loaded`): `AssertionError` aparece como *failed* no Allure (comportamento); `TimeoutException`, como *broken* (erro do teste).

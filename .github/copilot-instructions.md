@@ -94,6 +94,8 @@ Ao reportar um erro: **erro observado**, **causa raiz** (o porquê), **análise*
   - **Um PR aberto por vez.** Trabalho pronto espera em commit local até a fila esvaziar. Merge antes do próximo PR, sem empilhar (empilhar só se justifica com revisão demorada, em equipes).
   - **Dependabot agrupado:** GitHub Actions e Python minor/patch em um PR cada; só versões maiores do Python ficam isoladas, uma por PR.
   - **Merge só pelo `/ship-pr`, que o usuário dispara** (o merge no `master` publica o relatório): o agente abre o PR e pede o comando. Squash, por auto-merge nativo preso ao SHA da head: quem decide é o ruleset. **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
+- **Portão novo barra commits parciais:** cada commit é checado com a config dele; mudança indivisível (ligar o portão e corrigir o que ele acusa) vai em commit único, nunca com `--no-verify`.
+- **Alterar o ruleset é bloqueado para o agente:** só com autorização explícita do dono para aquela alteração. Ordem segura: CI do PR verde com o novo check → ruleset → merge.
 - **Antes de abrir o PR da missão**, o subagente `reviewer` revisa o diff (salvo em arquivo no scratchpad) contra a issue; corrija os achados que procedem e registre os descartados com o porquê.
 
 ## Princípios

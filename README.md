@@ -12,7 +12,7 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 
 ## ⚡ At a Glance
 
-- **Tests:** 806 unit · 96 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
+- **Tests:** 797 unit · 96 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
 - **Real browsers:** integration and smoke suites run on Chrome and Firefox in CI, inside docker-selenium containers
 - **Quality gates:** `master` only accepts a PR with green CI and a clean `pip-audit`; every GitHub Action is pinned to a commit SHA
 - **Live report:** Allure, republished on every merge to `master`: 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -101,6 +101,9 @@ This framework uses a **hybrid OOP/Functional programming approach**, choosing t
 ```bash
 # Install dependencies
 poetry install
+
+# Create your local settings (one-time), then fill in the password listed above
+cp .env.example .env
 
 # Install pre-commit hooks (one-time setup)
 poetry run pre-commit install
@@ -269,7 +272,8 @@ The framework runs in **headless mode by default** (best practice: faster, less 
 Configuration priority:
 1. **CLI Parameter** (highest): `-Dheadless=true/false`
 2. **Environment Variable**: `HEADLESS=true/false`
-3. **Config File** (lowest): `config.yaml` (default: `true`)
+3. **`.env` file**
+4. **Default** (lowest): `true`
 
 Use `-Dheadless=false` for debugging with visible browser.
 
@@ -371,10 +375,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 806 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 797 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 96 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 902 unit/integration tests + 73 E2E scenarios
+- **Total**: 893 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -410,13 +414,13 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 15 | 100% | ✅ Complete |
 | **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 16 | 100% | ✅ Complete |
 | **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 12 | 100% | ✅ Complete |
-| **Config** | `tests/test_config.py` | 2 | 94% | ✅ Complete |
-| **ConfigResolver** | `tests/test_config_resolver.py` | 48 | 100% | ✅ Complete |
+| **Config** | `tests/test_config.py` | 38 | 100% | ✅ Complete |
+| **Settings at startup (behave, pytest)** | `tests/test_settings_startup.py` | 3 | N/A | ✅ Complete |
 | **DriverManager** | `tests/test_driver_manager.py` | 23 | 100% | ✅ Complete |
 | **Browser test setup (BROWSER, HEADLESS, Grid)** | `tests/test_driver_setup.py` | 3 | N/A | ✅ Complete |
 | **Step definitions (OR logic, configured password, local page objects)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 20 | N/A | ✅ Complete |
-| **Behave hooks (failure screenshot and URL in Allure)** | `tests/test_environment.py` | 9 | N/A | ✅ Complete |
-| **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Complete |
+| **Behave hooks (failure screenshot and URL in Allure)** | `tests/test_environment.py` | 11 | N/A | ✅ Complete |
+| **Smoke Tests** | `tests/test_smoke.py` | 2 | N/A | ✅ Complete |
 | **Workflow version comments (CI)** | `tests/test_workflow_version_comments.py` | 32 | N/A | ✅ Complete |
 | **Security gates: gitleaks and zizmor (CI)** | `tests/test_security_gates_ci.py` | 10 | N/A | ✅ Complete |
 | **Workflow hardening (CI)** | `tests/test_workflow_hardening.py` | 33 | N/A | ✅ Complete |
@@ -436,13 +440,13 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Complete |
-| **TOTAL** | | **806** | **100%** | **Complete** |
+| **TOTAL** | | **797** | **100%** | **Complete** |
 
 **Code Coverage:**
-- **Total statements:** 479
-- **Covered:** 478 (99%)
+- **Total statements:** 473
+- **Covered:** 473 (100%)
 - **Pages Module**: 100%
-- **Core Module**: 99% (1 uncovered line in `core/config.py`)
+- **Core Module**: 100%
 
 ### Integration Tests (Pytest + Real Browser)
 

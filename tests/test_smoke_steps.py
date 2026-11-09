@@ -2,14 +2,16 @@
 
 from unittest.mock import Mock, patch
 
+from pydantic import SecretStr
+
 from features.steps.smoke_steps import step_enter_valid_credentials
 
-CONFIG = {"environment": {"remote": {"default_password": "pw"}}}
+SETTINGS = Mock(test_user_password=SecretStr("pw"))
 
 
 def test_enter_valid_credentials_uses_configured_password():
     """Should log in as standard_user with the configured password."""
-    context = Mock(config_data=CONFIG)
+    context = Mock(settings=SETTINGS)
 
     with patch("features.steps.smoke_steps.LoginPage") as login_page_cls:
         step_enter_valid_credentials(context)

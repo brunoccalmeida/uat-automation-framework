@@ -9,7 +9,6 @@ Basic validation steps to ensure application is operational.
 
 from behave import given, then, when
 
-from core.config import get_base_url, get_default_password
 from pages.inventory_page import InventoryPage
 from pages.login_page import LoginPage
 
@@ -18,7 +17,7 @@ from pages.login_page import LoginPage
 @given("I am on the Sauce Demo homepage")
 def step_navigate_to_homepage(context):
     """Navigate to Sauce Demo homepage."""
-    base_url = get_base_url(context.config_data)
+    base_url = context.settings.base_url
     context.driver.get(base_url)
 
 
@@ -68,7 +67,7 @@ def step_verify_login_button(context):
 def step_enter_valid_credentials(context):
     """Enter valid test credentials (standard_user)."""
     LoginPage(context.driver).login(
-        "standard_user", get_default_password(context.config_data)
+        "standard_user", context.settings.test_user_password.get_secret_value()
     )
 
 

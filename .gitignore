@@ -48,9 +48,6 @@ allure-report/
 .DS_Store
 Thumbs.db
 
-# Configuration
-config.local.yaml
-
 # Personal documentation
 docs/PROJECT_CONTEXT.md
 docs/SESSION_NOTES*.md

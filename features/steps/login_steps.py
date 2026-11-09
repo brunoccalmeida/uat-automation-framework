@@ -9,7 +9,6 @@ Implements BDD steps for user login scenarios.
 
 from behave import given, then, when
 
-from core.config import get_base_url, get_default_password
 from pages.header_component import HeaderComponent
 from pages.inventory_page import InventoryPage
 from pages.login_page import LoginPage
@@ -18,16 +17,18 @@ from pages.login_page import LoginPage
 @given("I am on the Sauce Demo login page")
 def step_on_login_page(context):
     """Navigate to Sauce Demo login page."""
-    base_url = get_base_url(context.config_data)
+    base_url = context.settings.base_url
     context.driver.get(base_url)
 
 
 @given('I am logged in as "{username}"')
 def step_logged_in_as_user(context, username):
     """Log in as specific user."""
-    base_url = get_base_url(context.config_data)
+    base_url = context.settings.base_url
     context.driver.get(base_url)
-    LoginPage(context.driver).login(username, get_default_password(context.config_data))
+    LoginPage(context.driver).login(
+        username, context.settings.test_user_password.get_secret_value()
+    )
 
 
 @when('I enter username "{username}"')
@@ -39,7 +40,9 @@ def step_enter_username(context, username):
 @when('I log in as "{username}"')
 def step_log_in_as(context, username):
     """Log in as a pre-configured test user with the configured password."""
-    LoginPage(context.driver).login(username, get_default_password(context.config_data))
+    LoginPage(context.driver).login(
+        username, context.settings.test_user_password.get_secret_value()
+    )
 
 
 @when('I login with username "{username}" and password "{password}"')

@@ -18,6 +18,15 @@ concurrency:
 permissions:
   contents: read
 
+# Settings of the application under test (core/config.py). Literals on purpose:
+# the demo password is public, and PRs from Dependabot or forks cannot read
+# Actions secrets. For a real application, move the password to the env of the
+# jobs that open a browser, as ${{ secrets.TEST_USER_PASSWORD }}: here it would
+# reach every job, including the ones that run third-party tools.
+env:
+  BASE_URL: https://www.saucedemo.com
+  TEST_USER_PASSWORD: secret_sauce
+
 jobs:
   smoke-matrix:
     runs-on: ubuntu-latest

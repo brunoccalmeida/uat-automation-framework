@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 09/11/2026, missão #149 (resumo reduzido a estado).
+**Última atualização:** 09/11/2026, missão #144 (configuração por ambiente validado).
 
 ---
 
@@ -24,7 +24,7 @@
 | Proteções do agente | `permissions.deny` nos dois shells (`--admin`, force push, push no `master`, `.env`); casam o texto, a fronteira real é o ruleset |
 | Ambiente do agente | Filtro de saída de testes (`scripts/filter_test_output.py`) e `pyright-lsp`; passo a passo em `docs/ai-workflow/AGENT_TOKEN_SPEND.md` |
 | Navegador | `compose.yaml` é a fonte única do Grid, local e CI; imagens por tag + digest; `SELENIUM_REMOTE_URL` liga o `webdriver.Remote` |
-| Config | `config.yaml` com URL e senha da demo; migração para ambiente validado na #144 |
+| Config | Variáveis de ambiente validadas na largada (`Settings`, `core/config.py`, pydantic-settings); CLI > ambiente > `.env` > padrão; no CI, bloco `env` de `tests.yml` |
 | Bloqueios | #95 (PyYAML sem wheel `cp315`); #153 (Betterleaks v2 ainda em rc.7); #134 (pausada até o primeiro trabalho pago). Conferidos em 09/11/2026 |
 | Fila de PRs | Vazia |
 
@@ -32,7 +32,7 @@
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido: #144** (P2, configuração por ambiente validado), a mais próxima de segurança. Depois, as demais P2 por `gh issue list`. A #145 cita a lição do #129: fontes no corpo do PR #139 e no registro apontado no topo.
+**Sem bloqueio resolvido: #160** (P2, visibilidade: o `wait_for_merge` reporta como `BEHIND` um PR já integrado). Depois, as demais P2 por `gh issue list`. A #145 cita a lição do #129: fontes no corpo do PR #139 e no registro apontado no topo.
 
 **Ordem combinada (06/11/2026), item que falta:** bugs conhecidos no estilo do `playwright-qa-starter-kit` (afirmar o comportamento correto, marcar como falha esperada, apontar para um `KNOWN_ISSUES.md`).
 
@@ -56,6 +56,7 @@ Tudo em GitHub Issues com labels `priority: P0/P1/P2`: `gh issue list`.
 
 O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos com escopo de caminho; aqui, em uma linha, o porquê delas e as decisões ainda sem regra própria.
 
+- **Senha pública literal no workflow** (#144): PRs do Dependabot e de forks não recebem segredos do Actions; com credencial real, usar `secrets` e cadastrar também em "Dependabot secrets".
 - **Histórico fora do resumo** (#149): o `/close-mission` pedia um parágrafo por missão e o arquivo chegou a 78 KB; o resumo guarda estado, o corpo do PR guarda a história.
 - **Registro de sessão no PR da missão** (#126): PR separado dobrava os ciclos de CI e enchia o histórico.
 - **Credencial de curta duração (OIDC) > segredo fixo** (#25): Dependabot e PRs de fork não recebem `id-token: write`, por isso o passo é pulado exatamente ali.
@@ -83,6 +84,7 @@ O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos 
 - Em PR, triagem do gitleaks com `gitleaks:allow`: o fingerprint do `.gitleaksignore` contém o SHA, que o squash troca (#147).
 - `test_doc_links` parametriza por arquivo versionado: a contagem do README muda ao dar `git add` em arquivo novo (#147).
 - `gh` com 5xx: antes de repetir uma escrita, confira se ela ocorreu (#125).
+- O `permissions.deny` `Edit(.env.*)` também pega o `.env.example`: variável nova nele é edição humana (#144).
 - Subagente criado no meio da sessão só carrega no próximo chat; skill em pasta nova pede `/reload-skills` (#101).
 
 ### Selenium e Grid
@@ -94,6 +96,7 @@ O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos 
 ## Ambiente local (Windows)
 
 - Chrome e Firefox instalados; interpretador do VS Code = `.venv` do projeto.
+- Rodar `behave` ou integração pede um `.env` (copiado de `.env.example`, com a senha preenchida); sem ele, a largada falha nomeando a variável.
 - Todo `.md` novo fora do inglês começa com `<!-- LTeX: language=pt-BR -->`, senão a extensão anexa centenas de falsos positivos ao contexto.
 - Poetry pelo instalador oficial (`%APPDATA%\pypoetry`). Se `poetry self update` quebrar: `%APPDATA%\pypoetry\venv\Scripts\python -m pip install poetry==<versão>`.
 - Windows PowerShell 5.1 grava `>>`/`Out-File` em UTF-16: não use para texto do repo (barrado pelo hook `check-text-encoding`).

@@ -63,8 +63,6 @@ O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos 
 - **Pin por SHA do commit, não da tag:** tag anotada é um objeto próprio; descasque (`^{}` no `git ls-remote`) e confirme em `git/commits/<sha>`.
 - **Check obrigatório pulado conta como aprovado** (#36): gate com `always()`, não `!cancelled()`, e lista de permissão.
 - **Portão que nunca falha é pior que nenhum** (#27): `--exit-zero` e `continue-on-error` esconderam um F821 real.
-- **Portão novo barra commits parciais:** cada commit é checado com a config dele; mudança indivisível vai em commit único, nunca com `--no-verify`.
-- **Alterar o ruleset é bloqueado para o agente:** só com autorização explícita do dono. Ordem segura: CI verde com o novo check → ruleset → merge.
 - **Procedimento vai para skill, fato fica na regra** (#101); lógica determinística vira script testado, não prosa.
 - **Regra em dois agentes = duas cópias** (#35): a divergência é barrada por teste, não por disciplina.
 - **Flake se instrumenta, não se retenta** (#129): repetir o clique esconderia a causa.
@@ -89,7 +87,6 @@ O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos 
 
 ### Selenium e Grid
 
-- `Then` que falha usa `assert`, não `wait_until_loaded()`: `AssertionError` sai como *failed* no Allure; `TimeoutException`, como *broken* (#111).
 - Spike usa o `DriverManager`, nunca driver à mão: o diálogo de senha vazada do Chrome rouba o foco (#98).
 - O cookie `session-username` do Sauce Demo vale 10 min; script mais longo refaz o login (#129).
 - pytest interrompido deixa sessões presas no Grid: reinicie o contêiner. `docker update --cpus 0` não remove o limite: `docker compose down` + `up` (#129).

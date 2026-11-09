@@ -5,4 +5,4 @@ As regras do projeto ficam em um único lugar, compartilhado com o GitHub Copilo
 
 @.github/copilot-instructions.md
 
-Histórico e contexto das sessões: [docs/ai-workflow/PROJECT_SESSION_SUMMARY.md](docs/ai-workflow/PROJECT_SESSION_SUMMARY.md)
+Estado atual e próxima missão: [docs/ai-workflow/PROJECT_SESSION_SUMMARY.md](docs/ai-workflow/PROJECT_SESSION_SUMMARY.md)

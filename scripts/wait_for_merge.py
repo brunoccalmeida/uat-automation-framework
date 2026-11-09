@@ -7,10 +7,12 @@ Run by the /ship-pr skill, after ``gh pr merge --auto``:
 GitHub decides the merge from the ruleset; this script never merges. It exists
 for what GitHub does not tell anyone:
 
-1. The merge is asynchronous, so the script waits for ``MERGED`` and stops at
-   once on a state that will never merge by itself (a failed required check,
-   auto-merge off, a new head, ``BEHIND``, ``DIRTY``). Everything else, a gh
-   error included, means "not known yet" and only the deadline ends the wait.
+1. The merge is asynchronous, so the script waits for ``MERGED`` and stops on
+   a state that will never merge by itself: at once for a failed required
+   check or a new head; after a second read in a row for auto-merge off,
+   ``BEHIND`` and ``DIRTY``, which a merge in progress can show for an instant.
+   Everything else, a gh error included, means "not known yet" and only the
+   deadline ends the wait.
 2. Check runs outside the ruleset, such as ``codecov/patch``, can make a PR
    ``UNSTABLE`` but never hold it: GitHub requires only the ruleset's checks,
    and ``gh pr merge --auto`` merges an ``UNSTABLE`` PR directly. After the
@@ -122,7 +124,7 @@ class MergeWatcher:
         self.now = now
         self.interval = interval
         self.required: list[str] | None = None
-        self.auto_merge_off_seen = False
+        self.unconfirmed_stop: str | None = None
 
     def _poll(self, step: Callable[[], str | None], timeout: float) -> None:
         """Repeat step() until it returns None, meaning done, or fail at the deadline.
@@ -177,6 +179,18 @@ class MergeWatcher:
             )
         return data["check_runs"]
 
+    def _confirm_stop(self, reason: str) -> str:
+        """Stop when two reads in a row agree: one may be a PR on its way to MERGED.
+
+        A PR was read as open and ``BEHIND`` in the same second it merged (#160).
+        The likely cause, inferred from the timing, is that the base branch had
+        just moved; GitHub does not document the value during a merge.
+        """
+        if self.unconfirmed_stop == reason:
+            raise NotMerged(reason)
+        self.unconfirmed_stop = reason
+        return f"{reason}, confirming on the next read"
+
     def _merge_step(self, number: str, sha: str) -> str | None:
         pr = self._pr(number)
         if pr["state"] == "MERGED":
@@ -192,14 +206,10 @@ class MergeWatcher:
         if failed:
             raise NotMerged("required checks failed: " + ", ".join(failed))
         if pr["autoMergeRequest"] is None:
-            # One read may be a PR on its way to MERGED: confirm before stopping
-            if self.auto_merge_off_seen:
-                raise NotMerged("auto-merge is off")
-            self.auto_merge_off_seen = True
-            return "auto-merge off, confirming on the next read"
-        self.auto_merge_off_seen = False
+            return self._confirm_stop("auto-merge is off")
         if pr["mergeStateStatus"] in STOPPING_MERGE_STATES:
-            raise NotMerged(f"merge state is {pr['mergeStateStatus']}")
+            return self._confirm_stop(f"merge state is {pr['mergeStateStatus']}")
+        self.unconfirmed_stop = None
 
         unfinished = _unfinished_required(required, check_runs)
         return f"merge state {pr['mergeStateStatus']}; " + (

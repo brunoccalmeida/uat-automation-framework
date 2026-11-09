@@ -26,7 +26,7 @@ class DriverManager:
         """Initialize driver manager with browser configuration.
 
         Args:
-            browser_config: Browser configuration from config.yaml.
+            browser_config: Browser configuration (Settings.browser_config).
         """
         self.browser_config = browser_config
         self._driver: WebDriver | None = None

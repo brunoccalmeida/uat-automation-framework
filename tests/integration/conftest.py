@@ -5,7 +5,7 @@ Provides shared fixtures for integration testing with real browsers.
 
 import pytest
 
-from core.config import get_base_url, get_default_password, load_config
+from core.config import ConfigurationError, load_settings
 from tests.helpers.driver_setup import make_driver_manager
 from tests.helpers.failure_artifacts import (
     PHASE_REPORT_KEY,
@@ -18,6 +18,19 @@ from tests.helpers.navigation import (
     go_to_step_one,
     go_to_step_two,
 )
+
+
+def pytest_configure(config):
+    """Stop before any test runs if a setting is wrong (fail fast).
+
+    Only listing the tests (--collect-only) opens no browser and needs none.
+    """
+    if config.getoption("collectonly"):
+        return
+    try:
+        load_settings()
+    except ConfigurationError as error:
+        raise pytest.UsageError(str(error)) from error
 
 
 @pytest.hookimpl(wrapper=True, tryfirst=True)
@@ -59,14 +72,13 @@ def fixture_base_url():
     Returns:
         Base URL for application under test.
     """
-    config = load_config()
-    return get_base_url(config)
+    return load_settings().base_url
 
 
 @pytest.fixture(name="password")
 def fixture_password():
     """Get the test users' password from configuration."""
-    return get_default_password(load_config())
+    return load_settings().test_user_password.get_secret_value()
 
 
 @pytest.fixture(name="authenticated_driver")

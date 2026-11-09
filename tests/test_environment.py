@@ -7,7 +7,7 @@ import pytest
 from behave.model_core import Status
 from selenium.common.exceptions import WebDriverException
 
-from features.environment import after_scenario, before_scenario
+from features.environment import after_scenario, before_all, before_scenario
 
 URL = "https://www.saucedemo.com/inventory.html"
 
@@ -76,12 +76,8 @@ def test_no_capture_when_driver_was_never_created(allure):
 
 
 def _before_context(userdata):
-    """Context as Behave hands it to before_scenario."""
-    browser = {"name": "chrome", "headless": True, "remote_url": None}
-    return SimpleNamespace(
-        config_data={"browser": browser},
-        config=SimpleNamespace(userdata=userdata),
-    )
+    """Context as Behave hands it to before_all."""
+    return SimpleNamespace(config=SimpleNamespace(userdata=userdata))
 
 
 @pytest.mark.parametrize(
@@ -94,6 +90,7 @@ def _before_context(userdata):
     ids=["cli-wins", "env", "local-default"],
 )
 @patch("features.environment.DriverManager")
+@pytest.mark.usefixtures("settings_env")
 def test_before_scenario_passes_grid_url_to_driver_manager(
     driver_manager, monkeypatch, userdata, env, expected
 ):
@@ -102,10 +99,29 @@ def test_before_scenario_passes_grid_url_to_driver_manager(
     CI runners also ship local browsers, so without this wiring the Behave
     suites would pass while silently skipping the container.
     """
-    monkeypatch.delenv("SELENIUM_REMOTE_URL", raising=False)
     if env:
         monkeypatch.setenv("SELENIUM_REMOTE_URL", env)
+    context = _before_context(userdata)
 
-    before_scenario(_before_context(userdata), Mock())
+    before_all(context)
+    before_scenario(context, Mock())
 
     assert driver_manager.call_args.args[0]["remote_url"] == expected
+
+
+@pytest.mark.parametrize(
+    "userdata, attribute, expected",
+    [
+        ({"browser": "firefox"}, "browser", "firefox"),
+        ({"headless": "false"}, "headless", False),
+    ],
+    ids=["browser", "headless"],
+)
+@pytest.mark.usefixtures("settings_env")
+def test_before_all_applies_the_cli_parameters(userdata, attribute, expected):
+    """-Dbrowser and -Dheadless reach the settings."""
+    context = _before_context(userdata)
+
+    before_all(context)
+
+    assert getattr(context.settings, attribute) == expected

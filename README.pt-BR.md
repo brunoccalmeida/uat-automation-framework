@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:7d31572c74d39565391958a9f14dfa0feb8d2fc5b67cc4cd1e5f7ee5f5315277 -->
+<!-- translation-source: README.md sha256:56a7746e45a87187dc5345544f72a2eea0e512169bb50b7a1beab1060de888ad -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -14,7 +14,7 @@ Framework completo de automação UAT usando Python, Behave (BDD) e Selenium par
 
 ## ⚡ Em Resumo
 
-- **Testes:** 806 unitários · 96 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
+- **Testes:** 797 unitários · 96 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
 - **Navegadores reais:** as suítes de integração e smoke rodam no Chrome e no Firefox no CI, em contêineres docker-selenium
 - **Portões de qualidade:** o `master` só aceita PR com CI verde e `pip-audit` limpo; toda GitHub Action é fixada por SHA de commit
 - **Relatório ao vivo:** Allure, republicado a cada merge no `master`: 📊 **[Ver o Relatório de Testes Mais Recente](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -103,6 +103,9 @@ Este framework usa uma **abordagem híbrida de programação OO/funcional**, esc
 ```bash
 # Instalar as dependências
 poetry install
+
+# Criar as configurações locais (uma vez) e preencher a senha indicada acima
+cp .env.example .env
 
 # Instalar os hooks de pre-commit (configuração única)
 poetry run pre-commit install
@@ -271,7 +274,8 @@ O framework roda em **modo headless por padrão** (boa prática: mais rápido, u
 Prioridade da configuração:
 1. **Parâmetro de CLI** (maior): `-Dheadless=true/false`
 2. **Variável de Ambiente**: `HEADLESS=true/false`
-3. **Arquivo de Configuração** (menor): `config.yaml` (padrão: `true`)
+3. **Arquivo `.env`**
+4. **Padrão** (menor): `true`
 
 Use `-Dheadless=false` para depurar com o navegador visível.
 
@@ -373,10 +377,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 806 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes Unitários**: 797 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
 - **Testes de Integração**: 96 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 73 cenários, 463 steps (jornadas completas de usuário)
-- **Total**: 902 testes unitários/de integração + 73 cenários E2E
+- **Total**: 893 testes unitários/de integração + 73 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -412,13 +416,13 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 15 | 100% | ✅ Completo |
 | **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 16 | 100% | ✅ Completo |
 | **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 12 | 100% | ✅ Completo |
-| **Config** | `tests/test_config.py` | 2 | 94% | ✅ Completo |
-| **ConfigResolver** | `tests/test_config_resolver.py` | 48 | 100% | ✅ Completo |
+| **Config** | `tests/test_config.py` | 38 | 100% | ✅ Completo |
+| **Configuração na largada (behave, pytest)** | `tests/test_settings_startup.py` | 3 | N/A | ✅ Completo |
 | **DriverManager** | `tests/test_driver_manager.py` | 23 | 100% | ✅ Completo |
 | **Setup do navegador dos testes (BROWSER, HEADLESS, Grid)** | `tests/test_driver_setup.py` | 3 | N/A | ✅ Completo |
 | **Step definitions (lógica OU, senha da config, page objects locais)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 20 | N/A | ✅ Completo |
-| **Hooks do Behave (screenshot e URL da falha no Allure)** | `tests/test_environment.py` | 9 | N/A | ✅ Completo |
-| **Smoke Tests** | `tests/test_smoke.py` | 4 | N/A | ✅ Completo |
+| **Hooks do Behave (screenshot e URL da falha no Allure)** | `tests/test_environment.py` | 11 | N/A | ✅ Completo |
+| **Smoke Tests** | `tests/test_smoke.py` | 2 | N/A | ✅ Completo |
 | **Comentários de versão das actions (CI)** | `tests/test_workflow_version_comments.py` | 32 | N/A | ✅ Completo |
 | **Portões de segurança: gitleaks e zizmor (CI)** | `tests/test_security_gates_ci.py` | 10 | N/A | ✅ Completo |
 | **Endurecimento dos workflows (CI)** | `tests/test_workflow_hardening.py` | 33 | N/A | ✅ Completo |
@@ -438,13 +442,13 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
 | **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
-| **TOTAL** | | **806** | **100%** | **Completo** |
+| **TOTAL** | | **797** | **100%** | **Completo** |
 
 **Cobertura de Código:**
-- **Total de statements:** 479
-- **Cobertos:** 478 (99%)
+- **Total de statements:** 473
+- **Cobertos:** 473 (100%)
 - **Módulo Pages**: 100%
-- **Módulo Core**: 99% (1 linha sem cobertura em `core/config.py`)
+- **Módulo Core**: 100%
 
 ### Testes de Integração (Pytest + Navegador Real)
 

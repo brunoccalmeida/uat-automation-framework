@@ -5,7 +5,7 @@ has rendered (the page objects' navigation methods wait for it). Fixtures in
 conftest.py use them; tests that need another product mix call them directly.
 """
 
-from core.config import get_default_password, load_config
+from core.config import load_settings
 from pages.cart_page import CartPage
 from pages.checkout_step_one_page import CheckoutStepOnePage
 from pages.inventory_page import InventoryPage
@@ -17,7 +17,8 @@ DEFAULT_PRODUCTS = ("Sauce Labs Backpack",)
 def go_to_inventory(driver, base_url, username="standard_user"):
     """Log in as username and land on the inventory page."""
     driver.get(base_url)
-    LoginPage(driver).login(username, get_default_password(load_config()))
+    password = load_settings().test_user_password.get_secret_value()
+    LoginPage(driver).login(username, password)
 
 
 def go_to_cart(driver, base_url, products=DEFAULT_PRODUCTS):

@@ -21,11 +21,12 @@ from pathlib import Path
 import pytest
 import yaml
 
+from core.config import Settings
+
 ROOT = Path(__file__).resolve().parent.parent
 COMPOSE = ROOT / "compose.yaml"
 WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
 DEPENDABOT = ROOT / ".github" / "dependabot.yml"
-CONFIG = ROOT / "config.yaml"
 BROWSERS = ("chrome", "firefox")
 BROWSER_JOBS = ("smoke-matrix", "test", "integration-matrix")
 PINNED_IMAGE = re.compile(
@@ -41,7 +42,7 @@ def _load(path):
 
 SERVICES = _load(COMPOSE)["services"]
 JOBS = _load(WORKFLOW)["jobs"]
-DEFAULT_BROWSER = _load(CONFIG)["browser"]["name"]
+DEFAULT_BROWSER = Settings.model_construct().browser
 
 
 def _host_port(browser):
@@ -78,7 +79,7 @@ def _integration_runs():
     """Yield (job, variant, browser used, Grid started) per integration run.
 
     The browser used is what the helper reads (#118): BROWSER from the step
-    or job env, else config.yaml.
+    or job env, else the default in Settings.
     """
     for job_name, job in JOBS.items():
         for variant in _variants(job_name):

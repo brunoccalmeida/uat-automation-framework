@@ -1,70 +1,105 @@
-"""Configuration management module.
+"""Settings read from the environment (Twelve-Factor App, factor III).
 
-Provides functions to load and access configuration from YAML files.
-Uses functional approach for stateless configuration loading.
+Precedence, highest first: CLI arguments, environment variables, the ``.env``
+file in the working directory, defaults. Everything is validated once, at
+startup, so a wrong setting stops the run with a message that names it.
 """
 
-from pathlib import Path
-from typing import Any
+from typing import Annotated, Any, Literal
 
-import yaml
+from pydantic import (
+    AfterValidator,
+    Field,
+    HttpUrl,
+    SecretStr,
+    TypeAdapter,
+    ValidationError,
+    field_validator,
+)
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_HTTP_URL_ADAPTER = TypeAdapter(HttpUrl)
 
 
-def load_config(config_path: str = "config.yaml") -> dict[str, Any]:
-    """Load configuration from YAML file.
+class ConfigurationError(Exception):
+    """A setting is missing or invalid."""
+
+
+def _validate_http_url(value: str) -> str:
+    """Accept only http(s) URLs, returning the text unchanged.
+
+    ``HttpUrl`` itself would normalize the value (trailing slash), changing
+    the address the browser opens.
+    """
+    try:
+        _HTTP_URL_ADAPTER.validate_python(value)
+    except ValidationError as error:
+        raise ValueError("must be an http or https URL") from error
+    return value
+
+
+_Url = Annotated[str, AfterValidator(_validate_http_url)]
+
+
+class Settings(BaseSettings):
+    """The variables a run depends on; each field is one variable."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_ignore_empty=True,
+        str_strip_whitespace=True,
+        hide_input_in_errors=True,
+    )
+
+    base_url: _Url
+    test_user_password: SecretStr
+    browser: Literal["chrome", "firefox"] = "chrome"
+    headless: bool = True
+    window_size: str = Field(default="1920,1080", pattern=r"^\d+,\d+$")
+    selenium_remote_url: _Url | None = None
+
+    @field_validator("browser", mode="before")
+    @classmethod
+    def _normalize_browser(cls, value: str) -> str:
+        return value.strip().lower()
+
+    @property
+    def browser_config(self) -> dict[str, Any]:
+        """Browser settings in the form DriverManager reads."""
+        return {
+            "name": self.browser,
+            "headless": self.headless,
+            "window_size": self.window_size,
+            "remote_url": self.selenium_remote_url,
+        }
+
+
+def load_settings(**cli_overrides: str | None) -> Settings:
+    """Read and validate the settings.
 
     Args:
-        config_path: Path to the YAML configuration file.
+        **cli_overrides: Field values from the command line. A value that was
+            not given (None or blank) leaves the field to the other sources.
 
     Returns:
-        Dictionary containing the configuration.
+        The validated settings.
 
     Raises:
-        FileNotFoundError: If configuration file doesn't exist.
-        yaml.YAMLError: If YAML is malformed.
+        ConfigurationError: If a setting is missing or invalid, naming every
+            variable at fault and never showing a value.
     """
-    path = Path(config_path)
-
-    if not path.exists():
-        raise FileNotFoundError(f"Configuration file not found: {config_path}")
-
-    with open(path, encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-
-    return config
-
-
-def get_base_url(config: dict[str, Any]) -> str:
-    """Extract base URL from configuration.
-
-    Args:
-        config: Configuration dictionary.
-
-    Returns:
-        Base URL for the application under test.
-    """
-    return config["environment"]["remote"]["base_url"]
-
-
-def get_default_password(config: dict[str, Any]) -> str:
-    """Extract the password shared by the application's test users.
-
-    Args:
-        config: Configuration dictionary.
-
-    Returns:
-        Password for the pre-configured test users.
-    """
-    return config["environment"]["remote"]["default_password"]
-
-
-def get_browser_config(config: dict[str, Any]) -> dict[str, Any]:
-    """Extract browser configuration.
-
-    Args:
-        config: Configuration dictionary.
-
-    Returns:
-        Browser configuration dictionary.
-    """
-    return config["browser"]
+    # Any: the command line only has text, which the validation converts.
+    overrides: dict[str, Any] = {
+        name: value for name, value in cli_overrides.items() if value and value.strip()
+    }
+    try:
+        return Settings(**overrides)
+    except ValidationError as error:
+        problems = "\n".join(
+            f"  {str(item['loc'][0]).upper()}: {item['msg']}"
+            for item in error.errors(include_input=False, include_url=False)
+        )
+        raise ConfigurationError(
+            f"Invalid configuration (see .env.example):\n{problems}"
+        ) from None

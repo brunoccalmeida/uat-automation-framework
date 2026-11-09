@@ -7,6 +7,7 @@ verification with OR logic support.
 from unittest.mock import Mock, patch
 
 import pytest
+from pydantic import SecretStr
 
 # Import the step functions we want to test
 from features.steps.login_steps import (
@@ -17,11 +18,7 @@ from features.steps.login_steps import (
     step_verify_redirected_to_login,
 )
 
-CONFIG = {
-    "environment": {
-        "remote": {"base_url": "https://example.test", "default_password": "pw"}
-    }
-}
+SETTINGS = Mock(base_url="https://example.test", test_user_password=SecretStr("pw"))
 
 
 @pytest.fixture(name="login_page")
@@ -135,7 +132,7 @@ class TestLoginStepsUseConfiguredPassword:
 
     def test_log_in_as_uses_configured_password(self):
         """Should log in with the scenario's user and the configured password."""
-        context = Mock(config_data=CONFIG)
+        context = Mock(settings=SETTINGS)
 
         with patch("features.steps.login_steps.LoginPage") as login_page_cls:
             step_log_in_as(context, "standard_user")
@@ -144,7 +141,7 @@ class TestLoginStepsUseConfiguredPassword:
 
     def test_logged_in_as_uses_configured_password(self):
         """Should open the app and log in with the configured password."""
-        context = Mock(config_data=CONFIG)
+        context = Mock(settings=SETTINGS)
 
         with patch("features.steps.login_steps.LoginPage") as login_page_cls:
             step_logged_in_as_user(context, "problem_user")
@@ -167,7 +164,7 @@ class TestLoginPageAssertionSteps:
         """Should pass when the login page is shown."""
         login_page.is_on_login_page.return_value = True
 
-        step(Mock(config_data=CONFIG))
+        step(Mock(settings=SETTINGS))
 
         login_page.is_on_login_page.assert_called_once_with()
 
@@ -175,7 +172,7 @@ class TestLoginPageAssertionSteps:
     def test_fails_on_another_page_of_the_site(self, step, login_page):
         """Should fail on any other page, even one under the base URL."""
         login_page.is_on_login_page.return_value = False
-        context = Mock(config_data=CONFIG)
+        context = Mock(settings=SETTINGS)
         context.driver.current_url = "https://example.test/inventory.html"
 
         with pytest.raises(AssertionError, match="login page"):

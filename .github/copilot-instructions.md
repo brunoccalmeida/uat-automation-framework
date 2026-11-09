@@ -10,7 +10,7 @@ Nunca implemente código de produção sem antes ter um teste falhando.
 Toda decisão (código, testes, CI, ambiente, processo) segue as melhores práticas reconhecidas da indústria.
 
 - Havendo mais de um caminho, recomende o indicado pelas melhores práticas e cite o princípio que o sustenta (ex.: dev/prod parity, YAGNI, fail fast).
-- Antes de toda pergunta de decisão ao usuário, **consulte** as melhores práticas do tema (documentação oficial, projetos de referência), sem citar de memória; a pergunta diz explicitamente quais são, com as fontes, e traz a recomendação. O usuário decide já informado.
+- Em qualquer situação de dúvida, antes de sugerir o que fazer ou perguntar uma decisão ao usuário, **consulte as melhores práticas mais modernas** do tema, a começar pela documentação oficial na versão usada no projeto (e projetos de referência), sem citar de memória; a sugestão diz explicitamente quais são, com as fontes, a recomendação e o que é julgamento próprio. O usuário decide já informado.
 - O padrão é aplicar a prática estabelecida (documentação oficial, consenso da indústria). Investigação ou medição sob medida só quando a economia esperada supera claramente o custo de investigar; estimativa e suposição são rotuladas como tais.
 - Não escolha atalhos por conveniência (ex.: contornar um problema de ambiente com código novo).
 - Desvios só com justificativa explícita, registrada no commit ou na documentação.
@@ -93,7 +93,7 @@ Ao reportar um erro: **erro observado**, **causa raiz** (o porquê), **análise*
 - O `master` é protegido (ruleset): só aceita PR com os checks obrigatórios (`ci-passed` e `pip-audit`) verdes e **branch atualizada**. Cada merge desatualiza os outros PRs abertos, custando novo ciclo de CI e revisão. Por isso:
   - **Um PR aberto por vez.** Trabalho pronto espera em commit local até a fila esvaziar. Merge antes do próximo PR, sem empilhar (empilhar só se justifica com revisão demorada, em equipes).
   - **Dependabot agrupado:** GitHub Actions e Python minor/patch em um PR cada; só versões maiores do Python ficam isoladas, uma por PR.
-  - **Merge só pelo `/ship-pr`, que o usuário dispara** (o merge no `master` publica o relatório): o agente abre o PR e pede o comando. Squash, só com cada check obrigatório aprovado no SHA da head (lista de permissão). **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
+  - **Merge só pelo `/ship-pr`, que o usuário dispara** (o merge no `master` publica o relatório): o agente abre o PR e pede o comando. Squash, por auto-merge nativo preso ao SHA da head: quem decide é o ruleset. **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
 - **Antes de abrir o PR da missão**, o subagente `reviewer` revisa o diff (salvo em arquivo no scratchpad) contra a issue; corrija os achados que procedem e registre os descartados com o porquê.
 
 ## Princípios

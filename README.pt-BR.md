@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:8c3b485307ea069b443f36741a1413b745cb2549cf6f5f3ecd7863c6e8c94df0 -->
+<!-- translation-source: README.md sha256:7d31572c74d39565391958a9f14dfa0feb8d2fc5b67cc4cd1e5f7ee5f5315277 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -14,7 +14,7 @@ Framework completo de automação UAT usando Python, Behave (BDD) e Selenium par
 
 ## ⚡ Em Resumo
 
-- **Testes:** 786 unitários · 96 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
+- **Testes:** 801 unitários · 96 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
 - **Navegadores reais:** as suítes de integração e smoke rodam no Chrome e no Firefox no CI, em contêineres docker-selenium
 - **Portões de qualidade:** o `master` só aceita PR com CI verde e `pip-audit` limpo; toda GitHub Action é fixada por SHA de commit
 - **Relatório ao vivo:** Allure, republicado a cada merge no `master`: 📊 **[Ver o Relatório de Testes Mais Recente](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -373,10 +373,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 786 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
+- **Testes Unitários**: 801 testes (componentes do framework, 100% de cobertura dos Page Objects, proteções do CI)
 - **Testes de Integração**: 96 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 73 cenários, 463 steps (jornadas completas de usuário)
-- **Total**: 882 testes unitários/de integração + 73 cenários E2E
+- **Total**: 897 testes unitários/de integração + 73 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -425,20 +425,20 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Fixação dos hooks do pre-commit (CI)** | `tests/test_precommit_pinning.py` | 17 | N/A | ✅ Completo |
 | **Portão do CI (check obrigatório)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Completo |
 | **Selenium Grid no Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 19 | N/A | ✅ Completo |
-| **Upload para o Codecov (CI)** | `tests/test_codecov_upload.py` | 6 | N/A | ✅ Completo |
+| **Upload para o Codecov (CI)** | `tests/test_codecov_upload.py` | 8 | N/A | ✅ Completo |
 | **Ambiente e executor do Allure (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Completo |
 | **Screenshot e HTML das falhas de integração (CI)** | `tests/test_failure_artifacts.py` | 10 | N/A | ✅ Completo |
-| **Regras do agente (tamanho, sincronia, skills, subagente revisor, diagnósticos do editor, code intelligence)** | `tests/test_agent_rules.py` | 45 | N/A | ✅ Completo |
+| **Regras do agente (tamanho, sincronia, skills, subagente revisor, diagnósticos do editor, code intelligence)** | `tests/test_agent_rules.py` | 48 | N/A | ✅ Completo |
 | **Links da documentação (todo caminho citado existe)** | `tests/test_doc_links.py` | 108 | N/A | ✅ Completo |
 | **Hook de saída de testes do agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
 | **Proteções do agente (regras de deny)** | `tests/test_agent_guardrails.py` | 61 | N/A | ✅ Completo |
-| **Merge com checks verdes (`/ship-pr`: checks obrigatórios do ruleset, lista de permissão)** | `tests/test_merge_when_green.py` | 24 | N/A | ✅ Completo |
+| **Espera do auto-merge nativo (`/ship-pr`: resultado e checks extras)** | `tests/test_wait_for_merge.py` | 34 | N/A | ✅ Completo |
 | **Portão de lint (pre-commit + CI + ordem de imports no editor, ruff no lugar do flake8, nenhuma regra em dois linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Completo |
 | **Métricas dos READMEs (sincronia por linha pela coluna Fonte, traduções)** | `tests/test_validate_readme_metrics.py` | 51 | N/A | ✅ Completo |
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
 | **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
-| **TOTAL** | | **786** | **100%** | **Completo** |
+| **TOTAL** | | **801** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 479

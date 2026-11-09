@@ -243,7 +243,7 @@ jobs:
       - name: Run integration tests with coverage (parallel)
         if: ${{ !cancelled() }}
         run: |
-          poetry run pytest tests/integration/ -n auto -v --tb=short --cov=core --cov=pages --cov-append --cov-report=xml --cov-report=term
+          poetry run pytest tests/integration/ -n auto -v --tb=short --cov=core --cov=pages --cov-append --cov-report=xml --cov-report=term --cov-fail-under=99
         env:
           HEADLESS: true
 

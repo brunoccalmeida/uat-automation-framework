@@ -116,6 +116,15 @@ Ortografia ficou só com o Code Spell Checker (`cSpell.language: "en,pt_BR,es"`,
 
 A recomendação "Trim CLAUDE.md" não apareceu. Este chat inclui ~14 KB das próprias consultas de diagnóstico.
 
+### Resumo de sessão reduzido a estado (#149, 09/11/2026)
+
+| `PROJECT_SESSION_SUMMARY.md` | Bytes | Tokens |
+| --- | ---: | ---: |
+| Antes | 77.981 | **30.307** (contador do `Read`, ao recusar o arquivo acima do limite de 25 mil) |
+| Depois | ~9.300 | ~3.600 (estimativa: bytes ÷ 2,57, a proporção do "antes") |
+
+O "depois" em `/context` falta: rode em chat novo, logo após ler o resumo, e compare a linha *Messages*. O arquivo não é `@import`, então não aparece em *Memory files*, e sem a leitura a diferença seria zero. O `/context` tirado no chat desta missão (*Messages* 26,1 mil) não serve de "antes": ali o arquivo foi lido em trecho e com as linhas cortadas.
+
 ### Registro por missão (`/usage` antes do `/clear`): encerrado
 
 **Encerrado em 01/11/2026, após três registros, por decisão do dono.** Critério: métrica só se paga se puder mudar uma decisão e se resolver o efeito que se quer ver. Aqui, a semana andou ~1 p.p. por missão, o mesmo tamanho do arredondamento do diálogo; a sessão de 5 h não é comparável sem saber quando a janela reiniciou; as fatias ficaram paradas (52–55) com ou sem subagente, porque somam as sessões das 24 h. Nenhuma decisão saiu desses registros, e cada um custava um PR com ciclo de CI (o do #26 ficou aberto e travou o início do chat seguinte). No lugar: medição **antes/depois de cada mudança que promete economia** (`/context`, tamanho da saída), como no #65; o % semanal fica como alarme, sem registro.

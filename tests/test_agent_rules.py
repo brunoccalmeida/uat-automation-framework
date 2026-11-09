@@ -31,6 +31,12 @@ COPILOT_SUFFIX = ".instructions.md"
 # copilot/customization/agent-skills and custom-agents, read 02/11/2026)
 SKILLS = ROOT / ".claude" / "skills"
 AGENTS = ROOT / ".claude" / "agents"
+# Read at the start of every chat (#149). Both limits are a judgment call, not
+# an official number: roughly a fifth of the 78 KB the file had reached, and a
+# table row that fits one idea
+SESSION_SUMMARY = ROOT / "docs" / "ai-workflow" / "PROJECT_SESSION_SUMMARY.md"
+MAX_SESSION_SUMMARY_CHARS = 16_000
+MAX_STATE_ROW_CHARS = 240
 
 
 def _split_frontmatter(path):
@@ -67,6 +73,53 @@ class TestAlwaysLoadedRules:
             f"always-loaded rules have {lines} lines; move rules that apply "
             "to part of the code to path-scoped files"
         )
+
+
+def _session_summary():
+    return SESSION_SUMMARY.read_text(encoding="utf-8")
+
+
+def _state_table_rows():
+    section = _session_summary().split("## Estado atual")[1].split("\n## ")[0]
+    return [line for line in section.splitlines() if line.startswith("|")]
+
+
+class TestSessionSummary:
+    """The handoff holds state: what is true now, not how it came to be.
+
+    Every chat pays for this file, and history already has a home (issues, PR
+    bodies, Git). It reached 78 KB because close-mission asked for a history
+    paragraph per mission, so the procedure is checked along with the file.
+    """
+
+    def test_session_summary_stays_short(self):
+        chars = len(_session_summary())
+        assert chars <= MAX_SESSION_SUMMARY_CHARS, (
+            f"session summary has {chars} characters; history belongs in the "
+            "PR body, lasting decisions in the rules"
+        )
+
+    def test_session_summary_has_no_mission_history_paragraphs(self):
+        history = [
+            line[:40]
+            for line in _session_summary().splitlines()
+            if line.startswith("Do #")
+        ]
+        assert not history
+
+    def test_state_table_exists(self):
+        assert _state_table_rows()
+
+    def test_state_table_rows_hold_state_only(self):
+        long_rows = [
+            row[:40] for row in _state_table_rows() if len(row) > MAX_STATE_ROW_CHARS
+        ]
+        assert not long_rows
+
+    def test_close_mission_sends_history_to_the_pr_body(self):
+        _, body = _split_frontmatter(SKILLS / "close-mission" / "SKILL.md")
+        assert "corpo do PR" in body
+        assert 'parágrafo "Do #N"' not in body
 
 
 class TestPathScopedRules:

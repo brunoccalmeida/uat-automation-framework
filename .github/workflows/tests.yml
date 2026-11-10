@@ -89,9 +89,11 @@ jobs:
           curl -fsS "$SELENIUM_REMOTE_URL/status"
           | jq '.value.nodes[] | {grid: .version, browser: .slots[0].stereotype | {browserName, browserVersion}}'
 
+      # Each -o pairs with the -f in its position: Allure goes to the folder
+      # and pretty, which has no -o, keeps the steps in the job log.
       - name: Run BDD smoke tests (${{ matrix.browser }})
         run: |
-          poetry run behave --tags=@smoke -Dbrowser=${{ matrix.browser }} --no-capture
+          poetry run behave --tags=@smoke -Dbrowser=${{ matrix.browser }} -f allure_behave.formatter:AllureFormatter -o reports/allure-results -f pretty --no-capture
         env:
           HEADLESS: true
 
@@ -100,6 +102,16 @@ jobs:
       - name: Show Selenium Grid logs on failure
         if: failure()
         run: docker compose logs --no-color --tail 200
+
+      # Screenshot and URL of each failed scenario (#163), attached by
+      # features/environment.py to the Allure results.
+      - name: Upload smoke failure evidence
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: smoke-failures-${{ matrix.browser }}
+          path: reports/allure-results
+          retention-days: 30
 
   # Page Objects against each supported browser's driver (#118). Chrome
   # runs in the "test" job, where coverage is measured; each other browser

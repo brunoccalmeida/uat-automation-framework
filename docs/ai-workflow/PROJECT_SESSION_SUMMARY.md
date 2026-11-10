@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 09/11/2026, missão #160 (`wait_for_merge` confirma `BEHIND` e `DIRTY` em segunda leitura).
+**Última atualização:** 09/11/2026, missão #145 (política escrita de testes flaky).
 
 ---
 
@@ -14,6 +14,7 @@
 | --- | --- |
 | CI (`master`) | Verde: unit, integração Chrome + Firefox, E2E Chrome, smoke, lint, report, `secret-scan`, `workflow-audit`; navegadores no Grid do `compose.yaml` |
 | Testes | Contagens no README (mantidas pelo hook `validate-readme-metrics`); cobertura mínima de 99% (`--cov-fail-under`) |
+| Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum teste em quarentena |
 | Relatório público | Allure em <https://brunoccalmeida.github.io/uat-automation-framework/>, publicado só em push no `master` |
 | Proteção do `master` | Ruleset "Protect master": PR, checks `ci-passed` e `pip-audit`, branch atualizada, histórico linear, sem bypass |
 | Segurança | gitleaks e zizmor no `ci-passed`; actions e hooks fixados por SHA; Dependabot com `cooldown` de 7 dias; versões do gitleaks e do zizmor sobem à mão |
@@ -32,7 +33,7 @@
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica). A #145 cita a lição do #129: fontes no corpo do PR #139 e no registro apontado no topo.
+**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); a próxima de visibilidade é a #148.
 
 **Ordem combinada (06/11/2026), item que falta:** bugs conhecidos no estilo do `playwright-qa-starter-kit` (afirmar o comportamento correto, marcar como falha esperada, apontar para um `KNOWN_ISSUES.md`).
 
@@ -66,7 +67,7 @@ O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos 
 - **Portão que nunca falha é pior que nenhum** (#27): `--exit-zero` e `continue-on-error` esconderam um F821 real.
 - **Procedimento vai para skill, fato fica na regra** (#101); lógica determinística vira script testado, não prosa.
 - **Regra em dois agentes = duas cópias** (#35): a divergência é barrada por teste, não por disciplina.
-- **Flake se instrumenta, não se retenta** (#129): repetir o clique esconderia a causa.
+- **Flake se instrumenta, não se retenta** (#129, #145): o kit usa `retries: 2` do Playwright, que relata "flaky"; ao copiar a política, a `playwright-qa-starter-kit#29` decide esse ponto.
 - **Fatia de recomendação do `/usage` não é gasto** (#56, #58); detalhes em `docs/ai-workflow/AGENT_TOKEN_SPEND.md`.
 
 ## Armadilhas

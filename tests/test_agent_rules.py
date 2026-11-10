@@ -318,3 +318,48 @@ class TestCodeIntelligence:
 
     def test_poetry_creates_the_virtualenv_in_project(self):
         assert _toml("poetry.toml")["virtualenvs"]["in-project"] is True
+
+
+# Each is a way to rerun a failed test until it passes
+RETRY_PLUGINS = {"flaky", "pytest-rerunfailures", "pytest-retry"}
+RETRY_SWITCHES = (
+    "--reruns",
+    "--retries",
+    "--force-flaky",
+    "nick-fields/retry",
+    "wretry.action",
+)
+BEHAVE_AUTORETRY = "scenario_autoretry"
+
+
+class TestFlakyTestPolicy:
+    """A flaky test is recorded and fixed, never retried until green (#145).
+
+    A retry turns the signal green and hides the cause (#129). The policy is
+    in docs/FLAKY_TESTS.md; test_doc_links checks that the path exists.
+    """
+
+    def test_always_loaded_rules_point_to_the_policy(self):
+        assert any(
+            "docs/FLAKY_TESTS.md" in path.read_text("utf-8") for path in ALWAYS_LOADED
+        )
+
+    def test_no_retry_plugin_is_installed(self):
+        packages = {package["name"] for package in _toml("poetry.lock")["package"]}
+        assert not packages & RETRY_PLUGINS
+
+    @pytest.mark.parametrize(
+        "path",
+        [
+            ROOT / "pyproject.toml",
+            *sorted((ROOT / ".github" / "workflows").glob("*.yml")),
+        ],
+        ids=lambda path: path.name,
+    )
+    def test_no_retry_switch_is_configured(self, path):
+        text = path.read_text("utf-8")
+        assert not [switch for switch in RETRY_SWITCHES if switch in text]
+
+    def test_behave_scenarios_are_not_auto_retried(self):
+        hooks = (ROOT / "features").rglob("*.py")
+        assert not [p.name for p in hooks if BEHAVE_AUTORETRY in p.read_text("utf-8")]

@@ -76,6 +76,8 @@ Nunca "chute" soluções. Antes de propor uma correção:
 
 Exemplo: `AttributeError: 'Context' object has no attribute 'cart_page'` não se resolve criando `context.cart_page` no step; veja como os outros steps criam pages e padronize todos. Erro por erro sem ver o padrão (ex.: corrigir uma `ImportError` por vez) também é chute.
 
+**Teste intermitente (flaky):** nunca rode de novo até passar. Registre em issue antes do re-run, instrumente e corrija a causa; a quarentena é o último recurso e tem prazo: `docs/FLAKY_TESTS.md`.
+
 Ao reportar um erro: **erro observado**, **causa raiz** (o porquê), **análise** (o que foi investigado, padrão, impacto), **solução proposta** com justificativa e **prevenção**.
 
 ## Comunicação

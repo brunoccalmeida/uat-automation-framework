@@ -12,7 +12,7 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 
 ## ⚡ At a Glance
 
-- **Tests:** 809 unit · 96 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
+- **Tests:** 815 unit · 96 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
 - **Real browsers:** integration and smoke suites run on Chrome and Firefox in CI, inside docker-selenium containers
 - **Quality gates:** `master` only accepts a PR with green CI and a clean `pip-audit`; every GitHub Action is pinned to a commit SHA
 - **Live report:** Allure, republished on every merge to `master`: 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -376,10 +376,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 809 tests (framework components, 100% Page Objects coverage, CI guardrails)
+- **Unit Tests**: 815 tests (framework components, 100% Page Objects coverage, CI guardrails)
 - **Integration Tests**: 96 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 905 unit/integration tests + 73 E2E scenarios
+- **Total**: 911 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -422,7 +422,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Step definitions (OR logic, configured password, local page objects)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 20 | N/A | ✅ Complete |
 | **Behave hooks (failure screenshot and URL in Allure)** | `tests/test_environment.py` | 11 | N/A | ✅ Complete |
 | **Smoke Tests** | `tests/test_smoke.py` | 2 | N/A | ✅ Complete |
-| **Workflow version comments (CI)** | `tests/test_workflow_version_comments.py` | 32 | N/A | ✅ Complete |
+| **Workflow version comments (CI)** | `tests/test_workflow_version_comments.py` | 33 | N/A | ✅ Complete |
 | **Security gates: gitleaks and zizmor (CI)** | `tests/test_security_gates_ci.py` | 10 | N/A | ✅ Complete |
 | **Workflow hardening (CI)** | `tests/test_workflow_hardening.py` | 33 | N/A | ✅ Complete |
 | **Pre-commit hook pinning (CI)** | `tests/test_precommit_pinning.py` | 17 | N/A | ✅ Complete |
@@ -430,7 +430,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Selenium Grid in Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 19 | N/A | ✅ Complete |
 | **Codecov upload (CI)** | `tests/test_codecov_upload.py` | 8 | N/A | ✅ Complete |
 | **Allure environment and executor (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Complete |
-| **Integration failure screenshots and page source (CI)** | `tests/test_failure_artifacts.py` | 10 | N/A | ✅ Complete |
+| **Failure evidence of browser tests (CI)** | `tests/test_failure_artifacts.py` | 15 | N/A | ✅ Complete |
 | **Agent rules (size, sync, skills, reviewer subagent, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 59 | N/A | ✅ Complete |
 | **Doc links (every referenced path exists)** | `tests/test_doc_links.py` | 109 | N/A | ✅ Complete |
 | **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
@@ -441,7 +441,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Complete |
-| **TOTAL** | | **809** | **100%** | **Complete** |
+| **TOTAL** | | **815** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 473

@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 09/11/2026, missão #145 (política escrita de testes flaky).
+**Última atualização:** 09/11/2026, missão #163 (evidência de falha do `smoke-matrix`).
 
 ---
 
@@ -15,6 +15,7 @@
 | CI (`master`) | Verde: unit, integração Chrome + Firefox, E2E Chrome, smoke, lint, report, `secret-scan`, `workflow-audit`; navegadores no Grid do `compose.yaml` |
 | Testes | Contagens no README (mantidas pelo hook `validate-readme-metrics`); cobertura mínima de 99% (`--cov-fail-under`) |
 | Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum teste em quarentena |
+| Evidência de falha | Integração, E2E e smoke guardam screenshot e URL como artefato do CI; todo job com `behave` é cobrado por `tests/test_failure_artifacts.py` |
 | Relatório público | Allure em <https://brunoccalmeida.github.io/uat-automation-framework/>, publicado só em push no `master` |
 | Proteção do `master` | Ruleset "Protect master": PR, checks `ci-passed` e `pip-audit`, branch atualizada, histórico linear, sem bypass |
 | Segurança | gitleaks e zizmor no `ci-passed`; actions e hooks fixados por SHA; Dependabot com `cooldown` de 7 dias; versões do gitleaks e do zizmor sobem à mão |
@@ -98,7 +99,7 @@ O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos 
 ## Ambiente local (Windows)
 
 - Chrome e Firefox instalados; interpretador do VS Code = `.venv` do projeto.
-- Rodar `behave` ou integração pede um `.env` (copiado de `.env.example`, com a senha preenchida); sem ele, a largada falha nomeando a variável.
+- Rodar `behave` ou integração pede um `.env` (copiado de `.env.example`, com a senha preenchida) ou `BASE_URL` e `TEST_USER_PASSWORD` no ambiente do processo, com os valores públicos do `env` de `tests.yml`; sem eles, a largada falha nomeando a variável.
 - Todo `.md` novo fora do inglês começa com `<!-- LTeX: language=pt-BR -->`, senão a extensão anexa centenas de falsos positivos ao contexto.
 - Poetry pelo instalador oficial (`%APPDATA%\pypoetry`). Se `poetry self update` quebrar: `%APPDATA%\pypoetry\venv\Scripts\python -m pip install poetry==<versão>`.
 - Windows PowerShell 5.1 grava `>>`/`Out-File` em UTF-16: não use para texto do repo (barrado pelo hook `check-text-encoding`).

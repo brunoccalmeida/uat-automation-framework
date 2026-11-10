@@ -1,9 +1,11 @@
-"""Unit tests for the integration-test failure artifacts (#129).
+"""Unit tests for the failure artifacts of browser tests (#129, #163).
 
 A flaky integration failure left only a one-line message in the CI log; the
-screenshot and page source show the state the browser was really in.
+screenshot and page source show the state the browser was really in. Behave
+jobs keep the same kind of evidence through the Allure results.
 """
 
+import re
 from pathlib import Path, PurePosixPath
 from unittest.mock import Mock
 
@@ -26,6 +28,14 @@ INTEGRATION_JOBS = [
     for name, job in JOBS.items()
     if any("pytest tests/integration/" in step.get("run", "") for step in job["steps"])
 ]
+BEHAVE_JOBS = [
+    name
+    for name, job in JOBS.items()
+    if any("poetry run behave" in step.get("run", "") for step in job["steps"])
+]
+ALLURE_OUTPUT = re.compile(
+    r"-f allure_behave\.formatter:AllureFormatter -o (?P<path>\S+)"
+)
 
 
 def _node_with_reports(**outcomes):
@@ -118,9 +128,59 @@ def _uploaded_paths_on_failure(job):
     ]
 
 
+def _allure_results_dir(job):
+    """Folder the job's Behave run writes Allure results to, None if no such run."""
+    for step in job["steps"]:
+        match = ALLURE_OUTPUT.search(step.get("run", ""))
+        if match:
+            return PurePosixPath(match["path"])
+    return None
+
+
 def test_the_workflow_runs_integration_tests_somewhere():
     """Guard: the check below must have jobs to look at."""
     assert INTEGRATION_JOBS
+
+
+def test_the_workflow_runs_behave_somewhere():
+    """Guard: the checks below must have jobs to look at."""
+    assert "smoke-matrix" in BEHAVE_JOBS
+
+
+@pytest.mark.parametrize("job_name", BEHAVE_JOBS)
+def test_every_behave_job_writes_and_uploads_the_failure_evidence(job_name):
+    """environment.py attaches through Allure: no formatter, no evidence (#163)."""
+    job = JOBS[job_name]
+
+    results = _allure_results_dir(job)
+
+    assert results, f"job '{job_name}' runs Behave without the Allure formatter"
+    paths = _uploaded_paths_on_failure(job)
+    assert any(
+        results.is_relative_to(path) for path in paths
+    ), f"job '{job_name}' writes {results} but uploads only {paths} on failure"
+
+
+def test_smoke_keeps_the_scenario_steps_in_the_job_log():
+    """Each -o pairs with the -f in its position; a -f without one goes to stdout."""
+    runs = [step.get("run", "") for step in JOBS["smoke-matrix"]["steps"]]
+
+    assert any(
+        (match := ALLURE_OUTPUT.search(run))
+        and run[match.end() :].lstrip().startswith("-f pretty")
+        for run in runs
+    ), "the Allure formatter replaced the readable output of smoke-matrix"
+
+
+def test_each_smoke_browser_uploads_its_own_artifact():
+    """Artifact names are unique per run: a shared one fails the second upload."""
+    names = [
+        step["with"]["name"]
+        for step in JOBS["smoke-matrix"]["steps"]
+        if step.get("uses", "").startswith("actions/upload-artifact@")
+    ]
+
+    assert names and all("matrix.browser" in name for name in names), names
 
 
 @pytest.mark.parametrize("job_name", INTEGRATION_JOBS)

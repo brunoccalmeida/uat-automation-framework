@@ -11,3 +11,4 @@ applyTo: "pages/**/*.py,features/**/*.py,tests/**/*.py"
 - Formulário com erro: remova o erro antigo antes de reenviar (`submit_and_wait_for_outcome`), senão o erro velho parece o resultado novo.
 - `Then` que falha usa `assert`, não uma espera (`wait_until_loaded`): `AssertionError` aparece como *failed* no Allure (comportamento); `TimeoutException`, como *broken* (erro do teste).
 - Teste de integração de condição de corrida é probabilístico; a garantia determinística vem do unitário (ex.: ordem clique → espera).
+- Unitário de Page Object só para lógica e contrato de espera: locator e delegação simples ao `BasePage` se provam na integração, contra o DOM; mock que repete o código só detecta mudança (#143).

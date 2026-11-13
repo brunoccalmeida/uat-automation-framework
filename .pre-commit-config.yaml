@@ -80,3 +80,12 @@ repos:
       - id: name-tests-test
         args: ['--pytest-test-first']
         exclude: ^tests/(conftest.py|.*/conftest.py|helpers/)
+
+  # An invalid issue form is not reported anywhere: it just disappears from
+  # the template chooser. These hooks check the forms and the chooser config
+  # against the SchemaStore schemas (tests/test_issue_pr_templates.py, #148).
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: a76b92851fc9eede9f9bc4073eb55202f34eb0df  # frozen: 0.39.0
+    hooks:
+      - id: check-github-issue-forms
+      - id: check-github-issue-config

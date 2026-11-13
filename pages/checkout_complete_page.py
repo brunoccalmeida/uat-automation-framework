@@ -17,9 +17,7 @@ class CheckoutCompletePage(BasePage):
     CHECKOUT_COMPLETE_CONTAINER = (By.ID, "checkout_complete_container")
     PAGE_LOADED = CHECKOUT_COMPLETE_CONTAINER
     COMPLETE_HEADER = (By.CLASS_NAME, "complete-header")
-    COMPLETE_TEXT = (By.CLASS_NAME, "complete-text")
     BACK_HOME_BUTTON = (By.ID, "back-to-products")
-    PONY_EXPRESS_IMAGE = (By.CLASS_NAME, "pony_express")
 
     def __init__(self, driver: WebDriver, timeout: int = 10):
         """Initialize the page and the header it includes.
@@ -47,14 +45,6 @@ class CheckoutCompletePage(BasePage):
         """
         return self.get_text(self.COMPLETE_HEADER)
 
-    def get_confirmation_text(self) -> str:
-        """Get detailed confirmation text.
-
-        Returns:
-            Confirmation description text.
-        """
-        return self.get_text(self.COMPLETE_TEXT)
-
     def click_back_home(self) -> "inventory_page.InventoryPage":
         """Click Back Home button to return to products page.
 
@@ -63,11 +53,3 @@ class CheckoutCompletePage(BasePage):
         """
         self.click(self.BACK_HOME_BUTTON)
         return inventory_page.InventoryPage(self.driver).wait_until_loaded()
-
-    def is_pony_express_displayed(self) -> bool:
-        """Check if Pony Express delivery image is displayed.
-
-        Returns:
-            True if image is present, False otherwise.
-        """
-        return self.is_element_visible(self.PONY_EXPRESS_IMAGE, timeout=2)

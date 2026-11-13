@@ -185,22 +185,6 @@ class TestGetCurrentSortOption:
                     page.get_current_sort_option()
 
 
-class TestRemoveProductFromCart:
-    """Test remove_product_from_cart method."""
-
-    def test_remove_product_from_cart_navigates_to_cart_removes_and_returns(self):
-        """remove_product_from_cart should go to cart, remove product and return."""
-        page = InventoryPage(Mock())
-
-        with patch.object(page.header, "click_shopping_cart") as mock_click_cart:
-            page.remove_product_from_cart("Sauce Labs Backpack")
-
-            mock_click_cart.assert_called_once()
-            cart = mock_click_cart.return_value
-            cart.remove_product.assert_called_once_with("Sauce Labs Backpack")
-            cart.click_continue_shopping.assert_called_once()
-
-
 class TestAreProductImagesBroken:
     """Test are_product_images_broken method."""
 

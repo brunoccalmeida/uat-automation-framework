@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 10/11/2026, missão sem issue (corte das regras sempre carregadas: fora o que envelhece rápido ou não vale para todo chat e agente).
+**Última atualização:** 12/11/2026, missão sem issue (segundo corte das regras sempre carregadas: o específico foi para regras com escopo de caminho).
 
 ---
 
@@ -21,7 +21,7 @@
 | Segurança | gitleaks e zizmor no `ci-passed`; actions e hooks fixados por SHA; Dependabot com `cooldown` de 7 dias; versões do gitleaks e do zizmor sobem à mão |
 | Portões locais | `pre-commit` igual ao CI: black, ruff, pylint, pyright, métricas do README, encoding; links de docs por `tests/test_doc_links.py` |
 | Ferramentas | Python pela fonte única `.python-version` (3.15 bloqueado, #95); Poetry, Selenium e demais versões em `pyproject.toml` e `poetry.lock` |
-| Regras do agente | `copilot-instructions.md` com 94 linhas e 9,1 mil caracteres (`wc -m`, 10/11/2026), só o que vale em todo chat e para todo agente; escopo de caminho em `.claude/rules/` = `.github/instructions/` |
+| Regras do agente | `copilot-instructions.md` com 91 linhas e 8,4 mil caracteres (`wc -m`, 12/11/2026), só o que vale em todo chat e para todo agente; escopo de caminho em `.claude/rules/` = `.github/instructions/` |
 | Skills e revisor | `/close-mission` (Definition of Done, o agente invoca), `/ship-pr` (auto-merge nativo, só o usuário dispara), `reviewer` uma vez por missão |
 | Proteções do agente | `permissions.deny` nos dois shells (`--admin`, force push, push no `master`, `.env`); casam o texto, a fronteira real é o ruleset |
 | Ambiente do agente | Filtro de saída de testes (`scripts/filter_test_output.py`) e `pyright-lsp`; passo a passo em `docs/ai-workflow/AGENT_TOKEN_SPEND.md` |

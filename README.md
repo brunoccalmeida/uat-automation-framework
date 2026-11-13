@@ -12,7 +12,7 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 
 ## ⚡ At a Glance
 
-- **Tests:** 753 unit · 96 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
+- **Tests:** 753 unit · 97 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
 - **Real browsers:** integration and smoke suites run on Chrome and Firefox in CI, inside docker-selenium containers
 - **Quality gates:** `master` only accepts a PR with green CI and a clean `pip-audit`; every GitHub Action is pinned to a commit SHA
 - **Live report:** Allure, republished on every merge to `master`: 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -377,9 +377,9 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 
 **Layer Distribution:**
 - **Unit Tests**: 753 tests (framework components, Page Object logic and wait contracts, CI guardrails)
-- **Integration Tests**: 96 tests (Page Objects + real browser, including navigation synchronization)
+- **Integration Tests**: 97 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 849 unit/integration tests + 73 E2E scenarios
+- **Total**: 850 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -462,13 +462,13 @@ Integration tests validate Page Objects with real browser interactions, filling 
 | **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 7 | Chrome, Firefox | ✅ Complete |
 | **HeaderComponent** | `tests/integration/test_header_component_integration.py` | 14 | Chrome, Firefox | ✅ Complete |
 | **InventoryPage (sorting)** | `tests/integration/test_inventory_sorting_integration.py` | 1 | Chrome, Firefox | ✅ Complete |
-| **CartPage** | `tests/integration/test_cart_page_integration.py` | 10 | Chrome, Firefox | ✅ Complete |
+| **CartPage** | `tests/integration/test_cart_page_integration.py` | 11 | Chrome, Firefox | ✅ Complete |
 | **ProductDetailsPage** | `tests/integration/test_product_details_integration.py` | 9 | Chrome, Firefox | ✅ Complete |
 | **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 16 | Chrome, Firefox | ✅ Complete |
 | **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 14 | Chrome, Firefox | ✅ Complete |
 | **Navigation synchronization** | `tests/integration/test_navigation_integration.py` | 13 | Chrome, Firefox | ✅ Complete |
 | **Selenium Grid session** | `tests/integration/test_remote_driver_integration.py` | 1 | Chrome, Firefox (Grid) | ✅ Complete |
-| **TOTAL** | | **96** | **Real** | **Complete** |
+| **TOTAL** | | **97** | **Real** | **Complete** |
 
 **Key Differences from Unit Tests:**
 - ✅ Real Selenium WebDriver (not mocked)

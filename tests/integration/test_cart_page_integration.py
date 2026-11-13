@@ -90,3 +90,15 @@ class TestCartPageProductValidation:
         page = CartPage(cart_with_products)
 
         assert not page.is_product_in_cart("Nonexistent Product")
+
+
+class TestIsOnCartPage:
+    """Test is_on_cart_page against the real DOM."""
+
+    def test_false_on_another_page_under_base_url(self, authenticated_driver):
+        """is_on_cart_page should be False on the inventory page (#143).
+
+        The true case is test_cart_container_is_present; without this one, an
+        is_on_cart_page that always returned True would pass every test.
+        """
+        assert not CartPage(authenticated_driver).is_on_cart_page()

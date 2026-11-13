@@ -1,6 +1,10 @@
 """Unit tests for CheckoutCompletePage class.
 
-Tests the CheckoutCompletePage Page Object in isolation using mocks.
+Mostly the navigation wait contract. The container and the Back Home button
+are covered against the DOM by tests/integration/test_navigation_integration.py
+(#143). The confirmation reads (is_on_confirmation_page,
+get_confirmation_message) run against a real browser only in the E2E suite,
+so their unit tests stay until an integration test covers them.
 """
 
 from unittest.mock import Mock, patch
@@ -14,23 +18,12 @@ from tests.helpers.navigation_contract import assert_clicks_then_returns_loaded
 class TestCheckoutCompletePageLocators:
     """Test CheckoutCompletePage locator definitions."""
 
-    def test_checkout_complete_container_locator(self):
-        """CHECKOUT_COMPLETE_CONTAINER locator should use correct ID."""
-        assert CheckoutCompletePage.CHECKOUT_COMPLETE_CONTAINER == (
-            By.ID,
-            "checkout_complete_container",
-        )
-
     def test_complete_header_locator(self):
         """COMPLETE_HEADER locator should use correct class name."""
         assert CheckoutCompletePage.COMPLETE_HEADER == (
             By.CLASS_NAME,
             "complete-header",
         )
-
-    def test_back_home_button_locator(self):
-        """BACK_HOME_BUTTON locator should use correct ID."""
-        assert CheckoutCompletePage.BACK_HOME_BUTTON == (By.ID, "back-to-products")
 
 
 class TestIsOnConfirmationPage:

@@ -20,13 +20,6 @@ from pages.base_page import BasePage
 class TestBasePageInitialization:
     """Test BasePage initialization and setup."""
 
-    def test_base_page_stores_driver(self):
-        """BasePage should store the WebDriver instance."""
-        mock_driver = Mock()
-        page = BasePage(mock_driver)
-
-        assert page.driver is mock_driver
-
     def test_base_page_creates_wait_with_default_timeout(self):
         """BasePage should wait on its driver with a 10s timeout by default."""
         mock_driver = Mock()
@@ -34,13 +27,6 @@ class TestBasePageInitialization:
             BasePage(mock_driver)
 
         mock_wait.assert_called_once_with(mock_driver, 10)
-
-    def test_base_page_stores_the_wait(self):
-        """BasePage should expose the WebDriverWait it created."""
-        with patch("pages.base_page.WebDriverWait") as mock_wait:
-            page = BasePage(Mock())
-
-        assert page.wait is mock_wait.return_value
 
 
 class TestFindElement:
@@ -188,39 +174,6 @@ class TestTypeMethod:
 
                     mock_element.clear.assert_called_once()
 
-    def test_type_sends_text_to_element(self):
-        """type should send keys to the element."""
-        mock_driver = Mock()
-        mock_element = Mock()
-
-        page = BasePage(mock_driver)
-
-        with patch.object(page, "find_clickable_element", return_value=mock_element):
-            with patch.object(page.driver, "execute_script"):
-                with patch.object(page.wait, "until", return_value=mock_element):
-                    locator = (By.ID, "input-field")
-                    test_text = "my test input"
-                    page.type(locator, test_text)
-
-                    mock_element.send_keys.assert_called_once_with(test_text)
-
-    def test_type_method_sequence_is_correct(self):
-        """type should execute operations in correct order."""
-        mock_driver = Mock()
-        mock_element = Mock()
-
-        page = BasePage(mock_driver)
-
-        with patch.object(page, "find_clickable_element", return_value=mock_element):
-            with patch.object(page.driver, "execute_script"):
-                with patch.object(page.wait, "until", return_value=mock_element):
-                    locator = (By.ID, "input-field")
-                    page.type(locator, "text")
-
-                    # Verify key methods were called
-                    assert mock_element.clear.called
-                    assert mock_element.send_keys.called
-
 
 class TestClickMethod:
     """Test click method."""
@@ -240,19 +193,6 @@ class TestClickMethod:
 
             mock_find.assert_called_once_with(locator)
 
-    def test_click_calls_element_click(self):
-        """click should call click() on the element."""
-        mock_driver = Mock()
-        mock_element = Mock()
-
-        page = BasePage(mock_driver)
-
-        with patch.object(page, "find_clickable_element", return_value=mock_element):
-            locator = (By.ID, "button")
-            page.click(locator)
-
-            mock_element.click.assert_called_once()
-
 
 class TestGetTextMethod:
     """Test get_text method."""
@@ -270,21 +210,6 @@ class TestGetTextMethod:
             page.get_text(locator)
 
             mock_find.assert_called_once_with(locator)
-
-    def test_get_text_returns_element_text(self):
-        """get_text should return the text property of element."""
-        mock_driver = Mock()
-        mock_element = Mock()
-        expected_text = "Expected text content"
-        mock_element.text = expected_text
-
-        page = BasePage(mock_driver)
-
-        with patch.object(page, "find_element", return_value=mock_element):
-            locator = (By.ID, "label")
-            result = page.get_text(locator)
-
-            assert result == expected_text
 
 
 class TestIsElementVisibleMethod:

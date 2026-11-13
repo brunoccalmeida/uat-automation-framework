@@ -1,63 +1,16 @@
 """Unit tests for CheckoutStepTwoPage class.
 
-Tests the CheckoutStepTwoPage Page Object in isolation using mocks.
+Only what a real browser cannot check deterministically: logic (name
+matching, reading amounts out of their labels) and the wait contracts of
+finishing and cancelling. Locators and plain delegation to BasePage are
+covered against the DOM by tests/integration/test_checkout_step_two_integration.py
+(#143).
 """
 
 from unittest.mock import Mock, patch
 
-from selenium.webdriver.common.by import By
-
 from pages.checkout_step_two_page import CheckoutStepTwoPage
 from tests.helpers.navigation_contract import assert_clicks_then_returns_loaded
-
-
-class TestCheckoutStepTwoPageLocators:
-    """Test CheckoutStepTwoPage locator definitions."""
-
-    def test_checkout_summary_container_locator(self):
-        """CHECKOUT_SUMMARY_CONTAINER locator should use correct ID."""
-        assert CheckoutStepTwoPage.CHECKOUT_SUMMARY_CONTAINER == (
-            By.ID,
-            "checkout_summary_container",
-        )
-
-    def test_subtotal_label_locator(self):
-        """SUBTOTAL_LABEL locator should use correct class name."""
-        assert CheckoutStepTwoPage.SUBTOTAL_LABEL == (
-            By.CLASS_NAME,
-            "summary_subtotal_label",
-        )
-
-    def test_tax_label_locator(self):
-        """TAX_LABEL locator should use correct class name."""
-        assert CheckoutStepTwoPage.TAX_LABEL == (By.CLASS_NAME, "summary_tax_label")
-
-    def test_total_label_locator(self):
-        """TOTAL_LABEL locator should use correct class name."""
-        assert CheckoutStepTwoPage.TOTAL_LABEL == (By.CLASS_NAME, "summary_total_label")
-
-    def test_finish_button_locator(self):
-        """FINISH_BUTTON locator should use correct ID."""
-        assert CheckoutStepTwoPage.FINISH_BUTTON == (By.ID, "finish")
-
-
-class TestIsOnCheckoutOverviewPage:
-    """Test is_on_checkout_overview_page method."""
-
-    def test_is_on_checkout_overview_page_returns_true_when_container_present(self):
-        """is_on_checkout_overview_page is True when the summary container exists."""
-        mock_driver = Mock()
-        page = CheckoutStepTwoPage(mock_driver)
-
-        with patch.object(
-            page, "is_element_visible", return_value=True
-        ) as mock_is_present:
-            result = page.is_on_checkout_overview_page()
-
-            mock_is_present.assert_called_once_with(
-                CheckoutStepTwoPage.CHECKOUT_SUMMARY_CONTAINER, timeout=3
-            )
-            assert result is True
 
 
 class TestIsProductInSummary:
@@ -86,34 +39,6 @@ class TestIsProductInSummary:
         result = page.is_product_in_summary("Sauce Labs Backpack")
 
         assert result is False
-
-
-class TestIsPaymentInfoDisplayed:
-    """Test is_payment_info_displayed method."""
-
-    def test_is_payment_info_displayed_returns_true_when_present(self):
-        """is_payment_info_displayed should return True when payment info exists."""
-        mock_driver = Mock()
-        page = CheckoutStepTwoPage(mock_driver)
-
-        with patch.object(page, "is_element_visible", return_value=True):
-            result = page.is_payment_info_displayed()
-
-            assert result is True
-
-
-class TestIsShippingInfoDisplayed:
-    """Test is_shipping_info_displayed method."""
-
-    def test_is_shipping_info_displayed_returns_true_when_present(self):
-        """is_shipping_info_displayed should return True when shipping info exists."""
-        mock_driver = Mock()
-        page = CheckoutStepTwoPage(mock_driver)
-
-        with patch.object(page, "is_element_visible", return_value=True):
-            result = page.is_shipping_info_displayed()
-
-            assert result is True
 
 
 class TestGetItemTotal:

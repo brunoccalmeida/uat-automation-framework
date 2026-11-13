@@ -1,5 +1,5 @@
 <!-- LTeX: language=es -->
-<!-- translation-source: README.md sha256:0460f22f8f6213c9540ba71212d70f6aae96008468e8cacd2306d8d04e5f8913 -->
+<!-- translation-source: README.md sha256:860297cad97cda384e957e407e9f7eb2bcb37ee62b8fbba8a73a95a1247a0fd6 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -14,7 +14,7 @@ Framework completo de automatización UAT con Python, Behave (BDD) y Selenium pa
 
 ## ⚡ De un Vistazo
 
-- **Pruebas:** 833 unitarias · 96 de integración · 73 escenarios E2E, construidas con TDD de doble ciclo (los escenarios de Behave guían las pruebas unitarias de pytest)
+- **Pruebas:** 753 unitarias · 96 de integración · 73 escenarios E2E, construidas con TDD de doble ciclo (los escenarios de Behave guían las pruebas unitarias de pytest)
 - **Navegadores reales:** las suites de integración y smoke corren en Chrome y Firefox en el CI, dentro de contenedores docker-selenium
 - **Controles de calidad:** `master` solo acepta un PR con CI en verde y `pip-audit` limpio; cada GitHub Action está fijada por SHA de commit
 - **Informe en vivo:** Allure, republicado en cada merge a `master`: 📊 **[Ver el Informe de Pruebas Más Reciente](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -378,10 +378,10 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 ```
 
 **Distribución por Capa:**
-- **Pruebas Unitarias**: 833 pruebas (componentes del framework, 100% de cobertura de los Page Objects, salvaguardas del CI)
+- **Pruebas Unitarias**: 753 pruebas (componentes del framework, lógica y contratos de espera de los Page Objects, salvaguardas del CI)
 - **Pruebas de Integración**: 96 pruebas (Page Objects + navegador real, incluida la sincronización de la navegación)
 - **Pruebas E2E**: 73 escenarios, 463 steps (jornadas completas de usuario)
-- **Total**: 929 pruebas unitarias/de integración + 73 escenarios E2E
+- **Total**: 849 pruebas unitarias/de integración + 73 escenarios E2E
 
 **Cuándo Usar Cada Capa:**
 | Tipo de Prueba | Propósito | Velocidad | Navegador | Ejemplo |
@@ -408,15 +408,15 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 
 | Módulo | Fuente | Pruebas | Cobertura | Estado |
 |--------|--------|---------|-----------|--------|
-| **BasePage** | `tests/test_base_page.py` | 33 | 100% | ✅ Completo |
-| **LoginPage** | `tests/test_login_page.py` | 16 | 100% | ✅ Completo |
-| **CartPage** | `tests/test_cart_page.py` | 13 | 100% | ✅ Completo |
-| **InventoryPage** | `tests/test_inventory_page.py` | 25 | 100% | ✅ Completo |
-| **HeaderComponent** | `tests/test_header_component.py` | 20 | 100% | ✅ Completo |
-| **ProductDetailsPage** | `tests/test_product_details_page.py` | 15 | 100% | ✅ Completo |
-| **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 15 | 100% | ✅ Completo |
-| **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 16 | 100% | ✅ Completo |
-| **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 7 | 100% | ✅ Completo |
+| **BasePage** | `tests/test_base_page.py` | 27 | 100% | ✅ Completo |
+| **LoginPage** | `tests/test_login_page.py` | 3 | 100% | ✅ Completo |
+| **CartPage** | `tests/test_cart_page.py` | 5 | 100% | ✅ Completo |
+| **InventoryPage** | `tests/test_inventory_page.py` | 13 | 100% | ✅ Completo |
+| **HeaderComponent** | `tests/test_header_component.py` | 13 | 100% | ✅ Completo |
+| **ProductDetailsPage** | `tests/test_product_details_page.py` | 3 | 100% | ✅ Completo |
+| **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 3 | 100% | ✅ Completo |
+| **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 8 | 100% | ✅ Completo |
+| **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 5 | 100% | ✅ Completo |
 | **Config** | `tests/test_config.py` | 38 | 100% | ✅ Completo |
 | **Configuración al inicio (behave, pytest)** | `tests/test_settings_startup.py` | 3 | N/A | ✅ Completo |
 | **DriverManager** | `tests/test_driver_manager.py` | 23 | 100% | ✅ Completo |
@@ -444,13 +444,15 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **Puerta de codificación (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Clave de caché del venv (CI, versión exacta de Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
 | **Fuente de la versión de Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
-| **TOTAL** | | **833** | **100%** | **Completo** |
+| **TOTAL** | | **753** | **100%** | **Completo** |
 
 **Cobertura de Código:**
-- **Total de statements:** 473
-- **Cubiertos:** 473 (100%)
+- **Total de statements:** 463
+- **Cubiertos:** 463 (100%)
 - **Módulo Pages**: 100%
 - **Módulo Core**: 100%
+
+La cobertura se mide con las pruebas unitarias y de integración juntas, como en el CI: un método de Page Object que solo delega en `BasePage` se cubre contra el DOM real, no con un mock que repite su código.
 
 ### Pruebas de Integración (Pytest + Navegador Real)
 

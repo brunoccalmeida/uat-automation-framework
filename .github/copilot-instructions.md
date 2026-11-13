@@ -1,7 +1,7 @@
 <!-- LTeX: language=pt-BR -->
 # UAT Automation Framework - Regras do projeto
 
-Regras que valem em todo chat. Regras de uma parte do código ficam em arquivos com escopo de caminho (`.claude/rules/` e `.github/instructions/`, idênticos; `tests/test_agent_rules.py` cobra).
+Regras que valem em todo chat e para todo agente. O que vale só para uma parte do código fica nas regras com escopo de caminho (`.claude/rules/` e `.github/instructions/`).
 
 ## Regra de ouro: TDD
 Nunca implemente código de produção sem antes ter um teste falhando.
@@ -29,12 +29,9 @@ Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** 
 ## Gasto de tokens (contexto)
 Cada turno reenvia todo o contexto; contexto longo custa mais e piora a aderência às regras. Fontes, porquês e medição: `docs/ai-workflow/AGENT_TOKEN_SPEND.md`.
 
-- **Regras sempre carregadas < 200 linhas**, só o que vale em todo chat. Regra de uma parte do código vai para arquivo com escopo de caminho.
-- **Não repita o que linter/teste já impõe**; regra sem exceção vira teste ou hook, não ênfase.
 - **Filtre saídas na origem** (`grep`, `head`, `--jq`, `gh run view --log-failed`, leitura por trecho); nunca despeje log de CI ou notas de versão inteiras.
 - **Documentação web por seção, não página inteira:** sumário (`curl -s <url>.md | grep -n '^##'`) e depois só a seção (`sed -n '/^### X/,/^### /p'`).
 - **Subagente só com motivo**: trabalho paralelo independente, isolar saída volumosa ou revisor independente. Ele recomeça do zero e soma requisições. Tarefa simples: modelo menor.
-- **Medir antes e depois de cada mudança que promete economia**, não por rotina.
 - **Duas correções sem sucesso:** chat novo e um prompt melhor.
 
 ## TDD/BDD: duplo ciclo
@@ -48,7 +45,7 @@ Nunca comece pelo Page Object: feature → steps → `behave` (RED) → implemen
 
 Todo teste deve ter sido visto falhando (RED) ao menos uma vez. Teste que nunca falhou não prova nada; se o RED não foi observado, confirme com um teste de mutação (desfaça a correção e veja o teste falhar).
 
-**Hierarquia:** E2E (Behave, fluxos de usuário) · integração (Page Objects com driver real) · unit (lógica isolada, mocks). Testes de integração de condições de corrida são probabilísticos; a garantia determinística vem dos unitários (ex.: ordem clique → espera).
+**Hierarquia:** E2E (Behave, fluxos de usuário) · integração (Page Objects com driver real) · unit (lógica isolada, mocks).
 
 ## Espere o estado ficar pronto antes de agir
 Toda ação seguida de uma leitura ou decisão deve esperar o resultado da ação, nunca um estado intermediário. Vale para testes, scripts e automação de CI. Pergunte: *"isto vê o resultado da ação, ou um estado que ainda está mudando?"*
@@ -83,12 +80,12 @@ Ao reportar um erro: **erro observado**, **causa raiz** (o porquê), **análise*
 - **Versão maior é decisão humana**: leia as notas de cada versão maior intermediária e verifique se cada mudança incompatível afeta este projeto. Meça o impacto (ex.: rodar o formatador novo) antes de concluir.
 
 ## Git e Pull Requests
+- **Nunca `--no-verify`**: hook que reprova se corrige, não se pula.
 - **Conventional Commits** (`feat`, `fix`, `refactor`, `test`, `docs`, `style`, `perf`, `build`, `ci`, `chore`; escopo opcional, ex.: `build(deps):`), commits atômicos.
 - O `master` é protegido (ruleset): só aceita PR com os checks obrigatórios verdes e **branch atualizada**. Cada merge desatualiza os outros PRs abertos, custando novo ciclo de CI e revisão. Por isso:
   - **Um PR aberto por vez.** Trabalho pronto espera em commit local até a fila esvaziar. Merge antes do próximo PR, sem empilhar (empilhar só se justifica com revisão demorada, em equipes).
-  - **Merge só pelo `/ship-pr`, que o usuário dispara** (o merge no `master` publica o relatório): o agente abre o PR e pede o comando. Squash, por auto-merge nativo preso ao SHA da head: quem decide é o ruleset. **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
-- **Portão novo barra commits parciais:** cada commit é checado com a config dele; mudança indivisível (ligar o portão e corrigir o que ele acusa) vai em commit único, nunca com `--no-verify`.
-- **Alterar o ruleset é bloqueado para o agente:** só com autorização explícita do dono para aquela alteração. Ordem segura: CI do PR verde com o novo check → ruleset → merge.
+  - **Merge só pelo `/ship-pr`, que o usuário dispara** (o merge no `master` publica o relatório): o agente abre o PR e pede o comando. **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
+- **Alterar o ruleset é bloqueado para o agente:** só com autorização explícita do dono para aquela alteração.
 
 ## Princípios
 Explícito é melhor que implícito; simples é melhor que complexo; legibilidade conta; erros nunca passam em silêncio; diante da ambiguidade, recuse a tentação de adivinhar.

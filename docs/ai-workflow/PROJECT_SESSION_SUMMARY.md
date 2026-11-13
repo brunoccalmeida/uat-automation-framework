@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 12/11/2026, #148 (formulários de issue e modelo de PR).
+**Última atualização:** 12/11/2026, #142 (portões verdes no `/close-mission` e isolamento no revisor).
 
 ---
 
@@ -23,7 +23,7 @@
 | Issues e PRs | Formulários em `.github/ISSUE_TEMPLATE/` (missão, bug; sem issue em branco) validados pelo `check-jsonschema`; corpo de PR por `.github/pull_request_template.md` |
 | Ferramentas | Python pela fonte única `.python-version` (3.15 bloqueado, #95); Poetry, Selenium e demais versões em `pyproject.toml` e `poetry.lock` |
 | Regras do agente | `copilot-instructions.md` com 91 linhas e 8,4 mil caracteres (`wc -m`, 12/11/2026), só o que vale em todo chat e para todo agente; escopo de caminho em `.claude/rules/` = `.github/instructions/` |
-| Skills e revisor | `/close-mission` (Definition of Done, o agente invoca), `/ship-pr` (auto-merge nativo, só o usuário dispara), `reviewer` uma vez por missão |
+| Skills e revisor | `/close-mission` (Definition of Done, o agente invoca; abre com os portões locais, comandos cobrados contra `tests.yml`), `/ship-pr` (só o usuário dispara), `reviewer` (inclui isolamento) |
 | Proteções do agente | `permissions.deny` nos dois shells (`--admin`, force push, push no `master`, `.env`); casam o texto, a fronteira real é o ruleset |
 | Ambiente do agente | Filtro de saída de testes (`scripts/filter_test_output.py`) e `pyright-lsp`; passo a passo em `docs/ai-workflow/AGENT_TOKEN_SPEND.md` |
 | Navegador | `compose.yaml` é a fonte única do Grid, local e CI; imagens por tag + digest; `SELENIUM_REMOTE_URL` liga o `webdriver.Remote` |
@@ -35,7 +35,7 @@
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #142 (portões verdes no `/close-mission` e isolamento no revisor), que melhora toda missão seguinte.
+**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #143 (remover testes unitários que só detectam mudança ou só testam mocks), dívida de código; a #150 (alinhar regras base com o kit) é só documentação.
 
 **Ordem combinada (06/11/2026), item que falta:** bugs conhecidos no estilo do `playwright-qa-starter-kit` (afirmar o comportamento correto, marcar como falha esperada, apontar para um `KNOWN_ISSUES.md`).
 

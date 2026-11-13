@@ -13,7 +13,8 @@ Verifique só o que nenhum portão cobre:
 2. **Testes provam comportamento:** cada teste novo falharia se o comportamento quebrasse (não só cobra que algo foi chamado); casos de borda citados na issue têm teste.
 3. **RED registrado:** a mensagem de commit ou o texto entregue diz como cada teste foi visto falhando, pelo motivo certo, ou qual mutação o confirmou.
 4. **Espera do estado final:** toda leitura ou decisão após uma ação espera o resultado dela, por condição, nunca por tempo.
-5. **Desvios justificados:** escolha fora da prática estabelecida tem o porquê no commit ou na documentação; documentação e README acompanham a mudança.
+5. **Isolamento:** cada teste novo parte de um estado limpo e conhecido: navegador próprio (`before_scenario` no Behave, fixture `driver` de escopo `function` na integração) e pré-condições (login, carrinho) montadas no próprio `Given` ou fixture; não depende de ordem nem do que outro teste deixou, nem compartilha estado mutável entre os workers do `-n auto`.
+6. **Desvios justificados:** escolha fora da prática estabelecida tem o porquê no commit ou na documentação; documentação e README acompanham a mudança.
 
 Ignore estilo, formatação, imports, tipos e tudo o que black, ruff, pylint, pyright e os testes já impõem. Não proponha abstração nem teste para caso impossível: um revisor procurando problemas sempre acha algum.
 

@@ -13,6 +13,7 @@ See docs/ai-workflow/AGENT_TOKEN_SPEND.md.
 """
 
 import json
+import re
 import tomllib
 from pathlib import Path
 
@@ -37,6 +38,7 @@ AGENTS = ROOT / ".claude" / "agents"
 SESSION_SUMMARY = ROOT / "docs" / "ai-workflow" / "PROJECT_SESSION_SUMMARY.md"
 MAX_SESSION_SUMMARY_CHARS = 16_000
 MAX_STATE_ROW_CHARS = 240
+TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
 
 
 def _split_frontmatter(path):
@@ -158,6 +160,21 @@ def _always_loaded_text():
     return "\n".join(path.read_text(encoding="utf-8") for path in ALWAYS_LOADED)
 
 
+def _close_mission_steps():
+    """Return the text of each numbered step of /close-mission, in order."""
+    _, body = _split_frontmatter(SKILLS / "close-mission" / "SKILL.md")
+    return [
+        line.split(". ", 1)[1]
+        for line in body.splitlines()
+        if line[:1].isdigit() and ". " in line
+    ]
+
+
+def _close_mission_gate_commands():
+    """Return the `poetry run ...` commands of the green gates step."""
+    return re.findall(r"`(poetry run [^`]+)`", _close_mission_steps()[0])
+
+
 class TestSkills:
     """Procedures live in skills, whose body loads only when the skill is used.
 
@@ -213,6 +230,31 @@ class TestSkills:
         # the /ship-pr skill holds them; scripts/wait_for_merge.py says why
         assert step not in _always_loaded_text()
 
+    def test_close_mission_runs_the_gates_before_the_reviewer(self):
+        # fail fast: a red gate found locally costs seconds, in CI a full
+        # cycle, and the reviewer should read a diff that already passes
+        steps = _close_mission_steps()
+        assert steps[0].startswith("**Portões verdes:**")
+        assert any(step.startswith("**Revisor**") for step in steps[1:])
+
+    def test_close_mission_gates_cover_every_ci_test_layer(self):
+        commands = _close_mission_gate_commands()
+        for layer in ["pre-commit run --all-files", "tests/integration", "behave"]:
+            assert any(layer in command for command in commands), layer
+        assert any("--ignore=tests/integration" in command for command in commands)
+
+    def test_close_mission_starts_the_grid_like_ci(self):
+        # compose.yaml defaults to one session per node: without
+        # SE_NODE_MAX_SESSIONS the -n auto workers queue for it (seen: the
+        # integration layer took 4m55s locally)
+        assert "SE_NODE_MAX_SESSIONS" in _close_mission_steps()[0]
+
+    def test_close_mission_gates_are_the_commands_ci_runs(self):
+        # the local gates drift from CI unless each one is checked against it
+        ci = TESTS_WORKFLOW.read_text(encoding="utf-8")
+        missing = [cmd for cmd in _close_mission_gate_commands() if cmd not in ci]
+        assert not missing
+
     def test_ship_pr_enables_native_auto_merge_bound_to_the_head(self):
         _, body = _split_frontmatter(SKILLS / "ship-pr" / "SKILL.md")
         assert "gh pr merge <n> --auto --squash --match-head-commit <sha>" in body
@@ -251,6 +293,16 @@ class TestReviewerSubagent:
 
     def test_reviewer_runs_on_the_session_model(self):
         assert self._frontmatter()["model"] == "inherit"
+
+    def test_reviewer_checks_test_isolation(self):
+        # Selenium docs, test_practices/encouraged: "Test independency" and
+        # "Fresh browser per test"; no gate catches a test that relies on
+        # state left by another, it only shows up as a flake under -n auto
+        _, body = _split_frontmatter(AGENTS / "reviewer.md")
+        checklist = [line for line in body.splitlines() if line[:1].isdigit()]
+        isolation = [line for line in checklist if "**Isolamento" in line]
+        assert isolation
+        assert "before_scenario" in isolation[0]
 
 
 class TestEditorDiagnostics:

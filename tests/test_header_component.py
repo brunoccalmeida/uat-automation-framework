@@ -1,12 +1,15 @@
 """Unit tests for HeaderComponent.
 
-Tests the header shared by every page after login, in isolation using mocks.
+Tests the header shared by every page after login, in isolation using mocks:
+the badge count logic, the menu and navigation wait contracts, and which
+pages include the header. Locators and logout's plain sequence are covered
+against the DOM by tests/integration/test_header_component_integration.py
+(#143).
 """
 
 from unittest.mock import Mock, call, patch
 
 import pytest
-from selenium.webdriver.common.by import By
 
 from pages.cart_page import CartPage
 from pages.checkout_complete_page import CheckoutCompletePage
@@ -27,40 +30,6 @@ LOGGED_IN_PAGES = [
     CheckoutStepTwoPage,
     CheckoutCompletePage,
 ]
-
-
-class TestHeaderComponentLocators:
-    """Test HeaderComponent locator definitions."""
-
-    def test_header_loaded_locator(self):
-        """PAGE_LOADED should be the primary header container."""
-        assert HeaderComponent.PAGE_LOADED == (By.CLASS_NAME, "primary_header")
-
-    def test_shopping_cart_badge_locator(self):
-        """SHOPPING_CART_BADGE locator should use correct class name."""
-        assert HeaderComponent.SHOPPING_CART_BADGE == (
-            By.CLASS_NAME,
-            "shopping_cart_badge",
-        )
-
-    def test_shopping_cart_link_locator(self):
-        """SHOPPING_CART_LINK locator should use correct class name."""
-        assert HeaderComponent.SHOPPING_CART_LINK == (
-            By.CLASS_NAME,
-            "shopping_cart_link",
-        )
-
-    def test_menu_button_locator(self):
-        """MENU_BUTTON locator should use correct ID."""
-        assert HeaderComponent.MENU_BUTTON == (By.ID, "react-burger-menu-btn")
-
-    def test_logout_link_locator(self):
-        """LOGOUT_LINK locator should use correct ID."""
-        assert HeaderComponent.LOGOUT_LINK == (By.ID, "logout_sidebar_link")
-
-    def test_menu_panel_locator(self):
-        """MENU_PANEL locator should use the burger menu's wrapper class."""
-        assert HeaderComponent.MENU_PANEL == (By.CLASS_NAME, "bm-menu-wrap")
 
 
 class TestGetCartItemCount:
@@ -174,26 +143,6 @@ class TestClickLogout:
             HeaderComponent.LOGOUT_LINK,
             "pages.login_page.LoginPage",
         )
-
-
-class TestLogout:
-    """Test logout method."""
-
-    def test_logout_opens_the_menu_then_clicks_logout(self):
-        """logout should open the menu, then click Logout and return its page."""
-        header = HeaderComponent(Mock())
-
-        with (
-            patch.object(header, "open_menu") as mock_open,
-            patch.object(header, "click_logout") as mock_logout,
-        ):
-            calls = Mock()
-            calls.attach_mock(mock_open, "open_menu")
-            calls.attach_mock(mock_logout, "click_logout")
-            result = header.logout()
-
-        assert calls.mock_calls == [call.open_menu(), call.click_logout()]
-        assert result is mock_logout.return_value
 
 
 class TestPagesIncludeHeader:

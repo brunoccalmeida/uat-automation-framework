@@ -1,6 +1,9 @@
 """Unit tests for CartPage class.
 
-Tests the CartPage Page Object in isolation using mocks.
+Only what a real browser cannot check deterministically: logic (name
+matching, building the button ID) and the navigation wait contract.
+Locators and plain delegation to BasePage are covered against the DOM by
+tests/integration/test_cart_page_integration.py (#143).
 """
 
 from unittest.mock import Mock, patch
@@ -9,73 +12,6 @@ from selenium.webdriver.common.by import By
 
 from pages.cart_page import CartPage
 from tests.helpers.navigation_contract import assert_clicks_then_returns_loaded
-
-
-class TestCartPageLocators:
-    """Test CartPage locator definitions."""
-
-    def test_cart_container_locator(self):
-        """CART_CONTAINER locator should use correct ID."""
-        assert CartPage.CART_CONTAINER == (By.ID, "cart_contents_container")
-
-    def test_cart_items_locator(self):
-        """CART_ITEMS locator should use correct class name."""
-        assert CartPage.CART_ITEMS == (By.CLASS_NAME, "cart_item")
-
-    def test_cart_item_name_locator(self):
-        """CART_ITEM_NAME locator should use correct class name."""
-        assert CartPage.CART_ITEM_NAME == (By.CLASS_NAME, "inventory_item_name")
-
-    def test_continue_shopping_button_locator(self):
-        """CONTINUE_SHOPPING_BUTTON locator should use correct ID."""
-        assert CartPage.CONTINUE_SHOPPING_BUTTON == (By.ID, "continue-shopping")
-
-    def test_checkout_button_locator(self):
-        """CHECKOUT_BUTTON locator should use correct ID."""
-        assert CartPage.CHECKOUT_BUTTON == (By.ID, "checkout")
-
-
-class TestIsOnCartPage:
-    """Test is_on_cart_page method."""
-
-    def test_is_on_cart_page_returns_true_when_container_present(self):
-        """is_on_cart_page should return True when cart container exists."""
-        mock_driver = Mock()
-        page = CartPage(mock_driver)
-
-        with patch.object(
-            page, "is_element_visible", return_value=True
-        ) as mock_is_present:
-            result = page.is_on_cart_page()
-
-            mock_is_present.assert_called_once_with(CartPage.CART_CONTAINER, timeout=3)
-            assert result is True
-
-    def test_is_on_cart_page_returns_false_when_container_not_present(self):
-        """is_on_cart_page should return False when cart container doesn't exist."""
-        mock_driver = Mock()
-        page = CartPage(mock_driver)
-
-        with patch.object(page, "is_element_visible", return_value=False):
-            result = page.is_on_cart_page()
-
-            assert result is False
-
-
-class TestGetCartItemCount:
-    """Test get_cart_item_count method."""
-
-    def test_get_cart_item_count_returns_correct_count(self):
-        """get_cart_item_count should return number of cart items."""
-        mock_driver = Mock()
-        mock_items = [Mock(), Mock(), Mock()]
-        mock_driver.find_elements.return_value = mock_items
-
-        page = CartPage(mock_driver)
-        result = page.get_cart_item_count()
-
-        mock_driver.find_elements.assert_called_once_with(*CartPage.CART_ITEMS)
-        assert result == 3
 
 
 class TestIsProductInCart:

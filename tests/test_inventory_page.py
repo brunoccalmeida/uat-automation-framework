@@ -1,6 +1,13 @@
 """Unit tests for InventoryPage class.
 
-Tests the InventoryPage Page Object in isolation using mocks.
+Only what a real browser cannot check deterministically: logic (building
+button IDs, parsing prices, detecting broken images, failing fast) and the
+navigation wait contract. Locators and plain delegation to BasePage are
+covered against the DOM by tests/integration/test_inventory_page_integration.py,
+test_inventory_sorting_integration.py and test_product_details_integration.py
+(#143). The sort dropdown reads (get_current_sort_option,
+get_sort_dropdown_options) run against a real browser only in the E2E suite,
+so their unit tests stay until an integration test covers them.
 """
 
 from unittest.mock import Mock, patch
@@ -9,76 +16,7 @@ import pytest
 from selenium.webdriver.common.by import By
 
 from pages.inventory_page import InventoryPage
-from pages.product_details_page import ProductInfo
 from tests.helpers.navigation_contract import assert_clicks_then_returns_loaded
-
-
-class TestInventoryPageLocators:
-    """Test InventoryPage locator definitions."""
-
-    def test_inventory_container_locator(self):
-        """INVENTORY_CONTAINER locator should use correct ID."""
-        assert InventoryPage.INVENTORY_CONTAINER == (By.ID, "inventory_container")
-
-    def test_page_title_locator(self):
-        """PAGE_TITLE locator should use correct class name."""
-        assert InventoryPage.PAGE_TITLE == (By.CLASS_NAME, "title")
-
-    def test_sort_dropdown_locator(self):
-        """SORT_DROPDOWN locator should use correct class name."""
-        assert InventoryPage.SORT_DROPDOWN == (By.CLASS_NAME, "product_sort_container")
-
-
-class TestIsOnInventoryPage:
-    """Test is_on_inventory_page method."""
-
-    def test_is_on_inventory_page_returns_true_when_container_present(self):
-        """is_on_inventory_page should return True when inventory container exists."""
-        mock_driver = Mock()
-        page = InventoryPage(mock_driver)
-
-        with patch.object(
-            page, "is_element_visible", return_value=True
-        ) as mock_is_present:
-            result = page.is_on_inventory_page()
-
-            mock_is_present.assert_called_once_with(
-                InventoryPage.INVENTORY_CONTAINER, timeout=3
-            )
-            assert result is True
-
-
-class TestGetPageTitle:
-    """Test get_page_title method."""
-
-    def test_get_page_title_returns_text(self):
-        """get_page_title should return page title text."""
-        mock_driver = Mock()
-        page = InventoryPage(mock_driver)
-
-        with patch.object(page, "get_text", return_value="Products") as mock_get_text:
-            result = page.get_page_title()
-
-            mock_get_text.assert_called_once_with(InventoryPage.PAGE_TITLE)
-            assert result == "Products"
-
-
-class TestGetProductCount:
-    """Test get_product_count method."""
-
-    def test_get_product_count_returns_correct_count(self):
-        """get_product_count should return number of product items."""
-        mock_driver = Mock()
-        mock_items = [Mock() for _ in range(6)]
-        mock_driver.find_elements.return_value = mock_items
-
-        page = InventoryPage(mock_driver)
-        result = page.get_product_count()
-
-        mock_driver.find_elements.assert_called_once_with(
-            *InventoryPage.INVENTORY_ITEMS
-        )
-        assert result == 6
 
 
 class TestAddProductToCart:
@@ -94,44 +32,6 @@ class TestAddProductToCart:
 
             expected_locator = (By.ID, "add-to-cart-sauce-labs-backpack")
             mock_click.assert_called_once_with(expected_locator)
-
-
-class TestSelectSortOption:
-    """Test select_sort_option method."""
-
-    def test_select_sort_option_selects_by_value(self):
-        """select_sort_option should select dropdown option by value."""
-        mock_driver = Mock()
-        page = InventoryPage(mock_driver)
-
-        mock_dropdown_element = Mock()
-        mock_select = Mock()
-
-        with patch.object(
-            page, "find_clickable_element", return_value=mock_dropdown_element
-        ):
-            with patch("pages.inventory_page.Select", return_value=mock_select):
-                page.select_sort_option("za")
-
-                mock_select.select_by_value.assert_called_once_with("za")
-
-
-class TestGetProductNames:
-    """Test get_product_names method."""
-
-    def test_get_product_names_returns_list_of_names(self):
-        """get_product_names should return list of product names in order."""
-        mock_driver = Mock()
-        mock_elements = [Mock(text="Product A"), Mock(text="Product B")]
-        mock_driver.find_elements.return_value = mock_elements
-
-        page = InventoryPage(mock_driver)
-        result = page.get_product_names()
-
-        mock_driver.find_elements.assert_called_once_with(
-            *InventoryPage.INVENTORY_ITEM_NAME
-        )
-        assert result == ["Product A", "Product B"]
 
 
 class TestGetProductPrices:
@@ -183,22 +83,6 @@ class TestGetCurrentSortOption:
             with patch("pages.inventory_page.Select", return_value=mock_select):
                 with pytest.raises(ValueError, match="no value"):
                     page.get_current_sort_option()
-
-
-class TestRemoveProductFromCart:
-    """Test remove_product_from_cart method."""
-
-    def test_remove_product_from_cart_navigates_to_cart_removes_and_returns(self):
-        """remove_product_from_cart should go to cart, remove product and return."""
-        page = InventoryPage(Mock())
-
-        with patch.object(page.header, "click_shopping_cart") as mock_click_cart:
-            page.remove_product_from_cart("Sauce Labs Backpack")
-
-            mock_click_cart.assert_called_once()
-            cart = mock_click_cart.return_value
-            cart.remove_product.assert_called_once_with("Sauce Labs Backpack")
-            cart.click_continue_shopping.assert_called_once()
 
 
 class TestAreProductImagesBroken:
@@ -321,56 +205,6 @@ class TestRemoveProduct:
             page.remove_product("Sauce Labs Backpack")
 
         mock_click.assert_called_once_with((By.ID, "remove-sauce-labs-backpack"))
-
-
-class TestProductCardLocators:
-    """Test product card locators."""
-
-    def test_inventory_item_desc_locator(self):
-        """INVENTORY_ITEM_DESC locator should use the card description class."""
-        assert InventoryPage.INVENTORY_ITEM_DESC == (
-            By.CLASS_NAME,
-            "inventory_item_desc",
-        )
-
-    def test_product_card_locator_finds_card_by_its_name(self):
-        """product_card_locator should match the card containing the name."""
-        assert InventoryPage.product_card_locator("Sauce Labs Backpack") == (
-            By.XPATH,
-            "//div[@data-test='inventory-item']"
-            "[.//div[@data-test='inventory-item-name'"
-            " and text()='Sauce Labs Backpack']]",
-        )
-
-    def test_product_name_locator_finds_name_link(self):
-        """product_name_locator should match the card title by its text."""
-        assert InventoryPage.product_name_locator("Sauce Labs Backpack") == (
-            By.XPATH,
-            "//div[@data-test='inventory-item-name' and text()='Sauce Labs Backpack']",
-        )
-
-
-class TestGetProductCard:
-    """Test get_product_card method."""
-
-    def test_get_product_card_reads_name_description_and_price_of_card(self):
-        """get_product_card should read the card found by its name."""
-        page = InventoryPage(Mock())
-        card = Mock()
-        texts = {
-            InventoryPage.INVENTORY_ITEM_NAME: "Backpack",
-            InventoryPage.INVENTORY_ITEM_DESC: "Sleek pack",
-            InventoryPage.INVENTORY_ITEM_PRICE: "$29.99",
-        }
-        card.find_element.side_effect = lambda by, value: Mock(text=texts[(by, value)])
-
-        with patch.object(page, "find_element", return_value=card) as mock_find:
-            result = page.get_product_card("Backpack")
-
-        mock_find.assert_called_once_with(
-            InventoryPage.product_card_locator("Backpack")
-        )
-        assert result == ProductInfo("Backpack", "Sleek pack", "$29.99")
 
 
 class TestOpenProductDetails:

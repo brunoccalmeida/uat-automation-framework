@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 12/11/2026, #142 (portões verdes no `/close-mission` e isolamento no revisor).
+**Última atualização:** 12/11/2026, #143 (testes unitários que só detectam mudança removidos; código morto das páginas removido).
 
 ---
 
@@ -13,7 +13,8 @@
 | Área | Estado |
 | --- | --- |
 | CI (`master`) | Verde: unit, integração Chrome + Firefox, E2E Chrome, smoke, lint, report, `secret-scan`, `workflow-audit`; navegadores no Grid do `compose.yaml` |
-| Testes | Contagens no README (mantidas pelo hook `validate-readme-metrics`); cobertura mínima de 99% (`--cov-fail-under`) |
+| Testes | Contagens no README (mantidas pelo hook `validate-readme-metrics`); cobertura mínima de 99% (`--cov-fail-under`), medida com unitários e integração juntos (só unitários: ~92% em `pages`, por desenho) |
+| Unitários de Page Object | Só lógica e contratos de espera; locator e delegação ao `BasePage` se provam na integração (#143). Quatro leituras só têm E2E e guardam o teste de mock até a #170 |
 | Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum teste em quarentena |
 | Evidência de falha | Integração, E2E e smoke guardam screenshot e URL como artefato do CI; todo job com `behave` é cobrado por `tests/test_failure_artifacts.py` |
 | Relatório público | Allure em <https://brunoccalmeida.github.io/uat-automation-framework/>, publicado só em push no `master` |
@@ -28,14 +29,14 @@
 | Ambiente do agente | Filtro de saída de testes (`scripts/filter_test_output.py`) e `pyright-lsp`; passo a passo em `docs/ai-workflow/AGENT_TOKEN_SPEND.md` |
 | Navegador | `compose.yaml` é a fonte única do Grid, local e CI; imagens por tag + digest; `SELENIUM_REMOTE_URL` liga o `webdriver.Remote` |
 | Config | Variáveis de ambiente validadas na largada (`Settings`, `core/config.py`, pydantic-settings); CLI > ambiente > `.env` > padrão; no CI, bloco `env` de `tests.yml` |
-| Bloqueios | #95 (PyYAML sem wheel `cp315`); #153 (Betterleaks v2 ainda em rc.7); #134 (pausada até o primeiro trabalho pago). Conferidos em 09/11/2026 |
+| Bloqueios | #95 (PyYAML sem wheel `cp315`); #153 (Betterleaks v2 ainda em rc.7); #134 (pausada até o primeiro trabalho pago). Conferidos em 12/11/2026 |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #143 (remover testes unitários que só detectam mudança ou só testam mocks), dívida de código; a #150 (alinhar regras base com o kit) é só documentação.
+**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #170 (integração para as leituras da confirmação e do dropdown de ordenação, e remoção dos últimos testes de mock), dívida de código; a #150 (alinhar regras base com o kit) é só documentação.
 
 **Ordem combinada (06/11/2026), item que falta:** bugs conhecidos no estilo do `playwright-qa-starter-kit` (afirmar o comportamento correto, marcar como falha esperada, apontar para um `KNOWN_ISSUES.md`).
 
@@ -100,7 +101,7 @@ O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos 
 ## Ambiente local (Windows)
 
 - Chrome e Firefox instalados; interpretador do VS Code = `.venv` do projeto.
-- Rodar `behave` ou integração pede um `.env` (copiado de `.env.example`, com a senha preenchida) ou `BASE_URL` e `TEST_USER_PASSWORD` no ambiente do processo, com os valores públicos do `env` de `tests.yml`; sem eles, a largada falha nomeando a variável.
+- Rodar `behave`, integração ou mesmo os unitários (`tests/test_smoke.py` carrega a config) pede um `.env` (copiado de `.env.example`, com a senha preenchida) ou `BASE_URL` e `TEST_USER_PASSWORD` no ambiente do processo, com os valores públicos do `env` de `tests.yml`; sem eles, a largada falha nomeando a variável.
 - Todo `.md` novo fora do inglês começa com `<!-- LTeX: language=pt-BR -->`, senão a extensão anexa centenas de falsos positivos ao contexto.
 - Poetry pelo instalador oficial (`%APPDATA%\pypoetry`). Se `poetry self update` quebrar: `%APPDATA%\pypoetry\venv\Scripts\python -m pip install poetry==<versão>`.
 - Windows PowerShell 5.1 grava `>>`/`Out-File` em UTF-16: não use para texto do repo (barrado pelo hook `check-text-encoding`).

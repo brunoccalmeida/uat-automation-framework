@@ -14,19 +14,6 @@ from pages.base_page import BasePage
 class InventoryPage(BasePage):
     """Page Object for Sauce Demo inventory (products) page."""
 
-    def remove_product_from_cart(self, product_name: str) -> None:
-        """Remove specific product from shopping cart by name.
-
-        Args:
-            product_name: Name of product (e.g., 'Sauce Labs Backpack').
-        """
-        # 1. Click cart icon to go to cart page
-        cart = self.header.click_shopping_cart()
-        # 2. Remove product using CartPage
-        cart.remove_product(product_name)
-        # 3. Click 'Continue Shopping' to return to inventory
-        cart.click_continue_shopping()
-
     # Locators
     INVENTORY_CONTAINER = (By.ID, "inventory_container")
     PAGE_LOADED = INVENTORY_CONTAINER

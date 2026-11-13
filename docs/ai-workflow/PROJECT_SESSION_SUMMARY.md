@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 12/11/2026, missão sem issue (segundo corte das regras sempre carregadas: o específico foi para regras com escopo de caminho).
+**Última atualização:** 12/11/2026, #148 (formulários de issue e modelo de PR).
 
 ---
 
@@ -20,6 +20,7 @@
 | Proteção do `master` | Ruleset "Protect master": PR, checks `ci-passed` e `pip-audit`, branch atualizada, histórico linear, sem bypass |
 | Segurança | gitleaks e zizmor no `ci-passed`; actions e hooks fixados por SHA; Dependabot com `cooldown` de 7 dias; versões do gitleaks e do zizmor sobem à mão |
 | Portões locais | `pre-commit` igual ao CI: black, ruff, pylint, pyright, métricas do README, encoding; links de docs por `tests/test_doc_links.py` |
+| Issues e PRs | Formulários em `.github/ISSUE_TEMPLATE/` (missão, bug; sem issue em branco) validados pelo `check-jsonschema`; corpo de PR por `.github/pull_request_template.md` |
 | Ferramentas | Python pela fonte única `.python-version` (3.15 bloqueado, #95); Poetry, Selenium e demais versões em `pyproject.toml` e `poetry.lock` |
 | Regras do agente | `copilot-instructions.md` com 91 linhas e 8,4 mil caracteres (`wc -m`, 12/11/2026), só o que vale em todo chat e para todo agente; escopo de caminho em `.claude/rules/` = `.github/instructions/` |
 | Skills e revisor | `/close-mission` (Definition of Done, o agente invoca), `/ship-pr` (auto-merge nativo, só o usuário dispara), `reviewer` uma vez por missão |
@@ -34,7 +35,7 @@
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); a próxima de visibilidade é a #148.
+**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #142 (portões verdes no `/close-mission` e isolamento no revisor), que melhora toda missão seguinte.
 
 **Ordem combinada (06/11/2026), item que falta:** bugs conhecidos no estilo do `playwright-qa-starter-kit` (afirmar o comportamento correto, marcar como falha esperada, apontar para um `KNOWN_ISSUES.md`).
 

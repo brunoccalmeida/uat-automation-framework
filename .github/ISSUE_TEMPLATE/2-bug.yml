@@ -1,0 +1,39 @@
+# A bug is reported with the evidence the diagnosis rule asks for: the full
+# message, how to reproduce it and where it ran (.github/copilot-instructions.md,
+# "Diagnóstico de erros"). A flaky test is a bug too (docs/FLAKY_TESTS.md).
+name: Bug
+description: Something behaves differently from what it should.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: The full error message and stack trace, not only the last line.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Commands or scenario, from a clean checkout. For an intermittent failure, how often it fails.
+      value: |
+        1.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where it ran
+      description: Local or CI (link to the run), browser, commit SHA.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: CI artifacts (screenshot, page URL, Allure report) or logs.

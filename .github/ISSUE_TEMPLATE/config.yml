@@ -1,0 +1,4 @@
+# Contributors only see the forms; maintainers still get a "Blank issue"
+# option, labeled "Maintainers only" (GitHub docs, "Configuring the template
+# chooser").
+blank_issues_enabled: false

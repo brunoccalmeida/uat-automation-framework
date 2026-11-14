@@ -1,13 +1,13 @@
 <!-- LTeX: language=pt-BR -->
-# Gasto de tokens dos agentes (Claude Code, GitHub Copilot)
+# Gasto de tokens do agente (Claude Code)
 
-> Referência lida sob demanda: fontes, porquês e como medir. As regras em si (curtas) ficam em `.github/copilot-instructions.md`, seção "Gasto de tokens". Issue de origem: #41.
+> Referência lida sob demanda: fontes, porquês e como medir. As regras em si (curtas) ficam em `AGENTS.md`, seção "Gasto de tokens". Issue de origem: #41.
 
 ## Modelo mental
 
 Cada turno reenvia **todo** o contexto ao modelo: prompt do sistema, regras do projeto, histórico e cada resultado de ferramenta. O *prompt caching* barateia a releitura do que não mudou, mas não a elimina. Por isso o custo cresce com três coisas:
 
-1. **Contexto sempre carregado** (`CLAUDE.md`, `.github/copilot-instructions.md` e seus `@imports`): pago em toda requisição de todo chat.
+1. **Contexto sempre carregado** (`CLAUDE.md`, `AGENTS.md` e seus `@imports`): pago em toda requisição de todo chat.
 2. **Tamanho da conversa**: tudo o que entra (logs, arquivos lidos, saídas de comando) é relido em todos os turnos seguintes.
 3. **Requisições extras**: subagentes, compactação, tarefas agendadas.
 
@@ -19,7 +19,7 @@ Contexto longo também **piora a resposta**: regra perdida num arquivo grande é
 | --- | --- | --- |
 | Arquivo de regras sempre carregado com menos de 200 linhas; só o que vale em todo chat | Arquivo maior consome contexto e reduz a aderência às regras | [memory][mem] ("target under 200 lines") · [costs][costs] |
 | `@import` não economiza | O arquivo importado carrega junto com quem o importa | [memory][mem] |
-| Regra de uma parte do código vai para arquivo com escopo de caminho (`.claude/rules/*.md` com `paths:`; `.github/instructions/*.instructions.md` com `applyTo`) | Carrega só quando o agente mexe nos arquivos correspondentes | [memory][mem] · [VS Code][vsc] · [GitHub][gh] |
+| Regra de uma parte do código vai para arquivo com escopo de caminho (`.claude/rules/*.md` com `paths:`) | Carrega só quando o agente mexe nos arquivos correspondentes | [memory][mem] |
 | Não repetir o que linter, formatador ou teste já impõe; regra que não admite exceção vira teste/hook, não ênfase (IMPORTANT, CAIXA ALTA) | Ênfase faz o modelo atual aplicar a regra além da conta; o que é verificável por máquina não precisa ocupar contexto | [best practices][bp] · [VS Code][vsc] |
 | Uma missão por chat; `/clear` entre tarefas não relacionadas | `/clear` custa zero; contexto velho é pago em toda mensagem seguinte. `/compact` é ele próprio uma requisição grande | [costs][costs] · [best practices][bp] |
 | Depois de duas correções sem sucesso: `/clear` e um prompt melhor | A terceira correção soma-se a um histórico com duas tentativas erradas que continuam sendo relidas | [best practices][bp] |
@@ -48,7 +48,6 @@ Decidir com dados, não por palpite. Antes de `/clear` no fim da missão, o dono
 
 - **`/usage`**: o bloco *Session* mostra tokens por modelo (entrada, saída, leitura e escrita de cache) e custo estimado. A linha *Prompt cache (main)* mostra a fração servida do cache e os *misses*. Em planos de assinatura, o detalhamento por skill/subagente/MCP e as **recomendações** (cada uma com ≥ 10% do uso) apontam o que corrigir. Na extensão do VS Code: diálogo *Account & usage*.
 - **`/context`**: o que ocupa o contexto agora (regras carregadas, ferramentas, histórico). Use para conferir o tamanho real das regras.
-- **Copilot**: uso de *premium requests* nas configurações de cobrança da conta no GitHub.
 
 Sinais de desperdício e o que fazer:
 
@@ -78,7 +77,7 @@ Contexto do projeto carregado em todo chat (estimativa por bytes ÷ 4):
 | `.github/copilot-instructions.md` (sempre carregado) | 104 (era 357) | ~2.450 (era ~4.500) |
 | 4 arquivos com escopo de caminho (`.claude/rules/` e `.github/instructions/`, idênticos) | 46 | ~600, só quando o caminho é tocado |
 
-Como: fluxogramas ASCII e checklists que repetiam o fluxo viraram listas curtas; Selenium, Python, workflows e Poetry foram para arquivos com escopo de caminho; a ênfase (CAIXA ALTA, emojis) saiu. Linhas caíram 71%, tokens 46%: o que sobrou é denso (tabelas, comandos). `tests/test_agent_rules.py` barra o retorno acima de 200 linhas e a divergência entre as cópias Claude/Copilot.
+Como: fluxogramas ASCII e checklists que repetiam o fluxo viraram listas curtas; Selenium, Python, workflows e Poetry foram para arquivos com escopo de caminho; a ênfase (CAIXA ALTA, emojis) saiu. Linhas caíram 71%, tokens 46%: o que sobrou é denso (tabelas, comandos). `tests/test_agent_rules.py` barra o retorno acima de 200 linhas. (As tabelas de medição citam os arquivos com os nomes da época; desde a #173 as regras sempre carregadas estão no `AGENTS.md` e as cópias do Copilot saíram.)
 
 A economia real se confirma pelo `/usage` das próximas missões, não por esta estimativa.
 
@@ -95,7 +94,7 @@ Medido, não estimado.
 
 Neste repositório, **~2,4 bytes/token**, não 4: o "÷ 4" vale para inglês, e pt-BR (acento = 2 bytes em UTF-8), tabelas e comandos rendem menos por token. Logo o "antes" do #35 custava ~7 mil tokens reais; o corte percentual se mantém, os absolutos acima estavam subestimados em ~40%. Para estimar daqui em diante: bytes ÷ 2,4, ou meça com `/context`.
 
-**Regras com escopo de caminho:** ausentes de *Memory files*; entram como anexo quando o caminho é tocado. Neste chat, ler `docs/` e `.vscode/` não trouxe nenhuma; ler `tests/*.py` trouxe `python.md` e `selenium.md` (e não `workflows.md`/`dependencies.md`). Copilot: formato conferido nas fontes oficiais (pasta `.github/instructions/`, `applyTo` com globs separados por vírgula, [GitHub][gh]); no VS Code a aplicação depende de `chat.includeApplyingInstructions`, de padrão não documentado, por isso fixado em `true` no `.vscode/settings.json`. No GitHub.com, regras por caminho valem só para Copilot code review e cloud agent.
+**Regras com escopo de caminho:** ausentes de *Memory files*; entram como anexo quando o caminho é tocado. Neste chat, ler `docs/` e `.vscode/` não trouxe nenhuma; ler `tests/*.py` trouxe `python.md` e `selenium.md` (e não `workflows.md`/`dependencies.md`).
 
 **Diagnósticos do editor (#52)**, uma edição de `docs/ai-workflow/AGENT_TOKEN_SPEND.md`:
 
@@ -200,4 +199,3 @@ Fontes primárias: [Anthropic, *Effective context engineering for AI agents*, 29
 [pc]: https://code.claude.com/docs/en/prompt-caching
 [vsc]: https://code.visualstudio.com/docs/copilot/customization/custom-instructions
 [gitignore]: https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
-[gh]: https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions

@@ -1,10 +1,10 @@
 <!-- LTeX: language=pt-BR -->
 # PROJECT_SESSION_SUMMARY.md
 
-> **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `.github/copilot-instructions.md`).
+> **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `AGENTS.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 12/11/2026, #143 (testes unitários que só detectam mudança removidos; código morto das páginas removido).
+**Última atualização:** 13/11/2026, #173 (`AGENTS.md` como fonte única das regras; cópias do Copilot removidas; #172 fechada como not planned).
 
 ---
 
@@ -23,13 +23,13 @@
 | Portões locais | `pre-commit` igual ao CI: black, ruff, pylint, pyright, métricas do README, encoding; links de docs por `tests/test_doc_links.py` |
 | Issues e PRs | Formulários em `.github/ISSUE_TEMPLATE/` (missão, bug; sem issue em branco) validados pelo `check-jsonschema`; corpo de PR por `.github/pull_request_template.md` |
 | Ferramentas | Python pela fonte única `.python-version` (3.15 bloqueado, #95); Poetry, Selenium e demais versões em `pyproject.toml` e `poetry.lock` |
-| Regras do agente | `copilot-instructions.md` com 91 linhas e 8,4 mil caracteres (`wc -m`, 12/11/2026), só o que vale em todo chat e para todo agente; escopo de caminho em `.claude/rules/` = `.github/instructions/` |
+| Regras do agente | `AGENTS.md` (importado pelo `CLAUDE.md`) com 91 linhas e 8,4 mil caracteres (`wc -m`, 13/11/2026); escopo de caminho só em `.claude/rules/`; só Claude Code, sem suporte ao Copilot (#173) |
 | Skills e revisor | `/close-mission` (Definition of Done, o agente invoca; abre com os portões locais, comandos cobrados contra `tests.yml`), `/ship-pr` (só o usuário dispara), `reviewer` (inclui isolamento) |
 | Proteções do agente | `permissions.deny` nos dois shells (`--admin`, force push, push no `master`, `.env`); casam o texto, a fronteira real é o ruleset |
 | Ambiente do agente | Filtro de saída de testes (`scripts/filter_test_output.py`) e `pyright-lsp`; passo a passo em `docs/ai-workflow/AGENT_TOKEN_SPEND.md` |
 | Navegador | `compose.yaml` é a fonte única do Grid, local e CI; imagens por tag + digest; `SELENIUM_REMOTE_URL` liga o `webdriver.Remote` |
 | Config | Variáveis de ambiente validadas na largada (`Settings`, `core/config.py`, pydantic-settings); CLI > ambiente > `.env` > padrão; no CI, bloco `env` de `tests.yml` |
-| Bloqueios | #95 (PyYAML sem wheel `cp315`); #153 (Betterleaks v2 ainda em rc.7); #134 (pausada até o primeiro trabalho pago). Conferidos em 12/11/2026 |
+| Bloqueios | #95 (PyYAML sem wheel `cp315`); #153 (Betterleaks v2 ainda em rc.8); #134 (pausada até o primeiro trabalho pago). Conferidos em 13/11/2026 |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
@@ -58,7 +58,7 @@ Tudo em GitHub Issues com labels `priority: P0/P1/P2`: `gh issue list`.
 
 ## Decisões e aprendizados que guiam o trabalho
 
-O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos com escopo de caminho; aqui, em uma linha, o porquê delas e as decisões ainda sem regra própria.
+O que já virou regra está em `AGENTS.md` e nos arquivos com escopo de caminho; aqui, em uma linha, o porquê delas e as decisões ainda sem regra própria.
 
 - **Senha pública literal no workflow** (#144): PRs do Dependabot e de forks não recebem segredos do Actions; com credencial real, usar `secrets` e cadastrar também em "Dependabot secrets".
 - **Histórico fora do resumo** (#149): o `/close-mission` pedia um parágrafo por missão e o arquivo chegou a 78 KB; o resumo guarda estado, o corpo do PR guarda a história.
@@ -69,7 +69,7 @@ O que já virou regra está em `.github/copilot-instructions.md` e nos arquivos 
 - **Check obrigatório pulado conta como aprovado** (#36): gate com `always()`, não `!cancelled()`, e lista de permissão.
 - **Portão que nunca falha é pior que nenhum** (#27): `--exit-zero` e `continue-on-error` esconderam um F821 real.
 - **Procedimento vai para skill, fato fica na regra** (#101); lógica determinística vira script testado, não prosa.
-- **Regra em dois agentes = duas cópias** (#35): a divergência é barrada por teste, não por disciplina.
+- **Uma cópia só das regras** (#173): o Copilot não é usado, e duas cópias custavam em toda regra nova (YAGNI). `AGENTS.md` é formato aberto; o `@AGENTS.md` no `CLAUDE.md` vale mesmo nas sessões em que o Claude Code não o lê sozinho.
 - **Flake se instrumenta, não se retenta** (#129, #145): o kit usa `retries: 2` do Playwright, que relata "flaky"; ao copiar a política, a `playwright-qa-starter-kit#29` decide esse ponto.
 - **Fatia de recomendação do `/usage` não é gasto** (#56, #58); detalhes em `docs/ai-workflow/AGENT_TOKEN_SPEND.md`.
 

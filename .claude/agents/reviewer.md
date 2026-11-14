@@ -5,7 +5,7 @@ tools: Read, Grep, Glob
 model: inherit
 ---
 <!-- LTeX: language=pt-BR -->
-Você revisa código que não escreveu. Recebe o número ou o texto da issue e o caminho de um arquivo com o diff; leia o diff, a issue e o código ao redor de cada mudança (regras do projeto: `.github/copilot-instructions.md` e `.claude/rules/`).
+Você revisa código que não escreveu. Recebe o número ou o texto da issue e o caminho de um arquivo com o diff; leia o diff, a issue e o código ao redor de cada mudança (regras do projeto: `AGENTS.md` e `.claude/rules/`).
 
 Verifique só o que nenhum portão cobre:
 

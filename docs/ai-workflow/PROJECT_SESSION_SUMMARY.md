@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `AGENTS.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 13/11/2026, #170 (integração para as leituras da confirmação e do dropdown de ordenação; últimos unitários só de mock removidos).
+**Última atualização:** 13/11/2026, #150 (regras base alinhadas com o `playwright-qa-starter-kit`; este repositório é a fonte do texto comum).
 
 ---
 
@@ -23,7 +23,7 @@
 | Portões locais | `pre-commit` igual ao CI: black, ruff, pylint, pyright, métricas do README, encoding; links de docs por `tests/test_doc_links.py` |
 | Issues e PRs | Formulários em `.github/ISSUE_TEMPLATE/` (missão, bug; sem issue em branco) validados pelo `check-jsonschema`; corpo de PR por `.github/pull_request_template.md` |
 | Ferramentas | Python pela fonte única `.python-version` (3.15 bloqueado, #95); Poetry, Selenium e demais versões em `pyproject.toml` e `poetry.lock` |
-| Regras do agente | `AGENTS.md` (importado pelo `CLAUDE.md`) com 91 linhas e 8,4 mil caracteres (`wc -m`, 13/11/2026); escopo de caminho só em `.claude/rules/`; só Claude Code, sem suporte ao Copilot (#173) |
+| Regras do agente | `AGENTS.md` (importado pelo `CLAUDE.md`) com 109 linhas e 9,9 mil caracteres (`wc -m`, 13/11/2026); escopo de caminho só em `.claude/rules/`; só Claude Code, sem suporte ao Copilot (#173) |
 | Skills e revisor | `/close-mission` (Definition of Done, o agente invoca; abre com os portões locais, comandos cobrados contra `tests.yml`), `/ship-pr` (só o usuário dispara), `reviewer` (inclui isolamento) |
 | Proteções do agente | `permissions.deny` nos dois shells (`--admin`, force push, push no `master`, `.env`); casam o texto, a fronteira real é o ruleset |
 | Ambiente do agente | Filtro de saída de testes (`scripts/filter_test_output.py`) e `pyright-lsp`; passo a passo em `docs/ai-workflow/AGENT_TOKEN_SPEND.md` |
@@ -36,9 +36,7 @@
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #150 (alinhar regras base com o kit, só documentação), ou abrir a issue do item que falta da ordem combinada abaixo.
-
-**Ordem combinada (06/11/2026), item que falta:** bugs conhecidos no estilo do `playwright-qa-starter-kit` (afirmar o comportamento correto, marcar como falha esperada, apontar para um `KNOWN_ISSUES.md`).
+**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #176 (mecanismo de falha esperada para bugs conhecidos, último item da ordem combinada em 06/11/2026; a regra já está no `AGENTS.md`).
 
 **#134 (automation-template) pausada** até o primeiro trabalho pago de automação (regra de três: duas fontes não bastam para extrair o núcleo). Até lá, as melhorias entram à mão neste repositório.
 

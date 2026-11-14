@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `AGENTS.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 13/11/2026, #173 (`AGENTS.md` como fonte única das regras; cópias do Copilot removidas; #172 fechada como not planned).
+**Última atualização:** 13/11/2026, #170 (integração para as leituras da confirmação e do dropdown de ordenação; últimos unitários só de mock removidos).
 
 ---
 
@@ -14,7 +14,7 @@
 | --- | --- |
 | CI (`master`) | Verde: unit, integração Chrome + Firefox, E2E Chrome, smoke, lint, report, `secret-scan`, `workflow-audit`; navegadores no Grid do `compose.yaml` |
 | Testes | Contagens no README (mantidas pelo hook `validate-readme-metrics`); cobertura mínima de 99% (`--cov-fail-under`), medida com unitários e integração juntos (só unitários: ~92% em `pages`, por desenho) |
-| Unitários de Page Object | Só lógica e contratos de espera; locator e delegação ao `BasePage` se provam na integração (#143). Quatro leituras só têm E2E e guardam o teste de mock até a #170 |
+| Unitários de Page Object | Só lógica e contratos de espera; locator e delegação ao `BasePage` se provam na integração (#143, #170); nenhum unitário só de mock restante |
 | Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum teste em quarentena |
 | Evidência de falha | Integração, E2E e smoke guardam screenshot e URL como artefato do CI; todo job com `behave` é cobrado por `tests/test_failure_artifacts.py` |
 | Relatório público | Allure em <https://brunoccalmeida.github.io/uat-automation-framework/>, publicado só em push no `master` |
@@ -36,7 +36,7 @@
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #170 (integração para as leituras da confirmação e do dropdown de ordenação, e remoção dos últimos testes de mock), dívida de código; a #150 (alinhar regras base com o kit) é só documentação.
+**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #150 (alinhar regras base com o kit, só documentação), ou abrir a issue do item que falta da ordem combinada abaixo.
 
 **Ordem combinada (06/11/2026), item que falta:** bugs conhecidos no estilo do `playwright-qa-starter-kit` (afirmar o comportamento correto, marcar como falha esperada, apontar para um `KNOWN_ISSUES.md`).
 
@@ -109,3 +109,4 @@ O que já virou regra está em `AGENTS.md` e nos arquivos com escopo de caminho;
 - `poetry run python -c "<várias linhas>"` executa só a 1ª linha e sai com 0: Python multilinha vai em arquivo no scratchpad.
 - Barra invertida dupla em heredoc no Bash tool chegou simples: para texto com barra invertida, use o Edit e confira os bytes.
 - `sed -i` do Git Bash regrava com LF e remove `\r`: para editar texto, use o Edit.
+- `cat >> arquivo <<EOF` do Git Bash anexa linhas LF a um arquivo CRLF, e o pylint barra (C0327, finais de linha mistos): para anexar, use o Edit (#170).

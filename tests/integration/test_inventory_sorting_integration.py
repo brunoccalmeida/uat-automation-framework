@@ -26,3 +26,23 @@ def test_sorting_orders_products_correctly(authenticated_driver):
     assert prices_hilo == sorted(
         prices_hilo, reverse=True
     ), f"High-Low sorting failed: {prices_hilo}"
+
+
+def test_sort_dropdown_lists_the_four_options(authenticated_driver):
+    page = InventoryPage(authenticated_driver)
+
+    assert page.get_sort_dropdown_options() == [
+        "Name (A to Z)",
+        "Name (Z to A)",
+        "Price (low to high)",
+        "Price (high to low)",
+    ]
+
+
+def test_current_sort_option_reads_the_selected_value(authenticated_driver):
+    page = InventoryPage(authenticated_driver)
+    assert page.get_current_sort_option() == "az"
+
+    page.select_sort_option("hilo")
+
+    assert page.get_current_sort_option() == "hilo"

@@ -5,9 +5,7 @@ button IDs, parsing prices, detecting broken images, failing fast) and the
 navigation wait contract. Locators and plain delegation to BasePage are
 covered against the DOM by tests/integration/test_inventory_page_integration.py,
 test_inventory_sorting_integration.py and test_product_details_integration.py
-(#143). The sort dropdown reads (get_current_sort_option,
-get_sort_dropdown_options) run against a real browser only in the E2E suite,
-so their unit tests stay until an integration test covers them.
+(#143, #170).
 """
 
 from unittest.mock import Mock, patch
@@ -54,24 +52,6 @@ class TestGetProductPrices:
 
 class TestGetCurrentSortOption:
     """Test get_current_sort_option method."""
-
-    def test_get_current_sort_option_returns_selected_value(self):
-        """get_current_sort_option should return value of selected option."""
-        mock_driver = Mock()
-        page = InventoryPage(mock_driver)
-
-        mock_dropdown_element = Mock()
-        mock_select = Mock()
-        mock_option = Mock()
-        mock_option.get_attribute.return_value = "lohi"
-        mock_select.first_selected_option = mock_option
-
-        with patch.object(page, "find_element", return_value=mock_dropdown_element):
-            with patch("pages.inventory_page.Select", return_value=mock_select):
-                result = page.get_current_sort_option()
-
-                mock_option.get_attribute.assert_called_once_with("value")
-                assert result == "lohi"
 
     def test_get_current_sort_option_fails_clearly_without_a_value(self):
         """A selected option without value breaks the str contract: fail fast."""
@@ -139,27 +119,6 @@ class TestAreProductImagesBroken:
         result = page.are_product_images_broken()
 
         assert result is False
-
-
-class TestGetSortDropdownOptions:
-    """Test get_sort_dropdown_options method."""
-
-    def test_get_sort_dropdown_options_returns_option_texts(self):
-        """get_sort_dropdown_options should return list of visible option texts."""
-        mock_driver = Mock()
-        page = InventoryPage(mock_driver)
-
-        mock_dropdown_element = Mock()
-        mock_select = Mock()
-        mock_opt1 = Mock(text="Name (A to Z)")
-        mock_opt2 = Mock(text="Name (Z to A)")
-        mock_select.options = [mock_opt1, mock_opt2]
-
-        with patch.object(page, "find_element", return_value=mock_dropdown_element):
-            with patch("pages.inventory_page.Select", return_value=mock_select):
-                result = page.get_sort_dropdown_options()
-
-                assert result == ["Name (A to Z)", "Name (Z to A)"]
 
 
 class TestSortDropdownContainsOption:

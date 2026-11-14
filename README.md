@@ -12,7 +12,7 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 
 ## ⚡ At a Glance
 
-- **Tests:** 742 unit · 97 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
+- **Tests:** 737 unit · 101 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
 - **Real browsers:** integration and smoke suites run on Chrome and Firefox in CI, inside docker-selenium containers
 - **Quality gates:** `master` only accepts a PR with green CI and a clean `pip-audit`; every GitHub Action is pinned to a commit SHA
 - **Live report:** Allure, republished on every merge to `master`: 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -376,10 +376,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 742 tests (framework components, Page Object logic and wait contracts, CI guardrails)
-- **Integration Tests**: 97 tests (Page Objects + real browser, including navigation synchronization)
+- **Unit Tests**: 737 tests (framework components, Page Object logic and wait contracts, CI guardrails)
+- **Integration Tests**: 101 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 839 unit/integration tests + 73 E2E scenarios
+- **Total**: 838 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -409,12 +409,12 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **BasePage** | `tests/test_base_page.py` | 27 | 100% | ✅ Complete |
 | **LoginPage** | `tests/test_login_page.py` | 3 | 100% | ✅ Complete |
 | **CartPage** | `tests/test_cart_page.py` | 5 | 100% | ✅ Complete |
-| **InventoryPage** | `tests/test_inventory_page.py` | 13 | 100% | ✅ Complete |
+| **InventoryPage** | `tests/test_inventory_page.py` | 11 | 100% | ✅ Complete |
 | **HeaderComponent** | `tests/test_header_component.py` | 13 | 100% | ✅ Complete |
 | **ProductDetailsPage** | `tests/test_product_details_page.py` | 3 | 100% | ✅ Complete |
 | **CheckoutStepOnePage** | `tests/test_checkout_step_one_page.py` | 3 | 100% | ✅ Complete |
 | **CheckoutStepTwoPage** | `tests/test_checkout_step_two_page.py` | 8 | 100% | ✅ Complete |
-| **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 5 | 100% | ✅ Complete |
+| **CheckoutCompletePage** | `tests/test_checkout_complete_page.py` | 1 | 100% | ✅ Complete |
 | **Config** | `tests/test_config.py` | 38 | 100% | ✅ Complete |
 | **Settings at startup (behave, pytest)** | `tests/test_settings_startup.py` | 3 | N/A | ✅ Complete |
 | **DriverManager** | `tests/test_driver_manager.py` | 23 | 100% | ✅ Complete |
@@ -433,7 +433,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Allure environment and executor (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Complete |
 | **Failure evidence of browser tests (CI)** | `tests/test_failure_artifacts.py` | 15 | N/A | ✅ Complete |
 | **Agent rules (size, single copy, skills, reviewer subagent, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 63 | N/A | ✅ Complete |
-| **Doc links (every referenced path exists)** | `tests/test_doc_links.py` | 109 | N/A | ✅ Complete |
+| **Doc links (every referenced path exists)** | `tests/test_doc_links.py` | 110 | N/A | ✅ Complete |
 | **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
 | **Agent guardrails (deny rules)** | `tests/test_agent_guardrails.py` | 61 | N/A | ✅ Complete |
 | **Native auto-merge wait (`/ship-pr`: outcome and extra checks)** | `tests/test_wait_for_merge.py` | 39 | N/A | ✅ Complete |
@@ -442,7 +442,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Complete |
-| **TOTAL** | | **742** | **100%** | **Complete** |
+| **TOTAL** | | **737** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 463
@@ -461,14 +461,15 @@ Integration tests validate Page Objects with real browser interactions, filling 
 | **LoginPage** | `tests/integration/test_login_page_integration.py` | 11 | Chrome, Firefox | ✅ Complete |
 | **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 7 | Chrome, Firefox | ✅ Complete |
 | **HeaderComponent** | `tests/integration/test_header_component_integration.py` | 14 | Chrome, Firefox | ✅ Complete |
-| **InventoryPage (sorting)** | `tests/integration/test_inventory_sorting_integration.py` | 1 | Chrome, Firefox | ✅ Complete |
+| **InventoryPage (sorting)** | `tests/integration/test_inventory_sorting_integration.py` | 3 | Chrome, Firefox | ✅ Complete |
 | **CartPage** | `tests/integration/test_cart_page_integration.py` | 11 | Chrome, Firefox | ✅ Complete |
 | **ProductDetailsPage** | `tests/integration/test_product_details_integration.py` | 9 | Chrome, Firefox | ✅ Complete |
 | **CheckoutStepOnePage** | `tests/integration/test_checkout_step_one_integration.py` | 16 | Chrome, Firefox | ✅ Complete |
 | **CheckoutStepTwoPage** | `tests/integration/test_checkout_step_two_integration.py` | 14 | Chrome, Firefox | ✅ Complete |
+| **CheckoutCompletePage** | `tests/integration/test_checkout_complete_integration.py` | 2 | Chrome, Firefox | ✅ Complete |
 | **Navigation synchronization** | `tests/integration/test_navigation_integration.py` | 13 | Chrome, Firefox | ✅ Complete |
 | **Selenium Grid session** | `tests/integration/test_remote_driver_integration.py` | 1 | Chrome, Firefox (Grid) | ✅ Complete |
-| **TOTAL** | | **97** | **Real** | **Complete** |
+| **TOTAL** | | **101** | **Real** | **Complete** |
 
 **Key Differences from Unit Tests:**
 - ✅ Real Selenium WebDriver (not mocked)

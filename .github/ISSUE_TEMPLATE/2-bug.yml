@@ -1,5 +1,5 @@
 # A bug is reported with the evidence the diagnosis rule asks for: the full
-# message, how to reproduce it and where it ran (.github/copilot-instructions.md,
+# message, how to reproduce it and where it ran (AGENTS.md,
 # "Diagnóstico de erros"). A flaky test is a bug too (docs/FLAKY_TESTS.md).
 name: Bug
 description: Something behaves differently from what it should.

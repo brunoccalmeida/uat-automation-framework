@@ -1,5 +1,5 @@
 <!-- LTeX: language=es -->
-<!-- translation-source: README.md sha256:860297cad97cda384e957e407e9f7eb2bcb37ee62b8fbba8a73a95a1247a0fd6 -->
+<!-- translation-source: README.md sha256:db6a86fa7195f69bddfe5c410213a178645a9e2db11da83d8b06d990a76ca4f7 -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -14,7 +14,7 @@ Framework completo de automatización UAT con Python, Behave (BDD) y Selenium pa
 
 ## ⚡ De un Vistazo
 
-- **Pruebas:** 753 unitarias · 97 de integración · 73 escenarios E2E, construidas con TDD de doble ciclo (los escenarios de Behave guían las pruebas unitarias de pytest)
+- **Pruebas:** 742 unitarias · 97 de integración · 73 escenarios E2E, construidas con TDD de doble ciclo (los escenarios de Behave guían las pruebas unitarias de pytest)
 - **Navegadores reales:** las suites de integración y smoke corren en Chrome y Firefox en el CI, dentro de contenedores docker-selenium
 - **Controles de calidad:** `master` solo acepta un PR con CI en verde y `pip-audit` limpio; cada GitHub Action está fijada por SHA de commit
 - **Informe en vivo:** Allure, republicado en cada merge a `master`: 📊 **[Ver el Informe de Pruebas Más Reciente](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -342,14 +342,14 @@ Cualquier vulnerabilidad conocida hace fallar el check `pip-audit`. Para aceptar
 
 ## 🤖 Cómo Se Construye Este Proyecto
 
-Con IA, detrás de las mismas puertas que cualquier otro cambio. El trabajo se hace con un agente de IA (Claude Code; GitHub Copilot lee las mismas reglas), y sus commits llevan a Claude como coautor (trailer `Co-Authored-By`). El agente no tiene atajos:
+Con IA, detrás de las mismas puertas que cualquier otro cambio. El trabajo se hace con un agente de IA (Claude Code), y sus commits llevan a Claude como coautor (trailer `Co-Authored-By`). El agente no tiene atajos:
 
 - **Mismas puertas de CI:** `master` solo acepta un PR con `ci-passed` y `pip-audit` en verde en el commit de la head; el ruleset no tiene bypass, ni para el dueño.
 - **Prueba primero:** cada prueba se ve fallar antes del código que la hace pasar; cuando eso no se observó, una mutación (deshacer la corrección y ver fallar la prueba) lo confirma.
 - **Revisión independiente:** antes de cada PR, un agente revisor de solo lectura compara el diff con la issue de GitHub.
 - **Las pruebas flaky se corrigen, no se repiten:** cada una se registra e instrumenta hasta encontrar la causa ([docs/FLAKY_TESTS.md](docs/FLAKY_TESTS.md)).
 - **Un humano hace el merge:** el agente abre el PR; solo el dueño dispara el merge, porque el merge en `master` publica el informe.
-- **Reglas como código:** las reglas del agente viven en el repositorio ([.github/copilot-instructions.md](.github/copilot-instructions.md)), y una regla sin excepciones se vuelve prueba (por ejemplo `tests/test_agent_rules.py`), no recordatorio.
+- **Reglas como código:** las reglas del agente viven en el repositorio ([AGENTS.md](AGENTS.md)), y una regla sin excepciones se vuelve prueba (por ejemplo `tests/test_agent_rules.py`), no recordatorio.
 
 Notas de trabajo (handoff entre sesiones, mediciones de gasto de tokens; en portugués): [docs/ai-workflow/](docs/ai-workflow/).
 
@@ -378,10 +378,10 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 ```
 
 **Distribución por Capa:**
-- **Pruebas Unitarias**: 753 pruebas (componentes del framework, lógica y contratos de espera de los Page Objects, salvaguardas del CI)
+- **Pruebas Unitarias**: 742 pruebas (componentes del framework, lógica y contratos de espera de los Page Objects, salvaguardas del CI)
 - **Pruebas de Integración**: 97 pruebas (Page Objects + navegador real, incluida la sincronización de la navegación)
 - **Pruebas E2E**: 73 escenarios, 463 steps (jornadas completas de usuario)
-- **Total**: 850 pruebas unitarias/de integración + 73 escenarios E2E
+- **Total**: 839 pruebas unitarias/de integración + 73 escenarios E2E
 
 **Cuándo Usar Cada Capa:**
 | Tipo de Prueba | Propósito | Velocidad | Navegador | Ejemplo |
@@ -434,8 +434,8 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **Subida a Codecov (CI)** | `tests/test_codecov_upload.py` | 8 | N/A | ✅ Completo |
 | **Entorno y ejecutor de Allure (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Completo |
 | **Evidencia de fallos de las pruebas con navegador (CI)** | `tests/test_failure_artifacts.py` | 15 | N/A | ✅ Completo |
-| **Reglas del agente (tamaño, sincronía, skills, subagente revisor, diagnósticos del editor, code intelligence)** | `tests/test_agent_rules.py` | 68 | N/A | ✅ Completo |
-| **Enlaces de la documentación (toda ruta citada existe)** | `tests/test_doc_links.py` | 115 | N/A | ✅ Completo |
+| **Reglas del agente (tamaño, copia única, skills, subagente revisor, diagnósticos del editor, code intelligence)** | `tests/test_agent_rules.py` | 63 | N/A | ✅ Completo |
+| **Enlaces de la documentación (toda ruta citada existe)** | `tests/test_doc_links.py` | 109 | N/A | ✅ Completo |
 | **Hook de salida de pruebas del agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
 | **Protecciones del agente (reglas de deny)** | `tests/test_agent_guardrails.py` | 61 | N/A | ✅ Completo |
 | **Espera del auto-merge nativo (`/ship-pr`: resultado y checks extra)** | `tests/test_wait_for_merge.py` | 39 | N/A | ✅ Completo |
@@ -444,7 +444,7 @@ Este framework implementa la arquitectura completa de la **Pirámide de Pruebas*
 | **Puerta de codificación (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Clave de caché del venv (CI, versión exacta de Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
 | **Fuente de la versión de Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
-| **TOTAL** | | **753** | **100%** | **Completo** |
+| **TOTAL** | | **742** | **100%** | **Completo** |
 
 **Cobertura de Código:**
 - **Total de statements:** 463

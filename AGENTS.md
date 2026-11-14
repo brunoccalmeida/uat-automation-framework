@@ -1,7 +1,7 @@
 <!-- LTeX: language=pt-BR -->
 # UAT Automation Framework - Regras do projeto
 
-Regras que valem em todo chat e para todo agente. O que vale só para uma parte do código fica nas regras com escopo de caminho (`.claude/rules/` e `.github/instructions/`).
+Regras que valem em todo chat e para todo agente. O que vale só para uma parte do código fica nas regras com escopo de caminho (`.claude/rules/`).
 
 ## Regra de ouro: TDD
 Nunca implemente código de produção sem antes ter um teste falhando.

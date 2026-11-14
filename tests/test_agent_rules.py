@@ -1,14 +1,13 @@
-"""Tests for the rules the AI agents (Claude Code, GitHub Copilot) load.
+"""Tests for the rules the AI agent (Claude Code) loads.
 
 Every turn resends the always-loaded rules, so their size is paid in every
 request of every chat, and a long file lowers adherence to each rule. The
 official target is under 200 lines; rules that apply only to part of the code
 live in path-scoped files, loaded only when the agent touches those paths.
 
-Each tool reads path-scoped rules from its own directory and frontmatter
-(Claude: ``.claude/rules/*.md`` with ``paths:``; Copilot:
-``.github/instructions/*.instructions.md`` with ``applyTo``). The two copies
-must stay identical, or one agent silently follows outdated rules.
+The always-loaded rules live in ``AGENTS.md``, the open format for agent
+instructions, imported by ``CLAUDE.md``; path-scoped rules live only in
+``.claude/rules/`` (#173). A second copy for another agent would drift.
 See docs/ai-workflow/AGENT_TOKEN_SPEND.md.
 """
 
@@ -21,15 +20,17 @@ import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-# CLAUDE.md @imports the shared rules: both load in every Claude chat
-ALWAYS_LOADED = [ROOT / "CLAUDE.md", ROOT / ".github" / "copilot-instructions.md"]
+# CLAUDE.md @imports AGENTS.md: both load in every Claude chat
+CLAUDE_MD = ROOT / "CLAUDE.md"
+AGENTS_MD = ROOT / "AGENTS.md"
+ALWAYS_LOADED = [CLAUDE_MD, AGENTS_MD]
 MAX_ALWAYS_LOADED_LINES = 200
 CLAUDE_RULES = ROOT / ".claude" / "rules"
-COPILOT_RULES = ROOT / ".github" / "instructions"
-COPILOT_SUFFIX = ".instructions.md"
-# Copilot in VS Code reads skills and agents from these same folders, with the
-# same disable-model-invocation field, so there is one copy (VS Code docs:
-# copilot/customization/agent-skills and custom-agents, read 02/11/2026)
+# Copies of the rules in GitHub Copilot's format, removed in #173
+COPILOT_COPIES = [
+    ROOT / ".github" / "copilot-instructions.md",
+    ROOT / ".github" / "instructions",
+]
 SKILLS = ROOT / ".claude" / "skills"
 AGENTS = ROOT / ".claude" / "agents"
 # Read at the start of every chat (#149). Both limits are a judgment call, not
@@ -57,15 +58,19 @@ def _claude_names():
     return {path.stem for path in CLAUDE_RULES.glob("*.md")}
 
 
-def _copilot_names():
-    return {
-        path.name.removesuffix(COPILOT_SUFFIX)
-        for path in COPILOT_RULES.glob(f"*{COPILOT_SUFFIX}")
-    }
-
-
 class TestAlwaysLoadedRules:
     """The rules paid in every request stay under the official target."""
+
+    def test_claude_md_imports_agents_md(self):
+        # Claude Code reads AGENTS.md natively only from v2.1.277 and not in
+        # every session; the import works in all of them (code.claude.com/docs/
+        # en/memory, "Share one file with other coding tools", read 13/11/2026)
+        lines = CLAUDE_MD.read_text(encoding="utf-8").splitlines()
+        assert "@AGENTS.md" in lines
+
+    @pytest.mark.parametrize("path", COPILOT_COPIES, ids=lambda path: path.name)
+    def test_rules_have_a_single_copy(self, path):
+        assert not path.exists()
 
     def test_always_loaded_rules_are_under_the_line_target(self):
         lines = sum(
@@ -125,31 +130,15 @@ class TestSessionSummary:
 
 
 class TestPathScopedRules:
-    """Claude and Copilot load the same path-scoped rules for the same paths."""
+    """Rules for part of the code load only when the agent touches it."""
 
     def test_path_scoped_rules_exist(self):
         assert _claude_names(), f"no path-scoped rules in {CLAUDE_RULES}"
 
-    def test_every_rule_exists_for_both_agents(self):
-        assert _claude_names() == _copilot_names()
-
-    @pytest.mark.parametrize("name", sorted(_claude_names() & _copilot_names()))
-    def test_rule_body_is_identical_for_both_agents(self, name):
-        _, claude_body = _split_frontmatter(CLAUDE_RULES / f"{name}.md")
-        _, copilot_body = _split_frontmatter(COPILOT_RULES / f"{name}{COPILOT_SUFFIX}")
-        assert claude_body == copilot_body
-
-    @pytest.mark.parametrize("name", sorted(_claude_names() & _copilot_names()))
-    def test_rule_applies_to_the_same_paths_for_both_agents(self, name):
-        claude, _ = _split_frontmatter(CLAUDE_RULES / f"{name}.md")
-        copilot, _ = _split_frontmatter(COPILOT_RULES / f"{name}{COPILOT_SUFFIX}")
-        copilot_globs = [glob.strip() for glob in copilot["applyTo"].split(",")]
-        assert claude["paths"] == copilot_globs
-
-    def test_copilot_applies_path_scoped_rules_in_vscode(self):
-        # VS Code attaches applyTo rules only with this setting on; its default
-        # is undocumented, so the workspace states it
-        assert _vscode("settings")["chat.includeApplyingInstructions"] is True
+    @pytest.mark.parametrize("name", sorted(_claude_names()))
+    def test_rule_says_which_paths_it_applies_to(self, name):
+        frontmatter, _ = _split_frontmatter(CLAUDE_RULES / f"{name}.md")
+        assert frontmatter["paths"]
 
 
 def _skills():

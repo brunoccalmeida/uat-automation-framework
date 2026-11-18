@@ -500,7 +500,9 @@ jobs:
   # /mission:ship-pr waits for (#179). The called job keeps its own
   # timeout-minutes; a calling job cannot take one.
   dependency-audit:
-    uses: ./.github/workflows/security.yml
+    # $/: same-repository syntax, same commit as this run (GitHub docs, "Reuse
+    # workflows"); zizmor flags "./"
+    uses: $/.github/workflows/security.yml
     permissions:
       contents: read
 

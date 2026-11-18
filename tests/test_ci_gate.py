@@ -83,7 +83,7 @@ class TestDependencyAuditInGate:
         callers = [
             job_id
             for job_id, job in JOBS.items()
-            if job.get("uses") == "./.github/workflows/security.yml"
+            if job.get("uses") == "$/.github/workflows/security.yml"
         ]
         assert callers, f"no job of {WORKFLOW.name} calls security.yml"
         assert set(callers) <= set(JOBS[GATE]["needs"])

@@ -63,7 +63,9 @@ def _load_checkouts(jobs):
 
 WORKFLOWS = _load_workflows()
 WORKFLOW_NAMES = {name for name, _ in WORKFLOWS}
-LOCAL_WORKFLOW_PREFIX = "./.github/workflows/"
+# "$/" is GitHub's same-repository syntax, the one its docs recommend and
+# zizmor requires (#179); "./" is flagged
+LOCAL_WORKFLOW_PREFIX = "$/.github/workflows/"
 JOBS = _load_jobs(WORKFLOWS)
 CHECKOUTS = _load_checkouts(JOBS)
 
@@ -108,11 +110,21 @@ def timeout_problem(job):
         ({"runs-on": "ubuntu-latest"}, "no positive 'timeout-minutes'"),
         ({"runs-on": "ubuntu-latest", "timeout-minutes": 0}, "no positive"),
         ({"runs-on": "ubuntu-latest", "timeout-minutes": True}, "no positive"),
-        ({"uses": "./.github/workflows/security.yml"}, None),
-        ({"uses": "./.github/workflows/missing.yml"}, "not a workflow of"),
+        ({"uses": "$/.github/workflows/security.yml"}, None),
+        ({"uses": "./.github/workflows/security.yml"}, "not a workflow of"),
+        ({"uses": "$/.github/workflows/missing.yml"}, "not a workflow of"),
         ({"uses": "octo-org/repo/.github/workflows/x.yml@v1"}, "not a workflow of"),
     ],
-    ids=["valid", "missing", "zero", "bool", "local-call", "unknown-call", "remote"],
+    ids=[
+        "valid",
+        "missing",
+        "zero",
+        "bool",
+        "local-call",
+        "dot-slash-call",
+        "unknown-call",
+        "remote",
+    ],
 )
 def test_timeout_problem(job, expected):
     """The rule itself, on synthetic jobs (including cases absent today)."""

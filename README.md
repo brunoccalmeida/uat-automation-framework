@@ -12,7 +12,7 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 
 ## ⚡ At a Glance
 
-- **Tests:** 707 unit · 101 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
+- **Tests:** 708 unit · 101 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
 - **Real browsers:** integration and smoke suites run on Chrome and Firefox in CI, inside docker-selenium containers
 - **Quality gates:** `master` only accepts a PR with green CI and a clean `pip-audit`; every GitHub Action is pinned to a commit SHA
 - **Live report:** Allure, republished on every merge to `master`: 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -376,10 +376,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 707 tests (framework components, Page Object logic and wait contracts, CI guardrails)
+- **Unit Tests**: 708 tests (framework components, Page Object logic and wait contracts, CI guardrails)
 - **Integration Tests**: 101 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 808 unit/integration tests + 73 E2E scenarios
+- **Total**: 809 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -424,7 +424,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Smoke Tests** | `tests/test_smoke.py` | 2 | N/A | ✅ Complete |
 | **Workflow version comments (CI)** | `tests/test_workflow_version_comments.py` | 33 | N/A | ✅ Complete |
 | **Security gates: gitleaks and zizmor (CI)** | `tests/test_security_gates_ci.py` | 10 | N/A | ✅ Complete |
-| **Workflow hardening (CI)** | `tests/test_workflow_hardening.py` | 38 | N/A | ✅ Complete |
+| **Workflow hardening (CI)** | `tests/test_workflow_hardening.py` | 39 | N/A | ✅ Complete |
 | **Pre-commit hook pinning (CI)** | `tests/test_precommit_pinning.py` | 18 | N/A | ✅ Complete |
 | **Issue forms and PR template (required fields, schema gate)** | `tests/test_issue_pr_templates.py` | 7 | N/A | ✅ Complete |
 | **CI gate (required check)** | `tests/test_ci_gate.py` | 20 | N/A | ✅ Complete |
@@ -441,7 +441,7 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Complete |
-| **TOTAL** | | **707** | **100%** | **Complete** |
+| **TOTAL** | | **708** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 463

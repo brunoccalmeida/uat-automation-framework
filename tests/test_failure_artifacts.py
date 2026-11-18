@@ -106,6 +106,17 @@ class TestSaveFailureArtifacts:
         )
         assert timing.read_text(encoding="utf-8") == TIMING
 
+    def test_a_timing_error_keeps_the_screenshot_and_page_source(self, tmp_path):
+        """The timeline is extra evidence; its failure must not cost the rest."""
+        driver = self._driver()
+        driver.execute_script.side_effect = WebDriverException("javascript error")
+
+        with pytest.warns(UserWarning, match="javascript error"):
+            saved = save_failure_artifacts(driver, NODEID, tmp_path)
+
+        assert [path.suffix for path in saved] == [".png", ".html"]
+        assert saved[1].read_text(encoding="utf-8").startswith("<!-- URL: ")
+
     def test_creates_the_output_folder(self, tmp_path):
         """The folder may not exist yet on a fresh CI checkout."""
         out_dir = tmp_path / "reports" / "integration-failures"

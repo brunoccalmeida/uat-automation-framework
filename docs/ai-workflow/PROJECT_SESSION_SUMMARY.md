@@ -16,7 +16,7 @@
 | Testes | Contagens no README (mantidas pelo hook `validate-readme-metrics`); cobertura mínima de 99% (`--cov-fail-under`), medida com unitários e integração juntos (só unitários: ~92% em `pages`, por desenho) |
 | Unitários de Page Object | Só lógica e contratos de espera; locator e delegação ao `BasePage` se provam na integração (#143, #170); nenhum unitário só de mock restante |
 | Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum em quarentena; aberto: #180 (local, 1 em 8; instrumentada, esperando a próxima falha para ver a causa) |
-| Evidência de falha | Integração, E2E e smoke guardam screenshot e URL como artefato do CI; a integração guarda também `.timing.json` (`readyState` e Performance Timeline); todo job com `behave` é cobrado por `tests/test_failure_artifacts.py` |
+| Evidência de falha | Screenshot e URL como artefato do CI em todas as camadas; integração também com `.timing.json` (Performance Timeline); cobrado por `tests/test_failure_artifacts.py` |
 | Relatório público | Allure em <https://brunoccalmeida.github.io/uat-automation-framework/>, publicado só em push no `master` |
 | Proteção do `master` | Ruleset "Protect master": PR, check `ci-passed` (inclui o `pip-audit`), branch atualizada, histórico linear, sem bypass; squash grava título e corpo do PR |
 | Segurança | gitleaks e zizmor no `ci-passed`; actions e hooks fixados por SHA; Dependabot com `cooldown` de 7 dias; versões do gitleaks e do zizmor sobem à mão |

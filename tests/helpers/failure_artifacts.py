@@ -60,10 +60,16 @@ def save_failure_artifacts(driver, nodeid: str, out_dir: Path = ARTIFACTS_DIR):
         out_dir.mkdir(parents=True, exist_ok=True)
         driver.save_screenshot(str(png))
         source = f"<!-- URL: {driver.current_url} -->\n{driver.page_source}"
-        timeline = driver.execute_script(TIMING_SCRIPT)
     except WebDriverException as exc:
         warnings.warn(f"No failure artifacts for {nodeid}: {exc}", stacklevel=2)
         return []
     html.write_text(source, encoding="utf-8")
+    # The timeline is extra evidence: if the page cannot run the script,
+    # keep the screenshot and source rather than lose them too.
+    try:
+        timeline = driver.execute_script(TIMING_SCRIPT)
+    except WebDriverException as exc:
+        warnings.warn(f"No timing artifact for {nodeid}: {exc}", stacklevel=2)
+        return [png, html]
     timing.write_text(timeline, encoding="utf-8")
     return [png, html, timing]

@@ -48,6 +48,16 @@
     ]
   },
   "enabledPlugins": {
-    "pyright-lsp@claude-plugins-official": true
+    "pyright-lsp@claude-plugins-official": true,
+    "mission@brunoccalmeida-plugins": true
+  },
+  "extraKnownMarketplaces": {
+    "brunoccalmeida-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "brunoccalmeida/automation-template"
+      },
+      "autoUpdate": false
+    }
   }
 }

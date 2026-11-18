@@ -26,7 +26,9 @@ def _collect_uses():
         lines = workflow.read_text(encoding="utf-8").splitlines()
         for number, line in enumerate(lines, start=1):
             match = USES_LINE.match(line)
-            if match and not match["ref"].startswith("./"):
+            # "./" and "$/" are this repository at the running commit: no
+            # version to state ("$/" since #179, GitHub's same-repo syntax)
+            if match and not match["ref"].startswith(("./", "$/")):
                 location = f"{workflow.name}:{number}"
                 found.append((location, match["ref"], match["rest"]))
     return found

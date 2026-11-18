@@ -12,7 +12,7 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 
 ## ⚡ At a Glance
 
-- **Tests:** 737 unit · 101 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
+- **Tests:** 708 unit · 101 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
 - **Real browsers:** integration and smoke suites run on Chrome and Firefox in CI, inside docker-selenium containers
 - **Quality gates:** `master` only accepts a PR with green CI and a clean `pip-audit`; every GitHub Action is pinned to a commit SHA
 - **Live report:** Allure, republished on every merge to `master`: 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -336,13 +336,13 @@ poetry sync --no-root            # make the environment match poetry.lock exactl
 poetry run pip-audit --strict    # fails on any known vulnerability or unauditable package
 ```
 
-Any known vulnerability fails the `pip-audit` check. To accept one, add `--ignore-vuln <ID>` in `security.yml` with the justification and the issue that tracks its removal.
+Any known vulnerability fails the `pip-audit` job, and with it the `ci-passed` gate (it runs there as `dependency-audit`; `security.yml` also runs it daily). To accept one, add `--ignore-vuln <ID>` in `security.yml` with the justification and the issue that tracks its removal.
 
 ## 🤖 How This Project Is Built
 
 AI-assisted, behind the same gates as any other change. The work is done with an AI coding agent (Claude Code), and its commits carry a Claude co-author trailer (`Co-Authored-By`). The agent gets no shortcut:
 
-- **Same CI gates:** `master` accepts only a PR with `ci-passed` and `pip-audit` green on its head commit; the ruleset has no bypass, not even for the owner.
+- **Same CI gates:** `master` accepts only a PR with `ci-passed` (which includes `pip-audit`) green on its head commit; the ruleset has no bypass, not even for the owner.
 - **Tests first:** every test is seen failing before the code that makes it pass; when that was not observed, a mutation (undo the fix, watch the test fail) confirms it.
 - **Independent review:** before each PR, a read-only reviewer agent checks the diff against its GitHub issue.
 - **Flaky tests are fixed, not retried:** each one is recorded and instrumented until its cause is found ([docs/FLAKY_TESTS.md](docs/FLAKY_TESTS.md)).
@@ -376,10 +376,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 737 tests (framework components, Page Object logic and wait contracts, CI guardrails)
+- **Unit Tests**: 708 tests (framework components, Page Object logic and wait contracts, CI guardrails)
 - **Integration Tests**: 101 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 838 unit/integration tests + 73 E2E scenarios
+- **Total**: 809 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -424,25 +424,24 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Smoke Tests** | `tests/test_smoke.py` | 2 | N/A | ✅ Complete |
 | **Workflow version comments (CI)** | `tests/test_workflow_version_comments.py` | 33 | N/A | ✅ Complete |
 | **Security gates: gitleaks and zizmor (CI)** | `tests/test_security_gates_ci.py` | 10 | N/A | ✅ Complete |
-| **Workflow hardening (CI)** | `tests/test_workflow_hardening.py` | 33 | N/A | ✅ Complete |
+| **Workflow hardening (CI)** | `tests/test_workflow_hardening.py` | 39 | N/A | ✅ Complete |
 | **Pre-commit hook pinning (CI)** | `tests/test_precommit_pinning.py` | 18 | N/A | ✅ Complete |
-| **Issue forms and PR template (required fields, schema gate)** | `tests/test_issue_pr_templates.py` | 8 | N/A | ✅ Complete |
-| **CI gate (required check)** | `tests/test_ci_gate.py` | 16 | N/A | ✅ Complete |
+| **Issue forms and PR template (required fields, schema gate)** | `tests/test_issue_pr_templates.py` | 7 | N/A | ✅ Complete |
+| **CI gate (required check)** | `tests/test_ci_gate.py` | 20 | N/A | ✅ Complete |
 | **Selenium Grid in Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 19 | N/A | ✅ Complete |
 | **Codecov upload (CI)** | `tests/test_codecov_upload.py` | 8 | N/A | ✅ Complete |
 | **Allure environment and executor (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Complete |
 | **Failure evidence of browser tests (CI)** | `tests/test_failure_artifacts.py` | 15 | N/A | ✅ Complete |
-| **Agent rules (size, single copy, skills, reviewer subagent, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 63 | N/A | ✅ Complete |
-| **Doc links (every referenced path exists)** | `tests/test_doc_links.py` | 110 | N/A | ✅ Complete |
+| **Agent rules (size, single copy, mission plugin, contracts, review instructions, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 68 | N/A | ✅ Complete |
+| **Doc links (every referenced path exists)** | `tests/test_doc_links.py` | 106 | N/A | ✅ Complete |
 | **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
 | **Agent guardrails (deny rules)** | `tests/test_agent_guardrails.py` | 61 | N/A | ✅ Complete |
-| **Native auto-merge wait (`/ship-pr`: outcome and extra checks)** | `tests/test_wait_for_merge.py` | 39 | N/A | ✅ Complete |
 | **Lint gate (pre-commit + CI + editor import order, ruff replaces flake8, no rule in two linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Complete |
 | **README metrics (per-row sync from the Source column, translations)** | `tests/test_validate_readme_metrics.py` | 51 | N/A | ✅ Complete |
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Complete |
-| **TOTAL** | | **737** | **100%** | **Complete** |
+| **TOTAL** | | **708** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 463

@@ -61,6 +61,42 @@ class TestGateJob:
         assert checker[0].get("env", {}).get("NEEDS") == "${{ toJSON(needs) }}"
 
 
+SECURITY_WORKFLOW = WORKFLOW.parent / "security.yml"
+
+
+def _triggers(path):
+    """Return the event names of a workflow (PyYAML reads ``on:`` as True)."""
+    return set(yaml.safe_load(path.read_text(encoding="utf-8"))[True])
+
+
+class TestDependencyAuditInGate:
+    """pip-audit is one of the gate's dependencies, not a check of its own.
+
+    The mission plugin's /mission:ship-pr waits only for the ``gate`` check:
+    a separate required check that fails would hold the merge until its 30 min
+    deadline. Inside ``needs``, a failed audit fails ``ci-passed`` at once
+    (#179). The audit lives in one reusable workflow, so the daily run and the
+    gate run the same steps.
+    """
+
+    def test_gate_calls_the_security_workflow(self):
+        callers = [
+            job_id
+            for job_id, job in JOBS.items()
+            if job.get("uses") == "$/.github/workflows/security.yml"
+        ]
+        assert callers, f"no job of {WORKFLOW.name} calls security.yml"
+        assert set(callers) <= set(JOBS[GATE]["needs"])
+
+    def test_security_workflow_is_reusable_and_still_daily(self):
+        assert {"workflow_call", "schedule"} <= _triggers(SECURITY_WORKFLOW)
+
+    @pytest.mark.parametrize("event", ["pull_request", "push"])
+    def test_audit_runs_once_per_change(self, event):
+        """The gate already runs it on pull requests and pushes to master."""
+        assert event not in _triggers(SECURITY_WORKFLOW)
+
+
 def _needs(**results):
     """Build the shape of ``toJSON(needs)``: {job: {result, outputs}}."""
     return {job: {"result": result, "outputs": {}} for job, result in results.items()}

@@ -32,17 +32,13 @@ class TestLoginNavigation:
         self, driver, base_url, password
     ):
         """Valid login should return only after inventory page renders."""
-        driver.get(base_url)
-
-        LoginPage(driver).login("standard_user", password)
+        LoginPage(driver).open(base_url).login("standard_user", password)
 
         assert driver.find_elements(*InventoryPage.INVENTORY_CONTAINER)
 
     def test_invalid_login_returns_after_error_renders(self, driver, base_url):
         """Invalid login should return only after error message renders."""
-        driver.get(base_url)
-
-        LoginPage(driver).login("invalid_user", "wrong_password")
+        LoginPage(driver).open(base_url).login("invalid_user", "wrong_password")
 
         assert driver.find_elements(*LoginPage.ERROR_MESSAGE)
 
@@ -50,8 +46,7 @@ class TestLoginNavigation:
         self, driver, base_url, password
     ):
         """A leftover error banner must not count as the new login's outcome."""
-        driver.get(base_url)
-        login_page = LoginPage(driver)
+        login_page = LoginPage(driver).open(base_url)
         login_page.login("invalid_user", "wrong_password")
 
         login_page.login("standard_user", password)

@@ -6,10 +6,29 @@ BasePage are covered against the DOM by
 tests/integration/test_login_page_integration.py (#143).
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 from pages.inventory_page import InventoryPage
 from pages.login_page import LoginPage
+
+
+class TestOpen:
+    """open: navigate, then wait for the login page to render (#180)."""
+
+    def test_open_navigates_before_waiting_for_the_page_to_render(self):
+        """The wait must see the new page: driver.get first, then the wait."""
+        calls = Mock()
+        page = LoginPage(calls.driver)
+
+        with patch.object(page, "wait_until_loaded", calls.wait_until_loaded):
+            calls.wait_until_loaded.return_value = page
+            result = page.open("https://www.saucedemo.com")
+
+        assert calls.mock_calls == [
+            call.driver.get("https://www.saucedemo.com"),
+            call.wait_until_loaded(),
+        ]
+        assert result is page
 
 
 class TestClickLogin:

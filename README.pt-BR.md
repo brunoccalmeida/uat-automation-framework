@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:eee9292759a7baea28ad99e6872089b5c17af98e786d2eac413275f397f36c8d -->
+<!-- translation-source: README.md sha256:47508e043339b82b49df6f2e4ac48ca6a543ed08ae87463c4874682d0edded4b -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -14,7 +14,7 @@ Framework completo de automação UAT usando Python, Behave (BDD) e Selenium par
 
 ## ⚡ Em Resumo
 
-- **Testes:** 708 unitários · 101 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
+- **Testes:** 711 unitários · 104 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
 - **Navegadores reais:** as suítes de integração e smoke rodam no Chrome e no Firefox no CI, em contêineres docker-selenium
 - **Portões de qualidade:** o `master` só aceita PR com CI verde e `pip-audit` limpo; toda GitHub Action é fixada por SHA de commit
 - **Relatório ao vivo:** Allure, republicado a cada merge no `master`: 📊 **[Ver o Relatório de Testes Mais Recente](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -378,10 +378,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 708 testes (componentes do framework, lógica e contratos de espera dos Page Objects, proteções do CI)
-- **Testes de Integração**: 101 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
+- **Testes Unitários**: 711 testes (componentes do framework, lógica e contratos de espera dos Page Objects, proteções do CI)
+- **Testes de Integração**: 104 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 73 cenários, 463 steps (jornadas completas de usuário)
-- **Total**: 809 testes unitários/de integração + 73 cenários E2E
+- **Total**: 815 testes unitários/de integração + 73 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -409,7 +409,7 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | Módulo | Fonte | Testes | Cobertura | Status |
 |--------|-------|--------|-----------|--------|
 | **BasePage** | `tests/test_base_page.py` | 27 | 100% | ✅ Completo |
-| **LoginPage** | `tests/test_login_page.py` | 3 | 100% | ✅ Completo |
+| **LoginPage** | `tests/test_login_page.py` | 4 | 100% | ✅ Completo |
 | **CartPage** | `tests/test_cart_page.py` | 5 | 100% | ✅ Completo |
 | **InventoryPage** | `tests/test_inventory_page.py` | 11 | 100% | ✅ Completo |
 | **HeaderComponent** | `tests/test_header_component.py` | 13 | 100% | ✅ Completo |
@@ -433,9 +433,9 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Selenium Grid no Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 19 | N/A | ✅ Completo |
 | **Upload para o Codecov (CI)** | `tests/test_codecov_upload.py` | 8 | N/A | ✅ Completo |
 | **Ambiente e executor do Allure (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Completo |
-| **Evidência de falha dos testes com navegador (CI)** | `tests/test_failure_artifacts.py` | 15 | N/A | ✅ Completo |
+| **Evidência de falha dos testes com navegador (CI)** | `tests/test_failure_artifacts.py` | 16 | N/A | ✅ Completo |
 | **Regras do agente (tamanho, cópia única, plugin mission, contratos, instruções de revisão, diagnósticos do editor, code intelligence)** | `tests/test_agent_rules.py` | 68 | N/A | ✅ Completo |
-| **Links da documentação (todo caminho citado existe)** | `tests/test_doc_links.py` | 106 | N/A | ✅ Completo |
+| **Links da documentação (todo caminho citado existe)** | `tests/test_doc_links.py` | 107 | N/A | ✅ Completo |
 | **Hook de saída de testes do agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
 | **Proteções do agente (regras de deny)** | `tests/test_agent_guardrails.py` | 61 | N/A | ✅ Completo |
 | **Portão de lint (pre-commit + CI + ordem de imports no editor, ruff no lugar do flake8, nenhuma regra em dois linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Completo |
@@ -443,11 +443,11 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
 | **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
-| **TOTAL** | | **708** | **100%** | **Completo** |
+| **TOTAL** | | **711** | **100%** | **Completo** |
 
 **Cobertura de Código:**
-- **Total de statements:** 463
-- **Cobertos:** 463 (100%)
+- **Total de statements:** 466
+- **Cobertos:** 466 (100%)
 - **Módulo Pages**: 100%
 - **Módulo Core**: 100%
 
@@ -459,7 +459,7 @@ Os testes de integração validam os Page Objects com interações reais no nave
 
 | Módulo | Fonte | Testes | Navegador | Status |
 |--------|-------|--------|-----------|--------|
-| **LoginPage** | `tests/integration/test_login_page_integration.py` | 11 | Chrome, Firefox | ✅ Completo |
+| **LoginPage** | `tests/integration/test_login_page_integration.py` | 13 | Chrome, Firefox | ✅ Completo |
 | **InventoryPage** | `tests/integration/test_inventory_page_integration.py` | 7 | Chrome, Firefox | ✅ Completo |
 | **HeaderComponent** | `tests/integration/test_header_component_integration.py` | 14 | Chrome, Firefox | ✅ Completo |
 | **InventoryPage (ordenação)** | `tests/integration/test_inventory_sorting_integration.py` | 3 | Chrome, Firefox | ✅ Completo |
@@ -470,7 +470,8 @@ Os testes de integração validam os Page Objects com interações reais no nave
 | **CheckoutCompletePage** | `tests/integration/test_checkout_complete_integration.py` | 2 | Chrome, Firefox | ✅ Completo |
 | **Sincronização da navegação** | `tests/integration/test_navigation_integration.py` | 13 | Chrome, Firefox | ✅ Completo |
 | **Sessão no Selenium Grid** | `tests/integration/test_remote_driver_integration.py` | 1 | Chrome, Firefox (Grid) | ✅ Completo |
-| **TOTAL** | | **101** | **Real** | **Completo** |
+| **Tempos da evidência de falha** | `tests/integration/test_failure_artifacts_integration.py` | 1 | Chrome, Firefox | ✅ Completo |
+| **TOTAL** | | **104** | **Real** | **Completo** |
 
 **Diferenças em Relação aos Testes Unitários:**
 - ✅ Selenium WebDriver real (não mockado)

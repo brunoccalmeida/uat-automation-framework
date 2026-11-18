@@ -4,6 +4,9 @@ Tests LoginPage interactions with actual DOM elements,
 validating that locators work and methods interact correctly with Selenium.
 """
 
+import pytest
+from selenium.common.exceptions import TimeoutException
+
 from pages.login_page import LoginPage
 
 
@@ -12,22 +15,19 @@ class TestLoginPageElements:
 
     def test_username_input_is_present(self, driver, base_url):
         """Username input should be present on login page."""
-        driver.get(base_url)
-        page = LoginPage(driver)
+        page = LoginPage(driver).open(base_url)
 
         assert page.is_element_visible(page.USERNAME_INPUT, timeout=5)
 
     def test_password_input_is_present(self, driver, base_url):
         """Password input should be present on login page."""
-        driver.get(base_url)
-        page = LoginPage(driver)
+        page = LoginPage(driver).open(base_url)
 
         assert page.is_element_visible(page.PASSWORD_INPUT, timeout=5)
 
     def test_login_button_is_present(self, driver, base_url):
         """Login button should be present on login page."""
-        driver.get(base_url)
-        page = LoginPage(driver)
+        page = LoginPage(driver).open(base_url)
 
         assert page.is_element_visible(page.LOGIN_BUTTON, timeout=5)
 
@@ -37,8 +37,7 @@ class TestLoginPageInteractions:
 
     def test_enter_username_types_text(self, driver, base_url):
         """enter_username should type text into username field."""
-        driver.get(base_url)
-        page = LoginPage(driver)
+        page = LoginPage(driver).open(base_url)
 
         test_username = "standard_user"
         page.enter_username(test_username)
@@ -49,8 +48,7 @@ class TestLoginPageInteractions:
 
     def test_enter_password_types_text(self, driver, base_url):
         """enter_password should type text into password field."""
-        driver.get(base_url)
-        page = LoginPage(driver)
+        page = LoginPage(driver).open(base_url)
 
         test_password = "any_password"
         page.enter_password(test_password)
@@ -61,8 +59,7 @@ class TestLoginPageInteractions:
 
     def test_login_with_valid_credentials_succeeds(self, driver, base_url, password):
         """login with valid credentials should navigate to inventory page."""
-        driver.get(base_url)
-        page = LoginPage(driver)
+        page = LoginPage(driver).open(base_url)
 
         page.login("standard_user", password)
 
@@ -71,8 +68,7 @@ class TestLoginPageInteractions:
 
     def test_login_with_invalid_credentials_shows_error(self, driver, base_url):
         """login with invalid credentials should display error message."""
-        driver.get(base_url)
-        page = LoginPage(driver)
+        page = LoginPage(driver).open(base_url)
 
         page.login("invalid_user", "wrong_password")
 
@@ -88,16 +84,14 @@ class TestLoginPageErrorHandling:
 
     def test_get_error_message_returns_none_when_no_error(self, driver, base_url):
         """get_error_message should return None when error not present."""
-        driver.get(base_url)
-        page = LoginPage(driver)
+        page = LoginPage(driver).open(base_url)
 
         error = page.get_error_message()
         assert error is None
 
     def test_locked_user_shows_error(self, driver, base_url, password):
         """Locked user should display appropriate error message."""
-        driver.get(base_url)
-        page = LoginPage(driver)
+        page = LoginPage(driver).open(base_url)
 
         page.login("locked_out_user", password)
 
@@ -106,14 +100,29 @@ class TestLoginPageErrorHandling:
         assert "locked out" in error.lower()
 
 
+class TestOpen:
+    """open against a real browser: a page that never renders says so (#180)."""
+
+    def test_open_returns_the_rendered_login_page(self, driver, base_url):
+        """open returns once the login form is on screen."""
+        page = LoginPage(driver).open(base_url)
+
+        assert page.is_element_visible(page.LOGIN_BUTTON, timeout=0)
+
+    def test_open_on_an_app_that_never_renders_names_the_page(self, driver):
+        """An empty SPA shell fails as 'did not render', not as a field timeout."""
+        shell = "data:text/html,<noscript>JS</noscript><div id='root'></div>"
+
+        with pytest.raises(TimeoutException, match="LoginPage did not render"):
+            LoginPage(driver, timeout=1).open(shell)
+
+
 class TestIsOnLoginPage:
     """Test is_on_login_page against the real DOM."""
 
     def test_true_on_login_page(self, driver, base_url):
         """is_on_login_page should be True on the login page."""
-        driver.get(base_url)
-
-        assert LoginPage(driver).is_on_login_page()
+        assert LoginPage(driver).open(base_url).is_on_login_page()
 
     def test_false_on_another_page_under_base_url(self, authenticated_driver):
         """is_on_login_page should be False on a page sharing the base URL (#111)."""

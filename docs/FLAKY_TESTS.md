@@ -24,7 +24,7 @@ Do not guess at a cause the evidence cannot show. Failures already leave evidenc
 
 | Layer | Evidence on failure | Where |
 | --- | --- | --- |
-| Integration (pytest + real browser) | Screenshot and page source | `reports/integration-failures/`, uploaded as a CI artifact |
+| Integration (pytest + real browser) | Screenshot, page source and the browser's performance timeline (ready state; each resource with its duration and HTTP status) | `reports/integration-failures/`, uploaded as a CI artifact |
 | E2E (Behave, `test` job) | Screenshot and current URL | Attached to the Allure result |
 | Smoke (Behave, `smoke-matrix` job) | Screenshot and current URL; Grid and browser logs | Allure results in the `smoke-failures-<browser>` CI artifact; logs in the job log |
 

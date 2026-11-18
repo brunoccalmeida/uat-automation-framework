@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `AGENTS.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 18/11/2026, #179 (plugin `mission` adotado; `pip-audit` dentro do `ci-passed`).
+**Última atualização:** 18/11/2026, #180 instrumentada (`LoginPage.open` e linha do tempo de carga nos artefatos); causa ainda não observada.
 
 ---
 
@@ -15,8 +15,8 @@
 | CI (`master`) | Verde: unit, integração Chrome + Firefox, E2E Chrome, smoke, lint, report, `secret-scan`, `workflow-audit`; navegadores no Grid do `compose.yaml` |
 | Testes | Contagens no README (mantidas pelo hook `validate-readme-metrics`); cobertura mínima de 99% (`--cov-fail-under`), medida com unitários e integração juntos (só unitários: ~92% em `pages`, por desenho) |
 | Unitários de Page Object | Só lógica e contratos de espera; locator e delegação ao `BasePage` se provam na integração (#143, #170); nenhum unitário só de mock restante |
-| Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum em quarentena; aberto: #180 (local, 1 em 3) |
-| Evidência de falha | Integração, E2E e smoke guardam screenshot e URL como artefato do CI; todo job com `behave` é cobrado por `tests/test_failure_artifacts.py` |
+| Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum em quarentena; aberto: #180 (local, 1 em 8; instrumentada, esperando a próxima falha para ver a causa) |
+| Evidência de falha | Integração, E2E e smoke guardam screenshot e URL como artefato do CI; a integração guarda também `.timing.json` (`readyState` e Performance Timeline); todo job com `behave` é cobrado por `tests/test_failure_artifacts.py` |
 | Relatório público | Allure em <https://brunoccalmeida.github.io/uat-automation-framework/>, publicado só em push no `master` |
 | Proteção do `master` | Ruleset "Protect master": PR, check `ci-passed` (inclui o `pip-audit`), branch atualizada, histórico linear, sem bypass; squash grava título e corpo do PR |
 | Segurança | gitleaks e zizmor no `ci-passed`; actions e hooks fixados por SHA; Dependabot com `cooldown` de 7 dias; versões do gitleaks e do zizmor sobem à mão |
@@ -36,7 +36,7 @@
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido:** primeiro a #180 (integração intermitente: página do Sauce Demo em branco no Grid local; instrumentar antes de corrigir, `docs/FLAKY_TESTS.md`), porque um flake reprova os portões de qualquer missão; depois as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #176 (mecanismo de falha esperada para bugs conhecidos, último item da ordem combinada em 06/11/2026; a regra já está no `AGENTS.md`).
+**Sem bloqueio resolvido:** a #180 já está instrumentada e só volta a ser missão quando falhar de novo (ler `.timing.json` e a mensagem `LoginPage did not render` antes de corrigir, `docs/FLAKY_TESTS.md`); até lá, as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #176 (mecanismo de falha esperada para bugs conhecidos, último item da ordem combinada em 06/11/2026; a regra já está no `AGENTS.md`).
 
 **#134 (automation-template) pausada** até o primeiro trabalho pago de automação (regra de três: duas fontes não bastam para extrair o núcleo). Até lá, as melhorias entram à mão neste repositório.
 

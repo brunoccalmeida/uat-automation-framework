@@ -221,6 +221,24 @@ def _ci_text():
     return TESTS_WORKFLOW.read_text(encoding="utf-8")
 
 
+def _ci_commands():
+    """Return the tokens of every ``poetry run`` line of the tests.yml steps."""
+    return [
+        line.split()
+        for job in yaml.safe_load(_ci_text())["jobs"].values()
+        for step in job.get("steps", [])
+        for line in str(step.get("run", "")).splitlines()
+        if line.strip().startswith("poetry run")
+    ]
+
+
+def _runs_in_ci(command):
+    """True if one CI line holds every token of ``command`` (extra CI flags,
+    such as reporters, are allowed; a local flag CI never uses is not)."""
+    tokens = set(command.split())
+    return any(tokens <= set(line) for line in _ci_commands())
+
+
 class TestContracts:
     """The values behind the plugin's contracts match what CI really does.
 
@@ -251,7 +269,16 @@ class TestContracts:
     def test_commands_are_the_ones_ci_runs(self, contract):
         commands = _poetry_commands(contract)
         assert commands
-        assert not [command for command in commands if command not in _ci_text()]
+        assert not [command for command in commands if not _runs_in_ci(command)]
+
+    def test_test_applies_the_ci_coverage_gate(self):
+        # CI fails below this floor (test job); without it a drop in coverage
+        # passes the local gates and fails only in CI (reviewer, #179)
+        ci_floor = re.findall(r"--cov-fail-under=\d+", _ci_text())
+        assert ci_floor
+        assert set(ci_floor) == set(
+            re.findall(r"--cov-fail-under=\d+", _contracts()["test"])
+        )
 
     def test_test_covers_every_ci_test_layer(self):
         commands = _poetry_commands("test")

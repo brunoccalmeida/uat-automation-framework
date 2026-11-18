@@ -36,7 +36,7 @@ Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** 
 | Contrato | Valor |
 | --- | --- |
 | `check` | `poetry run pre-commit run --all-files` |
-| `test` | `poetry run pytest tests/ --ignore=tests/integration -n auto`, `poetry run pytest tests/integration/ -n auto` e `poetry run behave`; antes, como no CI: `BASE_URL` e `TEST_USER_PASSWORD` do bloco `env` do `tests.yml` (ou o `.env` do `.env.example`) e o Grid do [README](README.md#same-browser-as-ci-selenium-grid-in-docker), com `SE_NODE_MAX_SESSIONS` e `SELENIUM_REMOTE_URL` (sem o primeiro, os workers do `-n auto` esperam numa sessão só) |
+| `test` | `poetry run pytest tests/ --ignore=tests/integration -n auto --cov=core --cov=pages`, `poetry run pytest tests/integration/ -n auto --cov=core --cov=pages --cov-append --cov-fail-under=99` (a cobertura mínima do CI soma as duas camadas) e `poetry run behave`; antes, como no CI: `BASE_URL` e `TEST_USER_PASSWORD` do bloco `env` do `tests.yml` (ou o `.env` do `.env.example`) e o Grid do [README](README.md#same-browser-as-ci-selenium-grid-in-docker), com `SE_NODE_MAX_SESSIONS` e `SELENIUM_REMOTE_URL` (sem o primeiro, os workers do `-n auto` esperam numa sessão só) |
 | `smoke` | `poetry run behave --tags=@smoke` |
 | `main-branch` | `master` |
 | `gate` | `ci-passed` |

@@ -1,4 +1,4 @@
-"""Screenshot and page source of a failed integration test (#129).
+"""Screenshot, page source and timing of a failed integration test (#129, #180).
 
 A flaky integration failure left only a one-line message in the CI log. The
 browser state at the failure (screenshot, page source, URL) tells what really
@@ -20,6 +20,16 @@ ARTIFACTS_DIR = Path("reports/integration-failures")
 
 PHASE_REPORT_KEY = pytest.StashKey[dict[str, pytest.TestReport]]()
 
+# W3C Performance Timeline: the page's navigation and every resource it
+# fetched, with duration and HTTP status (#180). A blank SPA shell alone
+# cannot tell a slow or failed bundle from a script error; this can.
+TIMING_SCRIPT = """
+return JSON.stringify({
+  readyState: document.readyState,
+  entries: performance.getEntries().map((entry) => entry.toJSON()),
+}, null, 2);
+"""
+
 
 def call_failed(node) -> bool:
     """Tell whether the test body failed.
@@ -32,7 +42,7 @@ def call_failed(node) -> bool:
 
 
 def save_failure_artifacts(driver, nodeid: str, out_dir: Path = ARTIFACTS_DIR):
-    """Save the screenshot and page source (with its URL) of a failed test.
+    """Save the screenshot, page source (with its URL) and timing of a failure.
 
     Args:
         driver: WebDriver of the failed test, still open.
@@ -45,12 +55,15 @@ def save_failure_artifacts(driver, nodeid: str, out_dir: Path = ARTIFACTS_DIR):
     """
     stem = re.sub(r"[^\w.-]+", "_", nodeid)
     png, html = out_dir / f"{stem}.png", out_dir / f"{stem}.html"
+    timing = out_dir / f"{stem}.timing.json"
     try:
         out_dir.mkdir(parents=True, exist_ok=True)
         driver.save_screenshot(str(png))
         source = f"<!-- URL: {driver.current_url} -->\n{driver.page_source}"
+        timeline = driver.execute_script(TIMING_SCRIPT)
     except WebDriverException as exc:
         warnings.warn(f"No failure artifacts for {nodeid}: {exc}", stacklevel=2)
         return []
     html.write_text(source, encoding="utf-8")
-    return [png, html]
+    timing.write_text(timeline, encoding="utf-8")
+    return [png, html, timing]

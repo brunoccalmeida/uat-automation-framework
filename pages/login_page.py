@@ -20,6 +20,26 @@ class LoginPage(BasePage):
     ERROR_CLOSE_BUTTON = (By.CSS_SELECTOR, "[data-test='error-button']")
     PAGE_LOADED = LOGIN_BUTTON
 
+    def open(self, base_url: str) -> "LoginPage":
+        """Navigate to the login page and wait until it renders.
+
+        Sauce Demo is a SPA: driver.get returns once the HTML shell loads,
+        before the app renders the form. Waiting here makes an app that
+        never renders fail as "LoginPage did not render" (#180), not as a
+        timeout on whichever field the test touches first.
+
+        Args:
+            base_url: URL of the login page.
+
+        Returns:
+            This page object, once rendered.
+
+        Raises:
+            TimeoutException: If the page does not render within timeout.
+        """
+        self.driver.get(base_url)
+        return self.wait_until_loaded()
+
     def is_on_login_page(self) -> bool:
         """Check if user is on login page.
 

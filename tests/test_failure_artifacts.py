@@ -20,6 +20,7 @@ from tests.helpers.failure_artifacts import (
     save_failure_artifacts,
 )
 
+TIMING = '{"readyState": "loading", "entries": []}'
 NODEID = "tests/integration/test_header.py::TestMenu::test_logout[firefox]"
 WORKFLOW = Path(__file__).resolve().parent.parent / ".github/workflows/tests.yml"
 JOBS = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))["jobs"]
@@ -83,22 +84,27 @@ class TestSaveFailureArtifacts:
         driver = Mock()
         driver.current_url = "https://www.saucedemo.com/inventory.html"
         driver.page_source = "<html><body>inventory</body></html>"
+        driver.execute_script.return_value = TIMING
         return driver
 
-    def test_saves_screenshot_and_page_source_named_after_the_test(self, tmp_path):
-        """Both files go to out_dir, named after the test id in a safe form."""
+    def test_saves_screenshot_page_source_and_timing_named_after_the_test(
+        self, tmp_path
+    ):
+        """All files go to out_dir, named after the test id in a safe form."""
         driver = self._driver()
 
         saved = save_failure_artifacts(driver, NODEID, tmp_path)
 
         stem = "tests_integration_test_header.py_TestMenu_test_logout_firefox_"
         png, html = tmp_path / f"{stem}.png", tmp_path / f"{stem}.html"
-        assert saved == [png, html]
+        timing = tmp_path / f"{stem}.timing.json"
+        assert saved == [png, html, timing]
         driver.save_screenshot.assert_called_once_with(str(png))
         assert html.read_text(encoding="utf-8") == (
             "<!-- URL: https://www.saucedemo.com/inventory.html -->\n"
             "<html><body>inventory</body></html>"
         )
+        assert timing.read_text(encoding="utf-8") == TIMING
 
     def test_creates_the_output_folder(self, tmp_path):
         """The folder may not exist yet on a fresh CI checkout."""

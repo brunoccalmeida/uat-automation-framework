@@ -16,9 +16,10 @@ DEFAULT_PRODUCTS = ("Sauce Labs Backpack",)
 
 def go_to_inventory(driver, base_url, username="standard_user"):
     """Log in as username and land on the inventory page."""
-    driver.get(base_url)
     password = load_settings().test_user_password.get_secret_value()
-    LoginPage(driver).login(username, password)
+    login_page = LoginPage(driver)
+    login_page.open(base_url)
+    login_page.login(username, password)
 
 
 def go_to_cart(driver, base_url, products=DEFAULT_PRODUCTS):

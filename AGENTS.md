@@ -21,7 +21,7 @@ Toda decisão (código, testes, CI, ambiente, processo) segue as melhores práti
 
 ## Ciclo de missão (uma missão por chat)
 
-Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** (objetivo coeso, normalmente uma GitHub Issue) e **o estado do projeto mora no repositório, não na conversa**. O handoff é parte do trabalho: nunca depende de o usuário pedir (só o merge depende: `/ship-pr`).
+Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** (objetivo coeso, normalmente uma GitHub Issue) e **o estado do projeto mora no repositório, não na conversa**. O handoff é parte do trabalho: nunca depende de o usuário pedir (só o merge depende: `/mission:ship-pr`).
 
 **Início de cada chat** (automático):
 
@@ -29,7 +29,20 @@ Contexto longo degrada a qualidade; por isso cada chat cuida de **uma missão** 
 2. Listar issues e PRs abertos (`gh issue list`, `gh pr list`).
 3. Propor a missão de maior prioridade e confirmar com o usuário. Prioridade: bloqueio → segurança → visibilidade → dívida técnica (labels `priority: P0/P1/P2`).
 
-**Fechamento da missão** (automático): skill `/close-mission`, a Definition of Done; o registro de sessão vai no PR da própria missão.
+**Fechamento da missão** (automático): skill `/mission:close-mission` (plugin `mission`), a Definition of Done; o registro da missão vai no corpo do PR, e o resumo de sessão guarda só o estado e a próxima missão.
+
+**Contratos** do plugin `mission` ([formato](https://github.com/brunoccalmeida/automation-template/blob/main/plugins/mission/README.md)); a primeira coluna é o nome que as skills procuram (`tests/test_agent_rules.py` confere cada valor contra o `tests.yml`):
+
+| Contrato | Valor |
+| --- | --- |
+| `check` | `poetry run pre-commit run --all-files` |
+| `test` | `poetry run pytest tests/ --ignore=tests/integration -n auto`, `poetry run pytest tests/integration/ -n auto` e `poetry run behave`; antes, como no CI: `BASE_URL` e `TEST_USER_PASSWORD` do bloco `env` do `tests.yml` (ou o `.env` do `.env.example`) e o Grid do [README](README.md#same-browser-as-ci-selenium-grid-in-docker), com `SE_NODE_MAX_SESSIONS` e `SELENIUM_REMOTE_URL` (sem o primeiro, os workers do `-n auto` esperam numa sessão só) |
+| `smoke` | `poetry run behave --tags=@smoke` |
+| `main-branch` | `master` |
+| `gate` | `ci-passed` |
+| `session-summary` | `docs/ai-workflow/PROJECT_SESSION_SUMMARY.md` |
+
+Revisões específicas do projeto ficam em [REVIEW.md](REVIEW.md).
 
 ## Gasto de tokens (contexto)
 
@@ -101,7 +114,7 @@ Ao reportar um erro: **erro observado**, **causa raiz** (o porquê), **análise*
 - **Conventional Commits** (`feat`, `fix`, `refactor`, `test`, `docs`, `style`, `perf`, `build`, `ci`, `chore`; escopo opcional, ex.: `build(deps):`), commits atômicos.
 - O `master` é protegido (ruleset): só aceita PR com os checks obrigatórios verdes e **branch atualizada**. Cada merge desatualiza os outros PRs abertos, custando novo ciclo de CI e revisão. Por isso:
   - **Um PR aberto por vez.** Trabalho pronto espera em commit local até a fila esvaziar. Merge antes do próximo PR, sem empilhar (empilhar só se justifica com revisão demorada, em equipes).
-  - **Merge só pelo `/ship-pr`, que o usuário dispara** (o merge no `master` publica o relatório): o agente abre o PR e pede o comando. **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
+  - **Merge só pelo `/mission:ship-pr`, que o usuário dispara** (o merge no `master` publica o relatório): o agente abre o PR e pede o comando. **Nunca `--admin`** para furar o ruleset: se a regra atrapalha, discuta a regra.
 - **Alterar o ruleset é bloqueado para o agente:** só com autorização explícita do dono para aquela alteração.
 
 ## Princípios

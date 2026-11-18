@@ -11,6 +11,7 @@ The rules themselves live in the repository:
 
 - [AGENTS.md](../../AGENTS.md): rules for every chat, in the open format for agent instructions (Claude Code imports it from [CLAUDE.md](../../CLAUDE.md));
 - [.claude/rules/](../../.claude/rules/): rules scoped to part of the code;
-- [.claude/skills/](../../.claude/skills/): procedures (merge, Definition of Done) and [.claude/agents/](../../.claude/agents/): the read-only reviewer.
+- [REVIEW.md](../../REVIEW.md): this project's checks for the reviewer;
+- the `mission` plugin ([README](https://github.com/brunoccalmeida/automation-template/blob/main/plugins/mission/README.md)), enabled in [.claude/settings.json](../../.claude/settings.json): the procedures (`/mission:close-mission`, `/mission:ship-pr`) and the read-only reviewer (`mission:reviewer`), driven by the contract table in `AGENTS.md`.
 
-`tests/test_agent_rules.py` keeps a single copy of the rules, each path-scoped rule with its paths, and the always-loaded rules under their size target.
+`tests/test_agent_rules.py` keeps a single copy of the rules, each path-scoped rule with its paths, the always-loaded rules under their size target, and each contract value matching what CI runs.

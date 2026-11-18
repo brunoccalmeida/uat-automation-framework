@@ -123,11 +123,6 @@ class TestSessionSummary:
         ]
         assert not long_rows
 
-    def test_close_mission_sends_history_to_the_pr_body(self):
-        _, body = _split_frontmatter(SKILLS / "close-mission" / "SKILL.md")
-        assert "corpo do PR" in body
-        assert 'parágrafo "Do #N"' not in body
-
 
 class TestPathScopedRules:
     """Rules for part of the code load only when the agent touches it."""
@@ -141,157 +136,166 @@ class TestPathScopedRules:
         assert frontmatter["paths"]
 
 
-def _skills():
-    return {path.parent.name: path for path in SKILLS.glob("*/SKILL.md")}
+# Plugin that ships /mission:close-mission, /mission:ship-pr and the
+# mission:reviewer agent (#179); its README defines the contracts
+MARKETPLACE = "brunoccalmeida-plugins"
+MISSION_PLUGIN = f"mission@{MARKETPLACE}"
+# Local copies the plugin replaced (#179)
+LOCAL_COPIES = [
+    SKILLS / "close-mission",
+    SKILLS / "ship-pr",
+    AGENTS / "reviewer.md",
+    ROOT / "scripts" / "wait_for_merge.py",
+]
+REQUIRED_CONTRACTS = {"check", "test", "main-branch", "gate", "session-summary"}
+REVIEW_MD = ROOT / "REVIEW.md"
 
 
 def _always_loaded_text():
     return "\n".join(path.read_text(encoding="utf-8") for path in ALWAYS_LOADED)
 
 
-def _close_mission_steps():
-    """Return the text of each numbered step of /close-mission, in order."""
-    _, body = _split_frontmatter(SKILLS / "close-mission" / "SKILL.md")
-    return [
-        line.split(". ", 1)[1]
-        for line in body.splitlines()
-        if line[:1].isdigit() and ". " in line
-    ]
+def _settings():
+    return json.loads((ROOT / ".claude" / "settings.json").read_text("utf-8"))
 
 
-def _close_mission_gate_commands():
-    """Return the `poetry run ...` commands of the green gates step."""
-    return re.findall(r"`(poetry run [^`]+)`", _close_mission_steps()[0])
+class TestMissionPlugin:
+    """The mission procedures come from one plugin, not from local copies.
 
-
-class TestSkills:
-    """Procedures live in skills, whose body loads only when the skill is used.
-
-    A procedure in the always-loaded rules is paid in every turn of every
-    chat; a copy in both places drifts. A skill with side effects outside the
-    repository (a merge to master publishes the report) is started only by the
-    user (``disable-model-invocation``); the others stay available to the
-    agent, because the mission cycle runs without being asked.
+    A local copy per project drifts; the plugin is the same in every project
+    and is updated on purpose (``autoUpdate: false``), after reading what
+    changed. ``extraKnownMarketplaces`` registers it for everyone who clones
+    the repository (plugin README, "Install in a project").
     """
 
-    USER_ONLY = {"ship-pr"}
+    def test_marketplace_is_registered_for_the_project(self):
+        marketplace = _settings()["extraKnownMarketplaces"][MARKETPLACE]
+        assert marketplace["source"] == {
+            "source": "github",
+            "repo": "brunoccalmeida/automation-template",
+        }
 
-    def test_expected_skills_exist(self):
-        assert {"ship-pr", "close-mission"} <= set(_skills())
+    def test_plugin_updates_only_on_purpose(self):
+        # the default is false today, but the install does not write it down
+        marketplace = _settings()["extraKnownMarketplaces"][MARKETPLACE]
+        assert marketplace["autoUpdate"] is False
 
-    @pytest.mark.parametrize("name", sorted(_skills()))
-    def test_skill_name_matches_its_directory(self, name):
-        frontmatter, _ = _split_frontmatter(_skills()[name])
-        assert frontmatter["name"] == name
+    def test_plugin_is_enabled_for_the_project(self):
+        assert _settings()["enabledPlugins"][MISSION_PLUGIN] is True
 
-    @pytest.mark.parametrize("name", sorted(_skills()))
-    def test_skill_says_when_to_use_it(self, name):
-        frontmatter, _ = _split_frontmatter(_skills()[name])
-        assert frontmatter["description"].strip()
+    @pytest.mark.parametrize("path", LOCAL_COPIES, ids=lambda path: path.name)
+    def test_local_copy_is_gone(self, path):
+        assert not path.exists()
 
-    @pytest.mark.parametrize("name", sorted(_skills()))
-    def test_only_skills_with_side_effects_are_user_only(self, name):
-        frontmatter, _ = _split_frontmatter(_skills()[name])
-        user_only = frontmatter.get("disable-model-invocation", False)
-        assert user_only is (name in self.USER_ONLY)
+    @pytest.mark.parametrize("skill", ["mission:ship-pr", "mission:close-mission"])
+    def test_always_loaded_rules_point_to_the_plugin_skill(self, skill):
+        assert f"`/{skill}`" in _always_loaded_text()
 
-    @pytest.mark.parametrize("name", ["ship-pr", "close-mission"])
-    def test_always_loaded_rules_point_to_the_skill(self, name):
-        assert f"`/{name}`" in _always_loaded_text()
-
-    @pytest.mark.parametrize(
-        "name, procedure",
-        [
-            ("ship-pr", "scripts/wait_for_merge.py"),
-            # the session record rides in the mission PR (#126)
-            ("close-mission", "nunca abra PR separado de registro"),
-        ],
-    )
-    def test_procedure_lives_only_in_its_skill(self, name, procedure):
-        _, body = _split_frontmatter(SKILLS / name / "SKILL.md")
-        assert procedure in body
-        assert procedure not in _always_loaded_text()
+    @pytest.mark.parametrize("old", ["`/ship-pr", "`/close-mission"])
+    def test_always_loaded_rules_drop_the_local_names(self, old):
+        assert old not in _always_loaded_text()
 
     @pytest.mark.parametrize(
         "step", ["--match-head-commit", "gh run watch", "gh pr checks --watch"]
     )
-    def test_merge_steps_left_the_always_loaded_rules(self, step):
-        # the /ship-pr skill holds them; scripts/wait_for_merge.py says why
+    def test_merge_steps_stay_out_of_the_always_loaded_rules(self, step):
+        # the plugin's ship-pr holds them; a copy here would be paid every turn
         assert step not in _always_loaded_text()
 
-    def test_close_mission_runs_the_gates_before_the_reviewer(self):
-        # fail fast: a red gate found locally costs seconds, in CI a full
-        # cycle, and the reviewer should read a diff that already passes
-        steps = _close_mission_steps()
-        assert steps[0].startswith("**Portões verdes:**")
-        assert any(step.startswith("**Revisor**") for step in steps[1:])
 
-    def test_close_mission_gates_cover_every_ci_test_layer(self):
-        commands = _close_mission_gate_commands()
-        for layer in ["pre-commit run --all-files", "tests/integration", "behave"]:
+def _contracts():
+    """Return the contract table of the always-loaded rules as {name: value}."""
+    rows = [
+        line.split("|")[1:3]
+        for line in AGENTS_MD.read_text(encoding="utf-8").splitlines()
+        if line.startswith("| `")
+    ]
+    return {name.strip().strip("`"): value.strip() for name, value in rows}
+
+
+def _poetry_commands(contract):
+    return re.findall(r"`(poetry run [^`]+)`", _contracts()[contract])
+
+
+def _ci_text():
+    return TESTS_WORKFLOW.read_text(encoding="utf-8")
+
+
+class TestContracts:
+    """The values behind the plugin's contracts match what CI really does.
+
+    The plugin names contracts (``check``, ``test``, ``gate``...) and this
+    project declares the real value of each in AGENTS.md. A value that drifts
+    from tests.yml makes the local gates pass on something CI does not run.
+    """
+
+    def test_required_contracts_are_declared(self):
+        assert REQUIRED_CONTRACTS <= set(_contracts())
+
+    def test_main_branch_is_the_one_pull_requests_target(self):
+        on = yaml.safe_load(_ci_text())[True]
+        branch = _contracts()["main-branch"].strip("`")
+        assert branch == "master"
+        assert branch in on["pull_request"]["branches"]
+
+    def test_gate_is_a_job_of_the_tests_workflow(self):
+        gate = _contracts()["gate"].strip("`")
+        assert gate == "ci-passed"
+        assert gate in yaml.safe_load(_ci_text())["jobs"]
+
+    def test_session_summary_path_exists(self):
+        path = _contracts()["session-summary"].strip("`")
+        assert (ROOT / path) == SESSION_SUMMARY
+
+    @pytest.mark.parametrize("contract", ["check", "test", "smoke"])
+    def test_commands_are_the_ones_ci_runs(self, contract):
+        commands = _poetry_commands(contract)
+        assert commands
+        assert not [command for command in commands if command not in _ci_text()]
+
+    def test_test_covers_every_ci_test_layer(self):
+        commands = _poetry_commands("test")
+        for layer in ["--ignore=tests/integration", "tests/integration/", "behave"]:
             assert any(layer in command for command in commands), layer
-        assert any("--ignore=tests/integration" in command for command in commands)
 
-    def test_close_mission_starts_the_grid_like_ci(self):
+    def test_test_starts_the_grid_like_ci(self):
         # compose.yaml defaults to one session per node: without
         # SE_NODE_MAX_SESSIONS the -n auto workers queue for it (seen: the
         # integration layer took 4m55s locally)
-        assert "SE_NODE_MAX_SESSIONS" in _close_mission_steps()[0]
+        assert "SE_NODE_MAX_SESSIONS" in _contracts()["test"]
+        assert "SELENIUM_REMOTE_URL" in _contracts()["test"]
 
-    def test_close_mission_gates_are_the_commands_ci_runs(self):
-        # the local gates drift from CI unless each one is checked against it
-        ci = TESTS_WORKFLOW.read_text(encoding="utf-8")
-        missing = [cmd for cmd in _close_mission_gate_commands() if cmd not in ci]
-        assert not missing
-
-    def test_ship_pr_enables_native_auto_merge_bound_to_the_head(self):
-        _, body = _split_frontmatter(SKILLS / "ship-pr" / "SKILL.md")
-        assert "gh pr merge <n> --auto --squash --match-head-commit <sha>" in body
-
-    def test_ship_pr_cleans_up_only_after_confirming_merged(self):
-        _, body = _split_frontmatter(SKILLS / "ship-pr" / "SKILL.md")
-        confirm = body.index("confirme `MERGED`")
-        assert confirm < body.index("git pull --ff-only")
-
-    def test_ship_pr_reads_live_state_when_a_wait_stops(self):
-        _, body = _split_frontmatter(SKILLS / "ship-pr" / "SKILL.md")
-        assert "estado real" in body
+    def test_test_sets_the_ci_environment(self):
+        # Settings fails fast without them (seen in #179: a shell without
+        # .env errors in tests/test_smoke.py); CI sets them in tests.yml env
+        for name in yaml.safe_load(_ci_text())["env"]:
+            assert name in _contracts()["test"], name
 
 
-class TestReviewerSubagent:
-    """A reviewer that hasn't seen how the code was written and can't edit it.
+class TestReviewInstructions:
+    """REVIEW.md holds this project's checks for mission:reviewer.
 
-    The read-only limit is enforced by Claude Code from ``tools``, not asked
-    for in the prompt. ``inherit`` keeps the session model: review quality is
-    the reason this subagent exists, and without it an alias or the
-    ``CLAUDE_CODE_SUBAGENT_MODEL`` variable could pick a smaller one.
+    The plugin's reviewer is generic; it reads REVIEW.md at the root for the
+    project's own checks and for what to skip (plugin README, section 3).
     """
 
-    def _frontmatter(self):
-        frontmatter, _ = _split_frontmatter(AGENTS / "reviewer.md")
-        return frontmatter
+    def _text(self):
+        return REVIEW_MD.read_text(encoding="utf-8")
 
-    def test_reviewer_says_when_to_use_it(self):
-        frontmatter = self._frontmatter()
-        assert frontmatter["name"] == "reviewer"
-        assert frontmatter["description"].strip()
-
-    def test_reviewer_can_only_read(self):
-        tools = {tool.strip() for tool in self._frontmatter()["tools"].split(",")}
-        assert tools == {"Read", "Grep", "Glob"}
-
-    def test_reviewer_runs_on_the_session_model(self):
-        assert self._frontmatter()["model"] == "inherit"
-
-    def test_reviewer_checks_test_isolation(self):
+    def test_review_checks_test_isolation(self):
         # Selenium docs, test_practices/encouraged: "Test independency" and
         # "Fresh browser per test"; no gate catches a test that relies on
         # state left by another, it only shows up as a flake under -n auto
-        _, body = _split_frontmatter(AGENTS / "reviewer.md")
-        checklist = [line for line in body.splitlines() if line[:1].isdigit()]
-        isolation = [line for line in checklist if "**Isolamento" in line]
-        assert isolation
-        assert "before_scenario" in isolation[0]
+        for term in ["before_scenario", "-n auto"]:
+            assert term in self._text(), term
+
+    @pytest.mark.parametrize("gate", ["black", "ruff", "pylint", "pyright"])
+    def test_review_skips_what_the_static_gates_enforce(self, gate):
+        skip = self._text().split("## Não reportar")[1]
+        assert gate in skip
+
+    def test_always_loaded_rules_point_to_it(self):
+        assert "REVIEW.md" in _always_loaded_text()
 
 
 class TestEditorDiagnostics:

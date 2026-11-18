@@ -20,7 +20,6 @@ ROOT = Path(__file__).resolve().parent.parent
 ISSUE_TEMPLATES = ROOT / ".github" / "ISSUE_TEMPLATE"
 PR_TEMPLATE = ROOT / ".github" / "pull_request_template.md"
 PRE_COMMIT = ROOT / ".pre-commit-config.yaml"
-CLOSE_MISSION = ROOT / ".claude" / "skills" / "close-mission" / "SKILL.md"
 
 REQUIRED_FIELDS = {
     "1-mission.yml": {"observed", "acceptance-criteria"},
@@ -68,10 +67,3 @@ def test_issue_templates_are_validated_by_pre_commit(hook_id):
         hook["id"] for repo in _load(PRE_COMMIT)["repos"] for hook in repo["hooks"]
     }
     assert hook_id in hook_ids
-
-
-def test_close_mission_points_the_pr_body_to_the_template():
-    """`gh pr create --body` skips the template, so the agent must follow it by hand."""
-    assert ".github/pull_request_template.md" in CLOSE_MISSION.read_text(
-        encoding="utf-8"
-    )

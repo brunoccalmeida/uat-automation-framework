@@ -12,7 +12,7 @@ Comprehensive UAT automation framework using Python, Behave (BDD), and Selenium 
 
 ## ⚡ At a Glance
 
-- **Tests:** 746 unit · 101 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
+- **Tests:** 706 unit · 101 integration · 73 E2E scenarios, built with double-loop TDD (Behave scenarios drive pytest unit tests)
 - **Real browsers:** integration and smoke suites run on Chrome and Firefox in CI, inside docker-selenium containers
 - **Quality gates:** `master` only accepts a PR with green CI and a clean `pip-audit`; every GitHub Action is pinned to a commit SHA
 - **Live report:** Allure, republished on every merge to `master`: 📊 **[View Latest Test Report](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -376,10 +376,10 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 ```
 
 **Layer Distribution:**
-- **Unit Tests**: 746 tests (framework components, Page Object logic and wait contracts, CI guardrails)
+- **Unit Tests**: 706 tests (framework components, Page Object logic and wait contracts, CI guardrails)
 - **Integration Tests**: 101 tests (Page Objects + real browser, including navigation synchronization)
 - **E2E Tests**: 73 scenarios, 463 steps (complete user journeys)
-- **Total**: 847 unit/integration tests + 73 E2E scenarios
+- **Total**: 807 unit/integration tests + 73 E2E scenarios
 
 **When to Use Each Layer:**
 | Test Type | Purpose | Speed | Browser | Example |
@@ -426,23 +426,22 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **Security gates: gitleaks and zizmor (CI)** | `tests/test_security_gates_ci.py` | 10 | N/A | ✅ Complete |
 | **Workflow hardening (CI)** | `tests/test_workflow_hardening.py` | 38 | N/A | ✅ Complete |
 | **Pre-commit hook pinning (CI)** | `tests/test_precommit_pinning.py` | 18 | N/A | ✅ Complete |
-| **Issue forms and PR template (required fields, schema gate)** | `tests/test_issue_pr_templates.py` | 8 | N/A | ✅ Complete |
+| **Issue forms and PR template (required fields, schema gate)** | `tests/test_issue_pr_templates.py` | 7 | N/A | ✅ Complete |
 | **CI gate (required check)** | `tests/test_ci_gate.py` | 20 | N/A | ✅ Complete |
 | **Selenium Grid in Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 19 | N/A | ✅ Complete |
 | **Codecov upload (CI)** | `tests/test_codecov_upload.py` | 8 | N/A | ✅ Complete |
 | **Allure environment and executor (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Complete |
 | **Failure evidence of browser tests (CI)** | `tests/test_failure_artifacts.py` | 15 | N/A | ✅ Complete |
-| **Agent rules (size, single copy, skills, reviewer subagent, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 63 | N/A | ✅ Complete |
-| **Doc links (every referenced path exists)** | `tests/test_doc_links.py` | 110 | N/A | ✅ Complete |
+| **Agent rules (size, single copy, mission plugin, contracts, review instructions, editor diagnostics, code intelligence)** | `tests/test_agent_rules.py` | 67 | N/A | ✅ Complete |
+| **Doc links (every referenced path exists)** | `tests/test_doc_links.py` | 106 | N/A | ✅ Complete |
 | **Agent test-output hook** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Complete |
 | **Agent guardrails (deny rules)** | `tests/test_agent_guardrails.py` | 61 | N/A | ✅ Complete |
-| **Native auto-merge wait (`/ship-pr`: outcome and extra checks)** | `tests/test_wait_for_merge.py` | 39 | N/A | ✅ Complete |
 | **Lint gate (pre-commit + CI + editor import order, ruff replaces flake8, no rule in two linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Complete |
 | **README metrics (per-row sync from the Source column, translations)** | `tests/test_validate_readme_metrics.py` | 51 | N/A | ✅ Complete |
 | **Text encoding gate (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Complete |
 | **Venv cache key (CI, exact Python version)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Complete |
 | **Python version source (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Complete |
-| **TOTAL** | | **746** | **100%** | **Complete** |
+| **TOTAL** | | **706** | **100%** | **Complete** |
 
 **Code Coverage:**
 - **Total statements:** 463

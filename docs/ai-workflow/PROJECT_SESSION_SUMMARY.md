@@ -85,7 +85,7 @@ O que já virou regra está em `AGENTS.md` e nos arquivos com escopo de caminho;
 
 ### Ferramentas e GitHub
 
-- Valide com o zizmor no mesmo escopo do CI (`.`, que inclui o `dependabot.yml`), não só `.github/workflows` (#147).
+- Valide com o zizmor no mesmo escopo do CI (`.`, que inclui o `dependabot.yml`), não só `.github/workflows` (#147): `pipx run --spec zizmor==<version: do tests.yml> zizmor --offline .`; ele não está no `pre-commit` e barrou o `./` em `uses:` (#179).
 - Em PR, triagem do gitleaks com `gitleaks:allow`: o fingerprint do `.gitleaksignore` contém o SHA, que o squash troca (#147).
 - `test_doc_links` parametriza por arquivo versionado: a contagem do README muda ao dar `git add` em arquivo novo (#147).
 - `gh` com 5xx: antes de repetir uma escrita, confira se ela ocorreu (#125).

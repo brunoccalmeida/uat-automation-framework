@@ -444,8 +444,8 @@ This framework implements the complete **Testing Pyramid** architecture with thr
 | **TOTAL** | | **711** | **100%** | **Complete** |
 
 **Code Coverage:**
-- **Total statements:** 463
-- **Covered:** 463 (100%)
+- **Total statements:** 466
+- **Covered:** 466 (100%)
 - **Pages Module**: 100%
 - **Core Module**: 100%
 

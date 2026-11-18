@@ -446,8 +446,8 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **TOTAL** | | **711** | **100%** | **Completo** |
 
 **Cobertura de Código:**
-- **Total de statements:** 463
-- **Cobertos:** 463 (100%)
+- **Total de statements:** 466
+- **Cobertos:** 466 (100%)
 - **Módulo Pages**: 100%
 - **Módulo Core**: 100%
 

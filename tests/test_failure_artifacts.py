@@ -26,12 +26,15 @@ JOBS = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))["jobs"]
 INTEGRATION_JOBS = [
     name
     for name, job in JOBS.items()
-    if any("pytest tests/integration/" in step.get("run", "") for step in job["steps"])
+    if any(
+        "pytest tests/integration/" in step.get("run", "")
+        for step in job.get("steps", [])
+    )
 ]
 BEHAVE_JOBS = [
     name
     for name, job in JOBS.items()
-    if any("poetry run behave" in step.get("run", "") for step in job["steps"])
+    if any("poetry run behave" in step.get("run", "") for step in job.get("steps", []))
 ]
 ALLURE_OUTPUT = re.compile(
     r"-f allure_behave\.formatter:AllureFormatter -o (?P<path>\S+)"

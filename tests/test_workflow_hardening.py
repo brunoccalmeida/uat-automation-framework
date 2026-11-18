@@ -15,10 +15,12 @@ checkout opts out.
 
 ``concurrency``: a new push to a pull request makes the previous run useless,
 so it is cancelled. The group combines two examples from the GitHub docs:
-``github.workflow`` keeps ``Tests`` and ``Security`` from cancelling each other
-and ``github.run_id`` is unique, so runs outside a pull request (``head_ref``
-is empty there) never share a group and a push to master is never cancelled.
-The deploy job has its own group, which queues and never cancels (#140).
+``github.workflow`` keeps two workflows from cancelling each other and
+``github.run_id`` is unique, so runs outside a pull request (``head_ref`` is
+empty there) never share a group and a push to master is never cancelled.
+The deploy job has its own group, which queues and never cancels (#140). A
+reusable workflow (``security.yml``) declares no group: called, it would get
+the caller's (#179).
 """
 
 from pathlib import Path
@@ -60,6 +62,8 @@ def _load_checkouts(jobs):
 
 
 WORKFLOWS = _load_workflows()
+WORKFLOW_NAMES = {name for name, _ in WORKFLOWS}
+LOCAL_WORKFLOW_PREFIX = "./.github/workflows/"
 JOBS = _load_jobs(WORKFLOWS)
 CHECKOUTS = _load_checkouts(JOBS)
 
@@ -75,15 +79,18 @@ def timeout_problem(job):
     """Return why ``job`` breaks the timeout rule, or None if it complies."""
     # A job that calls a reusable workflow cannot take timeout-minutes
     # (GitHub docs, "Supported keywords for jobs that call a reusable
-    # workflow"): the limit belongs to the called workflow's own jobs. No
-    # such job exists yet; when one appears, decide its rule here on purpose
-    # instead of exempting it silently.
+    # workflow"): the limit belongs to the called workflow's own jobs. Only a
+    # workflow of this directory is accepted, because this test loads it and
+    # checks each of its jobs (#179); a remote one would go unchecked.
     if "uses" in job:
-        return (
-            "job calls a reusable workflow, which cannot take timeout-minutes: "
-            "set the timeout in the called workflow's jobs and teach this test "
-            "that case explicitly"
-        )
+        called = str(job["uses"]).removeprefix(LOCAL_WORKFLOW_PREFIX)
+        if called == job["uses"] or called not in WORKFLOW_NAMES:
+            return (
+                f"job calls {job['uses']!r}, which cannot take timeout-minutes "
+                f"and is not a workflow of {WORKFLOWS_DIR.name}/ whose jobs "
+                "this test checks"
+            )
+        return None
     timeout = job.get("timeout-minutes")
     # bool is an int subclass: "timeout-minutes: true" must not pass
     if not isinstance(timeout, int) or isinstance(timeout, bool) or timeout <= 0:
@@ -101,9 +108,11 @@ def timeout_problem(job):
         ({"runs-on": "ubuntu-latest"}, "no positive 'timeout-minutes'"),
         ({"runs-on": "ubuntu-latest", "timeout-minutes": 0}, "no positive"),
         ({"runs-on": "ubuntu-latest", "timeout-minutes": True}, "no positive"),
-        ({"uses": "./.github/workflows/reusable.yml"}, "reusable workflow"),
+        ({"uses": "./.github/workflows/security.yml"}, None),
+        ({"uses": "./.github/workflows/missing.yml"}, "not a workflow of"),
+        ({"uses": "octo-org/repo/.github/workflows/x.yml@v1"}, "not a workflow of"),
     ],
-    ids=["valid", "missing", "zero", "bool", "reusable-call"],
+    ids=["valid", "missing", "zero", "bool", "local-call", "unknown-call", "remote"],
 )
 def test_timeout_problem(job, expected):
     """The rule itself, on synthetic jobs (including cases absent today)."""
@@ -124,6 +133,14 @@ def test_job_has_timeout(job):
 def concurrency_problem(workflow):
     """Return why ``workflow`` breaks the concurrency rule, or None if it complies."""
     concurrency = workflow.get("concurrency")
+    # A called workflow sees the caller's name in github.workflow (GitHub
+    # docs, "Supported keywords for jobs that call a reusable workflow"), so
+    # this group would be the caller's own and could cancel it. The caller's
+    # group already cancels a superseded pull request run, calls included.
+    if "workflow_call" in (workflow.get(True) or {}):
+        if concurrency is not None:
+            return "a reusable workflow must leave 'concurrency' to its caller"
+        return None
     if not isinstance(concurrency, dict):
         return f"workflow has no 'concurrency' mapping (got {concurrency!r})"
     if concurrency.get("group") != CONCURRENCY_GROUP:
@@ -148,8 +165,24 @@ def concurrency_problem(workflow):
             "concurrency group must be",
         ),
         ({"concurrency": {"group": CONCURRENCY_GROUP}}, "cancel-in-progress"),
+        ({True: {"workflow_call": None, "schedule": []}}, None),
+        (
+            {
+                True: {"workflow_call": None},
+                "concurrency": {"group": CONCURRENCY_GROUP, "cancel-in-progress": True},
+            },
+            "leave 'concurrency' to its caller",
+        ),
     ],
-    ids=["valid", "missing", "short-form", "group-cancels-master", "no-cancel"],
+    ids=[
+        "valid",
+        "missing",
+        "short-form",
+        "group-cancels-master",
+        "no-cancel",
+        "reusable",
+        "reusable-with-group",
+    ],
 )
 def test_concurrency_problem(workflow, expected):
     """The rule itself, on synthetic workflows (including cases absent today)."""

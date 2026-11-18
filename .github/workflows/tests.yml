@@ -495,6 +495,15 @@ jobs:
           annotations: true
           version: 1.32.0
 
+  # pip-audit (security.yml, also run daily) as a gate dependency: a known
+  # vulnerability fails ci-passed, the one check the ruleset requires and
+  # /mission:ship-pr waits for (#179). The called job keeps its own
+  # timeout-minutes; a calling job cannot take one.
+  dependency-audit:
+    uses: ./.github/workflows/security.yml
+    permissions:
+      contents: read
+
   # The single required check of this workflow (ruleset "Protect master").
   # Matrix jobs are named after their values ("smoke-matrix (chrome)"): requiring them
   # by name would block every PR after a version bump, waiting for a check
@@ -505,7 +514,7 @@ jobs:
   ci-passed:
     runs-on: ubuntu-latest
     timeout-minutes: 5  # ~3x the slowest recent run (0.1 min)
-    needs: [smoke-matrix, integration-matrix, test, build-report, lint, secret-scan, workflow-audit]
+    needs: [smoke-matrix, integration-matrix, test, build-report, lint, secret-scan, workflow-audit, dependency-audit]
     if: ${{ always() }}
 
     steps:

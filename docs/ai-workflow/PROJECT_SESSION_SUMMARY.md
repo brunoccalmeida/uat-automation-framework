@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `AGENTS.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 13/11/2026, #150 (regras base alinhadas com o `playwright-qa-starter-kit`; este repositório é a fonte do texto comum).
+**Última atualização:** 18/11/2026, #179 (plugin `mission` adotado; `pip-audit` dentro do `ci-passed`).
 
 ---
 
@@ -15,16 +15,16 @@
 | CI (`master`) | Verde: unit, integração Chrome + Firefox, E2E Chrome, smoke, lint, report, `secret-scan`, `workflow-audit`; navegadores no Grid do `compose.yaml` |
 | Testes | Contagens no README (mantidas pelo hook `validate-readme-metrics`); cobertura mínima de 99% (`--cov-fail-under`), medida com unitários e integração juntos (só unitários: ~92% em `pages`, por desenho) |
 | Unitários de Page Object | Só lógica e contratos de espera; locator e delegação ao `BasePage` se provam na integração (#143, #170); nenhum unitário só de mock restante |
-| Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum teste em quarentena |
+| Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum em quarentena; aberto: #180 (local, 1 em 3) |
 | Evidência de falha | Integração, E2E e smoke guardam screenshot e URL como artefato do CI; todo job com `behave` é cobrado por `tests/test_failure_artifacts.py` |
 | Relatório público | Allure em <https://brunoccalmeida.github.io/uat-automation-framework/>, publicado só em push no `master` |
-| Proteção do `master` | Ruleset "Protect master": PR, checks `ci-passed` e `pip-audit`, branch atualizada, histórico linear, sem bypass |
+| Proteção do `master` | Ruleset "Protect master": PR, check `ci-passed` (inclui o `pip-audit`), branch atualizada, histórico linear, sem bypass; squash grava título e corpo do PR |
 | Segurança | gitleaks e zizmor no `ci-passed`; actions e hooks fixados por SHA; Dependabot com `cooldown` de 7 dias; versões do gitleaks e do zizmor sobem à mão |
 | Portões locais | `pre-commit` igual ao CI: black, ruff, pylint, pyright, métricas do README, encoding; links de docs por `tests/test_doc_links.py` |
 | Issues e PRs | Formulários em `.github/ISSUE_TEMPLATE/` (missão, bug; sem issue em branco) validados pelo `check-jsonschema`; corpo de PR por `.github/pull_request_template.md` |
 | Ferramentas | Python pela fonte única `.python-version` (3.15 bloqueado, #95); Poetry, Selenium e demais versões em `pyproject.toml` e `poetry.lock` |
-| Regras do agente | `AGENTS.md` (importado pelo `CLAUDE.md`) com 109 linhas e 9,9 mil caracteres (`wc -m`, 13/11/2026); escopo de caminho só em `.claude/rules/`; só Claude Code, sem suporte ao Copilot (#173) |
-| Skills e revisor | `/close-mission` (Definition of Done, o agente invoca; abre com os portões locais, comandos cobrados contra `tests.yml`), `/ship-pr` (só o usuário dispara), `reviewer` (inclui isolamento) |
+| Regras do agente | `AGENTS.md` (importado pelo `CLAUDE.md`) com 122 linhas e 11,0 mil caracteres (`wc -m`, 18/11/2026); escopo de caminho só em `.claude/rules/`; só Claude Code, sem suporte ao Copilot (#173) |
+| Plugin `mission` | `/mission:close-mission`, `/mission:ship-pr` (só o usuário), `mission:reviewer`; versão `84b2bf3`, `autoUpdate: false`; contratos no `AGENTS.md`, revisão própria no `REVIEW.md` |
 | Proteções do agente | `permissions.deny` nos dois shells (`--admin`, force push, push no `master`, `.env`); casam o texto, a fronteira real é o ruleset |
 | Ambiente do agente | Filtro de saída de testes (`scripts/filter_test_output.py`) e `pyright-lsp`; passo a passo em `docs/ai-workflow/AGENT_TOKEN_SPEND.md` |
 | Navegador | `compose.yaml` é a fonte única do Grid, local e CI; imagens por tag + digest; `SELENIUM_REMOTE_URL` liga o `webdriver.Remote` |
@@ -36,7 +36,7 @@
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido:** as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #176 (mecanismo de falha esperada para bugs conhecidos, último item da ordem combinada em 06/11/2026; a regra já está no `AGENTS.md`).
+**Sem bloqueio resolvido:** primeiro a #180 (integração intermitente: página do Sauce Demo em branco no Grid local; instrumentar antes de corrigir, `docs/FLAKY_TESTS.md`), porque um flake reprova os portões de qualquer missão; depois as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #176 (mecanismo de falha esperada para bugs conhecidos, último item da ordem combinada em 06/11/2026; a regra já está no `AGENTS.md`).
 
 **#134 (automation-template) pausada** até o primeiro trabalho pago de automação (regra de três: duas fontes não bastam para extrair o núcleo). Até lá, as melhorias entram à mão neste repositório.
 
@@ -44,6 +44,7 @@
 
 ## Procedimentos recorrentes
 
+- **Atualizar o plugin `mission`:** leia o que mudou em `plugins/mission/` do `automation-template` desde a versão instalada; depois `claude plugin update mission@brunoccalmeida-plugins` e `/reload-plugins`. Comportamento errado vira issue lá, não regra aqui.
 - **Trocar a versão do Python:** edite só o `.python-version` e confira a compatibilidade antes; o ruleset não depende do nome dos jobs.
 - **`pip-audit` vermelho sem mudança de código:** é CVE nova. Atualize o pacote; sem correção, `--ignore-vuln <ID>` em `security.yml` com justificativa e issue de remoção. Nunca `continue-on-error`.
 - **PR que atualiza Selenium ou outra dependência de execução:** `grep` por `remov`/`deprecat` no `py/CHANGES` oficial, busca no código pelas APIs citadas e todas as camadas localmente antes do merge.
@@ -67,6 +68,8 @@ O que já virou regra está em `AGENTS.md` e nos arquivos com escopo de caminho;
 - **Check obrigatório pulado conta como aprovado** (#36): gate com `always()`, não `!cancelled()`, e lista de permissão.
 - **Portão que nunca falha é pior que nenhum** (#27): `--exit-zero` e `continue-on-error` esconderam um F821 real.
 - **Procedimento vai para skill, fato fica na regra** (#101); lógica determinística vira script testado, não prosa.
+- **Procedimento comum vem do plugin `mission`** (#179): uma cópia para todos os projetos; o que é deste projeto mora nos contratos (testados contra o `tests.yml`) e no `REVIEW.md`.
+- **Um único check obrigatório** (#179): a espera do `/mission:ship-pr` só vê o `gate`; o `pip-audit` entrou no `needs` como workflow reutilizável, que não declara `concurrency` (o grupo seria o de quem chama).
 - **Uma cópia só das regras** (#173): o Copilot não é usado, e duas cópias custavam em toda regra nova (YAGNI). `AGENTS.md` é formato aberto; o `@AGENTS.md` no `CLAUDE.md` vale mesmo nas sessões em que o Claude Code não o lê sozinho.
 - **Flake se instrumenta, não se retenta** (#129, #145): o kit usa `retries: 2` do Playwright, que relata "flaky"; ao copiar a política, a `playwright-qa-starter-kit#29` decide esse ponto.
 - **Fatia de recomendação do `/usage` não é gasto** (#56, #58); detalhes em `docs/ai-workflow/AGENT_TOKEN_SPEND.md`.
@@ -89,6 +92,7 @@ O que já virou regra está em `AGENTS.md` e nos arquivos com escopo de caminho;
 - `gh --jq` com aspas duplas internas quebra no PowerShell 5.1, que as remove ao chamar executável nativo: rode pelo Bash tool (#160).
 - O `permissions.deny` `Edit(.env.*)` também pega o `.env.example`: variável nova nele é edição humana (#144).
 - Subagente criado no meio da sessão só carrega no próximo chat; skill em pasta nova pede `/reload-skills` (#101).
+- Plugin instalado pelo shell só aparece na sessão aberta após `/reload-plugins` (automation-template#25). Sem `claude` no PATH, use o binário da extensão do VS Code (`resources/native-binary/claude.exe`).
 
 ### Selenium e Grid
 

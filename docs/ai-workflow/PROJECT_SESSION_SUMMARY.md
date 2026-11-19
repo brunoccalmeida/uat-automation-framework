@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `AGENTS.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 19/11/2026, #180 com reprodução ativa (não reproduziu em 15 execuções; bundle bloqueado reproduz o sintoma) e erros da página nos artefatos via WebDriver BiDi; causa ainda não observada.
+**Última atualização:** 19/11/2026, #183: E2E e smoke anexam ao Allure os erros da página (BiDi, `page-errors`); `watch_page_errors` mudou para `core/page_errors.py`, comum às duas camadas.
 
 ---
 
@@ -16,7 +16,7 @@
 | Testes | Contagens no README (mantidas pelo hook `validate-readme-metrics`); cobertura mínima de 99% (`--cov-fail-under`), medida com unitários e integração juntos (só unitários: ~92% em `pages`, por desenho) |
 | Unitários de Page Object | Só lógica e contratos de espera; locator e delegação ao `BasePage` se provam na integração (#143, #170); nenhum unitário só de mock restante |
 | Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum em quarentena; aberto: #180 (local; 0 falhas em 15 execuções; investigação na issue) |
-| Evidência de falha | Screenshot e URL como artefato do CI em todas as camadas; integração também com `.timing.json` e `.console.json` (erros da página via BiDi); E2E sem eles (#183) |
+| Evidência de falha | Screenshot e URL como artefato do CI em todas as camadas; erros da página via BiDi em todas (`.console.json` na integração, anexo `page-errors` no Allure do E2E e do smoke; `[]` = nenhum); `.timing.json` só na integração (E2E: #185) |
 | Relatório público | Allure em <https://brunoccalmeida.github.io/uat-automation-framework/>, publicado só em push no `master` |
 | Proteção do `master` | Ruleset "Protect master": PR, check `ci-passed` (inclui o `pip-audit`), branch atualizada, histórico linear, sem bypass; squash grava título e corpo do PR |
 | Segurança | gitleaks e zizmor no `ci-passed`; actions e hooks fixados por SHA; Dependabot com `cooldown` de 7 dias; versões do gitleaks e do zizmor sobem à mão |
@@ -29,14 +29,14 @@
 | Ambiente do agente | Filtro de saída de testes (`scripts/filter_test_output.py`) e `pyright-lsp`; passo a passo em `docs/ai-workflow/AGENT_TOKEN_SPEND.md` |
 | Navegador | `compose.yaml` é a fonte única do Grid, local e CI; imagens por tag + digest; `SELENIUM_REMOTE_URL` liga o `webdriver.Remote` |
 | Config | Variáveis de ambiente validadas na largada (`Settings`, `core/config.py`, pydantic-settings); CLI > ambiente > `.env` > padrão; no CI, bloco `env` de `tests.yml` |
-| Bloqueios | #95 (PyYAML sem wheel `cp315`); #153 (Betterleaks v2 ainda em rc.8); #134 (pausada até o primeiro trabalho pago). Conferidos em 13/11/2026 |
+| Bloqueios | #95 (PyYAML sem wheel `cp315`); #153 (Betterleaks v2 ainda em rc.9); #134 (pausada até o primeiro trabalho pago). Conferidos em 19/11/2026 |
 | Fila de PRs | Vazia |
 
 ## Próxima missão recomendada
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido:** a #180 tem as duas causas principais distinguíveis nos artefatos (bundle com `responseStatus: 0` no `.timing.json` ou erro com pilha no `.console.json`); falta testar sob carga a hipótese de recurso (mais sessões que núcleos, ver o comentário da issue). Se ela falhar de novo, leia os dois arquivos antes de corrigir (`docs/FLAKY_TESTS.md`); até lá, as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #176 (mecanismo de falha esperada para bugs conhecidos, último item da ordem combinada em 06/11/2026; a regra já está no `AGENTS.md`).
+**Sem bloqueio resolvido:** a #180 tem as duas causas principais distinguíveis nos artefatos (bundle com `responseStatus: 0` no `.timing.json` ou erro com pilha no `.console.json`); falta testar sob carga a hipótese de recurso (mais sessões que núcleos, ver o comentário da issue). Se ela falhar de novo, leia os dois arquivos antes de corrigir (`docs/FLAKY_TESTS.md`); até lá, as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica): a próxima é a #185 (linha do tempo de carga na evidência do E2E, visibilidade); depois, a #176 (mecanismo de falha esperada para bugs conhecidos, último item da ordem combinada em 06/11/2026; a regra já está no `AGENTS.md`).
 
 **#134 (automation-template) pausada** até o primeiro trabalho pago de automação (regra de três: duas fontes não bastam para extrair o núcleo). Até lá, as melhorias entram à mão neste repositório.
 

@@ -25,8 +25,8 @@ Do not guess at a cause the evidence cannot show. Failures already leave evidenc
 | Layer | Evidence on failure | Where |
 | --- | --- | --- |
 | Integration (pytest + real browser) | Screenshot, page source, the browser's performance timeline (ready state; each resource with its duration and HTTP status) and the page's console messages and JavaScript errors since the session started, heard over WebDriver BiDi (`[]` means none) | `reports/integration-failures/`, uploaded as a CI artifact |
-| E2E (Behave, `test` job) | Screenshot and current URL | Attached to the Allure result |
-| Smoke (Behave, `smoke-matrix` job) | Screenshot and current URL; Grid and browser logs | Allure results in the `smoke-failures-<browser>` CI artifact; logs in the job log |
+| E2E (Behave, `test` job) | The page's console messages and JavaScript errors since the scenario started, heard over WebDriver BiDi (`page-errors`, `[]` means none); screenshot and current URL | Attached to the Allure result |
+| Smoke (Behave, `smoke-matrix` job) | Same as E2E; Grid and browser logs | Allure results in the `smoke-failures-<browser>` CI artifact; logs in the job log |
 
 If that evidence cannot tell the hypotheses apart, add the evidence first, test-first, and let the next failure answer. That includes failure messages: one message for two different causes is a bug in the instrumentation.
 

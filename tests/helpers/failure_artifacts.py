@@ -12,7 +12,6 @@ information available in fixtures"); the driver fixture reads it on teardown.
 import json
 import re
 import warnings
-from dataclasses import asdict
 from pathlib import Path
 
 import pytest
@@ -24,26 +23,6 @@ PHASE_REPORT_KEY = pytest.StashKey[dict[str, pytest.TestReport]]()
 # The page's console messages and JavaScript errors, recorded by the driver
 # fixture from the session's start (#180)
 PAGE_ERRORS_KEY = pytest.StashKey[list[dict]]()
-
-
-def watch_page_errors(driver) -> list[dict]:
-    """Record the page's console messages and JavaScript errors from now on.
-
-    Needs a session with WebDriver BiDi (DriverManager enables it). Call it
-    before the first navigation: an app bundle that throws does so while
-    driver.get loads the page.
-
-    Args:
-        driver: WebDriver whose pages to listen to.
-
-    Returns:
-        The list the BiDi handlers fill, one dict per log entry (text, level,
-        timestamp and, for JavaScript errors, the stack trace).
-    """
-    entries: list[dict] = []
-    driver.script.add_console_message_handler(lambda e: entries.append(asdict(e)))
-    driver.script.add_javascript_error_handler(lambda e: entries.append(asdict(e)))
-    return entries
 
 
 # W3C Performance Timeline: the page's navigation and every resource it
@@ -79,7 +58,8 @@ def save_failure_artifacts(
         driver: WebDriver of the failed test, still open.
         nodeid: pytest node id, used to name the files.
         out_dir: Folder for the files, created if missing.
-        page_errors: Entries from watch_page_errors, if it ran. An empty list
+        page_errors: Entries from core.page_errors.watch_page_errors, if it
+            ran. An empty list
             is saved too: "no JavaScript error" rules out a cause.
 
     Returns:

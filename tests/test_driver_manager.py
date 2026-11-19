@@ -331,6 +331,65 @@ class TestQuit:
         assert manager._driver is None
 
 
+class TestBidi:
+    """Every session opens WebDriver BiDi, to hear the page's errors (#180).
+
+    A blank SPA shell cannot tell a failed bundle from a script that threw;
+    only the browser's JavaScript errors can, and BiDi streams them.
+    """
+
+    @pytest.mark.parametrize(
+        ("browser", "local_class", "options_class", "factory"),
+        [
+            ("chrome", "Chrome", "ChromeOptions", "_create_chrome_driver"),
+            ("firefox", "Firefox", "FirefoxOptions", "_create_firefox_driver"),
+        ],
+    )
+    @pytest.mark.parametrize("remote_url", [None, "http://localhost:4444"])
+    def test_options_enable_bidi_locally_and_remotely(
+        self, browser, local_class, options_class, factory, remote_url
+    ):
+        """Local or Grid, the options ask for the BiDi WebSocket."""
+        manager = DriverManager({"name": browser, "remote_url": remote_url})
+
+        with (
+            patch(f"core.driver_manager.{local_class}"),
+            patch(f"core.driver_manager.{options_class}") as mock_options_class,
+            patch("core.driver_manager.WebDriver"),
+        ):
+            getattr(manager, factory)()
+
+        # "is True": a Mock attribute nobody set is a truthy Mock
+        assert mock_options_class.return_value.enable_bidi is True
+
+    @pytest.mark.parametrize(
+        ("browser", "local_class", "options_class", "factory"),
+        [
+            ("chrome", "Chrome", "ChromeOptions", "_create_chrome_driver"),
+            ("firefox", "Firefox", "FirefoxOptions", "_create_firefox_driver"),
+        ],
+    )
+    def test_alerts_stay_open_for_the_test_to_handle(
+        self, browser, local_class, options_class, factory
+    ):
+        """Under BiDi the default handler dismisses an alert as it opens.
+
+        WebDriver BiDi spec, "user prompt opened steps": the session's handler
+        runs when the prompt opens, and only "ignore" leaves it open. Classic
+        sessions ran it only on the next command, so accept_alert worked.
+        """
+        manager = DriverManager({"name": browser})
+
+        with (
+            patch(f"core.driver_manager.{local_class}"),
+            patch(f"core.driver_manager.{options_class}") as mock_options_class,
+        ):
+            getattr(manager, factory)()
+
+        options = mock_options_class.return_value
+        assert options.unhandled_prompt_behavior == "ignore"
+
+
 class TestRemoteDriver:
     """A configured remote_url opens the session in a Selenium Grid (#116).
 

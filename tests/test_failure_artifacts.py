@@ -5,6 +5,7 @@ screenshot and page source show the state the browser was really in. Behave
 jobs keep the same kind of evidence through the Allure results.
 """
 
+import json
 import re
 from pathlib import Path, PurePosixPath
 from unittest.mock import Mock
@@ -12,15 +13,40 @@ from unittest.mock import Mock
 import pytest
 import yaml
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.common.bidi.log import ConsoleLogEntry, JavascriptLogEntry
 
 from tests.helpers.failure_artifacts import (
     ARTIFACTS_DIR,
     PHASE_REPORT_KEY,
     call_failed,
     save_failure_artifacts,
+    watch_page_errors,
 )
 
 TIMING = '{"readyState": "loading", "entries": []}'
+# log.entryAdded payloads as the W3C WebDriver BiDi spec shapes them
+CONSOLE_PARAMS = {
+    "type": "console",
+    "level": "error",
+    "text": "early",
+    "timestamp": 1,
+    "method": "error",
+    "args": [{"type": "string", "value": "early"}],
+    "source": {"realm": "r1"},
+}
+JS_PARAMS = {
+    "type": "javascript",
+    "level": "error",
+    "text": "Error: boom",
+    "timestamp": 2,
+    "source": {"realm": "r1"},
+    "stackTrace": {
+        "callFrames": [
+            {"url": "app.js", "functionName": "", "lineNumber": 1, "columnNumber": 7}
+        ]
+    },
+}
+JS_ERROR = {"type_": "javascript", "level": "error", "text": "Error: boom"}
 NODEID = "tests/integration/test_header.py::TestMenu::test_logout[firefox]"
 WORKFLOW = Path(__file__).resolve().parent.parent / ".github/workflows/tests.yml"
 JOBS = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))["jobs"]
@@ -76,6 +102,27 @@ class TestCallFailed:
         assert not call_failed(node)
 
 
+class TestWatchPageErrors:
+    """watch_page_errors: the page's console and JavaScript errors, via BiDi."""
+
+    def test_records_console_messages_and_javascript_errors_as_dicts(self):
+        """Both BiDi streams land in one list, ready for json.dumps."""
+        driver = Mock()
+
+        errors = watch_page_errors(driver)
+        on_console = driver.script.add_console_message_handler.call_args.args[0]
+        on_error = driver.script.add_javascript_error_handler.call_args.args[0]
+        on_console(ConsoleLogEntry.from_json(CONSOLE_PARAMS))
+        on_error(JavascriptLogEntry.from_json(JS_PARAMS))
+
+        assert [(e["type_"], e["text"]) for e in errors] == [
+            ("console", "early"),
+            ("javascript", "Error: boom"),
+        ]
+        assert errors[1]["stacktrace"] == JS_PARAMS["stackTrace"]
+        json.dumps(errors)
+
+
 class TestSaveFailureArtifacts:
     """save_failure_artifacts: screenshot and page source of a failed test."""
 
@@ -116,6 +163,37 @@ class TestSaveFailureArtifacts:
 
         assert [path.suffix for path in saved] == [".png", ".html"]
         assert saved[1].read_text(encoding="utf-8").startswith("<!-- URL: ")
+
+    def test_saves_the_page_errors_even_when_there_are_none(self, tmp_path):
+        """[] means "no JavaScript error", which also rules out a cause (#180)."""
+        stem = "tests_integration_test_header.py_TestMenu_test_logout_firefox_"
+        for errors in ([], [JS_ERROR]):
+            saved = save_failure_artifacts(self._driver(), NODEID, tmp_path, errors)
+
+            console = tmp_path / f"{stem}.console.json"
+            assert console in saved
+            assert json.loads(console.read_text(encoding="utf-8")) == errors
+
+    def test_a_timing_error_keeps_the_page_errors(self, tmp_path):
+        """The errors are already in hand; a dead page script must not drop them."""
+        driver = self._driver()
+        driver.execute_script.side_effect = WebDriverException("javascript error")
+
+        with pytest.warns(UserWarning, match="javascript error"):
+            saved = save_failure_artifacts(driver, NODEID, tmp_path, [JS_ERROR])
+
+        assert [path.suffixes[-2:] for path in saved][-1] == [".console", ".json"]
+
+    def test_a_dead_browser_keeps_the_page_errors(self, tmp_path):
+        """A crashed tab is a lead (#180); the errors before it are in hand."""
+        driver = self._driver()
+        driver.save_screenshot.side_effect = WebDriverException("tab crashed")
+
+        with pytest.warns(UserWarning, match="tab crashed"):
+            saved = save_failure_artifacts(driver, NODEID, tmp_path, [JS_ERROR])
+
+        assert [path.name.endswith(".console.json") for path in saved] == [True]
+        assert json.loads(saved[0].read_text(encoding="utf-8")) == [JS_ERROR]
 
     def test_creates_the_output_folder(self, tmp_path):
         """The folder may not exist yet on a fresh CI checkout."""

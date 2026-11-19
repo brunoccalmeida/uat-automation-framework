@@ -1,14 +1,23 @@
-"""Integration test of the failure artifacts' timing script in a real browser.
+"""Integration tests of the failure artifacts' evidence in a real browser.
 
-The unit tests mock execute_script, so only a browser can show that the
-script runs and returns what an investigation needs (#180): the document's
-ready state and the Resource Timing entries, the app's JavaScript among them.
+The unit tests mock the driver, so only a browser can show that the evidence
+an investigation needs (#180) really arrives: the document's ready state and
+the Resource Timing entries, the app's JavaScript among them, and the errors
+the page threw, heard over WebDriver BiDi from the first navigation on.
 """
 
 import json
 
+from selenium.webdriver.support.wait import WebDriverWait
+
 from pages.login_page import LoginPage
-from tests.helpers.failure_artifacts import save_failure_artifacts
+from tests.helpers.failure_artifacts import PAGE_ERRORS_KEY, save_failure_artifacts
+
+# Throws while loading, as an app bundle that breaks before rendering would
+THROWING_PAGE = (
+    "data:text/html,<div id=root></div>"
+    "<script>throw new Error('bundle broke before render')</script>"
+)
 
 
 def test_timing_lists_the_ready_state_and_the_scripts_that_loaded(
@@ -24,3 +33,15 @@ def test_timing_lists_the_ready_state_and_the_scripts_that_loaded(
     scripts = [e for e in timing["entries"] if e.get("initiatorType") == "script"]
     assert scripts, f"no script in the timeline: {timing['entries']}"
     assert all("duration" in e and "responseStatus" in e for e in scripts), scripts
+
+
+def test_the_driver_records_errors_thrown_during_the_first_page_load(driver, request):
+    """The listener is on before the test navigates, not added after."""
+    driver.get(THROWING_PAGE)
+
+    errors = request.node.stash[PAGE_ERRORS_KEY]
+    # BiDi events arrive over a WebSocket, after driver.get returns
+    WebDriverWait(driver, 5).until(
+        lambda _: errors, message="no page error arrived over BiDi"
+    )
+    assert "bundle broke before render" in errors[0]["text"], errors

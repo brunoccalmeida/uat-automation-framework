@@ -47,28 +47,43 @@ def pytest_runtest_makereport(item, call):  # pylint: disable=unused-argument
     return report
 
 
-@pytest.fixture(name="driver", scope="function")
-def fixture_driver(request):
-    """Create WebDriver instance for integration tests.
+@pytest.fixture(name="browser_session", scope="function")
+def fixture_browser_session(request):
+    """Open the browser session; on teardown, keep the evidence and quit.
 
-    Listens to the page's errors from the start (#180) and, on a failed
-    test, saves them with its screenshot, page source and timing before
-    quitting (#129): the CI log alone cannot show the browser state.
+    One state-changing action per fixture (pytest docs, "Safe teardowns"):
+    if a later setup step fails, such as opening the BiDi channel in the
+    driver fixture, this teardown still runs and no session stays stuck in
+    the Grid. On a failed test, saves the page errors (if recorded), the
+    screenshot, page source and timing (#129, #180): the CI log alone
+    cannot show the browser state.
 
     Yields:
         WebDriver instance configured for integration testing.
     """
     dm = make_driver_manager()
     driver = dm.get_driver()
-    request.node.stash[PAGE_ERRORS_KEY] = watch_page_errors(driver)
     yield driver
 
     # Teardown
     if call_failed(request.node):
         save_failure_artifacts(
-            driver, request.node.nodeid, page_errors=request.node.stash[PAGE_ERRORS_KEY]
+            driver,
+            request.node.nodeid,
+            page_errors=request.node.stash.get(PAGE_ERRORS_KEY, None),
         )
     dm.quit()
+
+
+@pytest.fixture(name="driver", scope="function")
+def fixture_driver(request, browser_session):
+    """Browser session that listens to the page's errors from the start (#180).
+
+    Returns:
+        WebDriver instance, recording into request.node.stash[PAGE_ERRORS_KEY].
+    """
+    request.node.stash[PAGE_ERRORS_KEY] = watch_page_errors(browser_session)
+    return browser_session
 
 
 @pytest.fixture(name="base_url", scope="function")

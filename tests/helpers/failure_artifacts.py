@@ -83,25 +83,28 @@ def save_failure_artifacts(
             is saved too: "no JavaScript error" rules out a cause.
 
     Returns:
-        The saved paths, or an empty list if the browser could not answer.
-        That case only warns: raising would bury the test's own failure.
+        The saved paths. If the browser cannot answer, only the page errors
+        (or nothing): that case only warns, since raising would bury the
+        test's own failure.
     """
     stem = re.sub(r"[^\w.-]+", "_", nodeid)
     png, html = out_dir / f"{stem}.png", out_dir / f"{stem}.html"
     timing = out_dir / f"{stem}.timing.json"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    # The page errors are already in hand: save them before asking the
+    # browser anything, so a crashed tab cannot cost them too.
+    console = []
+    if page_errors is not None:
+        console = [out_dir / f"{stem}.console.json"]
+        console[0].write_text(json.dumps(page_errors, indent=2), encoding="utf-8")
     try:
-        out_dir.mkdir(parents=True, exist_ok=True)
         driver.save_screenshot(str(png))
         source = f"<!-- URL: {driver.current_url} -->\n{driver.page_source}"
     except WebDriverException as exc:
         warnings.warn(f"No failure artifacts for {nodeid}: {exc}", stacklevel=2)
-        return []
+        return console
     html.write_text(source, encoding="utf-8")
-    saved = [png, html]
-    if page_errors is not None:
-        console = out_dir / f"{stem}.console.json"
-        console.write_text(json.dumps(page_errors, indent=2), encoding="utf-8")
-        saved.append(console)
+    saved = [png, html, *console]
     # The timeline is extra evidence: if the page cannot run the script,
     # keep the screenshot and source rather than lose them too.
     try:

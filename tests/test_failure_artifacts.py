@@ -184,6 +184,17 @@ class TestSaveFailureArtifacts:
 
         assert [path.suffixes[-2:] for path in saved][-1] == [".console", ".json"]
 
+    def test_a_dead_browser_keeps_the_page_errors(self, tmp_path):
+        """A crashed tab is a lead (#180); the errors before it are in hand."""
+        driver = self._driver()
+        driver.save_screenshot.side_effect = WebDriverException("tab crashed")
+
+        with pytest.warns(UserWarning, match="tab crashed"):
+            saved = save_failure_artifacts(driver, NODEID, tmp_path, [JS_ERROR])
+
+        assert [path.name.endswith(".console.json") for path in saved] == [True]
+        assert json.loads(saved[0].read_text(encoding="utf-8")) == [JS_ERROR]
+
     def test_creates_the_output_folder(self, tmp_path):
         """The folder may not exist yet on a fresh CI checkout."""
         out_dir = tmp_path / "reports" / "integration-failures"

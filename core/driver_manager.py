@@ -148,6 +148,16 @@ class DriverManager:
         Returns:
             WebDriver with its window maximized.
         """
+        # WebDriver BiDi streams the page's console and JavaScript errors
+        # (#180): a blank SPA shell alone cannot say whether the app bundle
+        # failed to load or threw before rendering.
+        options.enable_bidi = True
+        # Under BiDi the session's prompt handler runs as an alert opens
+        # (WebDriver BiDi spec, "user prompt opened steps"): the default,
+        # "dismiss and notify", would close it before accept_alert sees it.
+        # "ignore" leaves it open; an alert nobody expected still fails the
+        # next command with UnexpectedAlertPresentException.
+        options.unhandled_prompt_behavior = "ignore"
         remote_url = self.browser_config.get("remote_url")
         if remote_url:
             # The remote WebDriver is the class selenium.webdriver.Remote

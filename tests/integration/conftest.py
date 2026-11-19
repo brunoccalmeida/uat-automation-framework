@@ -8,9 +8,11 @@ import pytest
 from core.config import ConfigurationError, load_settings
 from tests.helpers.driver_setup import make_driver_manager
 from tests.helpers.failure_artifacts import (
+    PAGE_ERRORS_KEY,
     PHASE_REPORT_KEY,
     call_failed,
     save_failure_artifacts,
+    watch_page_errors,
 )
 from tests.helpers.navigation import (
     go_to_cart,
@@ -49,19 +51,23 @@ def pytest_runtest_makereport(item, call):  # pylint: disable=unused-argument
 def fixture_driver(request):
     """Create WebDriver instance for integration tests.
 
-    On a failed test, saves its screenshot and page source before quitting
-    (#129): the CI log alone cannot show the browser state.
+    Listens to the page's errors from the start (#180) and, on a failed
+    test, saves them with its screenshot, page source and timing before
+    quitting (#129): the CI log alone cannot show the browser state.
 
     Yields:
         WebDriver instance configured for integration testing.
     """
     dm = make_driver_manager()
     driver = dm.get_driver()
+    request.node.stash[PAGE_ERRORS_KEY] = watch_page_errors(driver)
     yield driver
 
     # Teardown
     if call_failed(request.node):
-        save_failure_artifacts(driver, request.node.nodeid)
+        save_failure_artifacts(
+            driver, request.node.nodeid, page_errors=request.node.stash[PAGE_ERRORS_KEY]
+        )
     dm.quit()
 
 

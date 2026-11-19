@@ -6,13 +6,13 @@ Provides shared fixtures for integration testing with real browsers.
 import pytest
 
 from core.config import ConfigurationError, load_settings
+from core.page_errors import watch_page_errors
 from tests.helpers.driver_setup import make_driver_manager
 from tests.helpers.failure_artifacts import (
     PAGE_ERRORS_KEY,
     PHASE_REPORT_KEY,
     call_failed,
     save_failure_artifacts,
-    watch_page_errors,
 )
 from tests.helpers.navigation import (
     go_to_cart,

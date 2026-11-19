@@ -1,5 +1,5 @@
 <!-- LTeX: language=pt-BR -->
-<!-- translation-source: README.md sha256:47508e043339b82b49df6f2e4ac48ca6a543ed08ae87463c4874682d0edded4b -->
+<!-- translation-source: README.md sha256:84866e96d02d7155e326a5a9eea7f85b8bb3697d41542233da5ec2b62c68bf9b -->
 # UAT Automation Framework
 
 [![Tests](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/brunoccalmeida/uat-automation-framework/actions/workflows/tests.yml)
@@ -14,7 +14,7 @@ Framework completo de automação UAT usando Python, Behave (BDD) e Selenium par
 
 ## ⚡ Em Resumo
 
-- **Testes:** 721 unitários · 105 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
+- **Testes:** 727 unitários · 105 de integração · 73 cenários E2E, construídos com TDD de duplo ciclo (cenários do Behave guiam os testes unitários do pytest)
 - **Navegadores reais:** as suítes de integração e smoke rodam no Chrome e no Firefox no CI, em contêineres docker-selenium
 - **Portões de qualidade:** o `master` só aceita PR com CI verde e `pip-audit` limpo; toda GitHub Action é fixada por SHA de commit
 - **Relatório ao vivo:** Allure, republicado a cada merge no `master`: 📊 **[Ver o Relatório de Testes Mais Recente](https://brunoccalmeida.github.io/uat-automation-framework/)**
@@ -378,10 +378,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 ```
 
 **Distribuição por Camada:**
-- **Testes Unitários**: 721 testes (componentes do framework, lógica e contratos de espera dos Page Objects, proteções do CI)
+- **Testes Unitários**: 727 testes (componentes do framework, lógica e contratos de espera dos Page Objects, proteções do CI)
 - **Testes de Integração**: 105 testes (Page Objects + navegador real, incluindo a sincronização da navegação)
 - **Testes E2E**: 73 cenários, 463 steps (jornadas completas de usuário)
-- **Total**: 826 testes unitários/de integração + 73 cenários E2E
+- **Total**: 832 testes unitários/de integração + 73 cenários E2E
 
 **Quando Usar Cada Camada:**
 | Tipo de Teste | Propósito | Velocidade | Navegador | Exemplo |
@@ -422,7 +422,7 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **DriverManager** | `tests/test_driver_manager.py` | 29 | 100% | ✅ Completo |
 | **Setup do navegador dos testes (BROWSER, HEADLESS, Grid)** | `tests/test_driver_setup.py` | 3 | N/A | ✅ Completo |
 | **Step definitions (lógica OU, senha da config, page objects locais)** | `tests/test_login_steps.py`, `tests/test_smoke_steps.py`, `tests/test_step_page_objects.py` | 20 | N/A | ✅ Completo |
-| **Hooks do Behave (screenshot e URL da falha no Allure)** | `tests/test_environment.py` | 11 | N/A | ✅ Completo |
+| **Hooks do Behave (erros da página, screenshot e URL da falha no Allure)** | `tests/test_environment.py` | 15 | N/A | ✅ Completo |
 | **Smoke Tests** | `tests/test_smoke.py` | 2 | N/A | ✅ Completo |
 | **Comentários de versão das actions (CI)** | `tests/test_workflow_version_comments.py` | 33 | N/A | ✅ Completo |
 | **Portões de segurança: gitleaks e zizmor (CI)** | `tests/test_security_gates_ci.py` | 10 | N/A | ✅ Completo |
@@ -433,9 +433,10 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Selenium Grid no Docker (CI + compose)** | `tests/test_selenium_grid_ci.py` | 19 | N/A | ✅ Completo |
 | **Upload para o Codecov (CI)** | `tests/test_codecov_upload.py` | 8 | N/A | ✅ Completo |
 | **Ambiente e executor do Allure (CI)** | `tests/test_allure_metadata.py` | 8 | N/A | ✅ Completo |
-| **Evidência de falha dos testes com navegador (CI)** | `tests/test_failure_artifacts.py` | 20 | N/A | ✅ Completo |
+| **Evidência de falha dos testes com navegador (CI)** | `tests/test_failure_artifacts.py` | 19 | N/A | ✅ Completo |
+| **Erros da página via WebDriver BiDi (as duas camadas com navegador)** | `tests/test_page_errors.py` | 1 | N/A | ✅ Completo |
 | **Regras do agente (tamanho, cópia única, plugin mission, contratos, instruções de revisão, diagnósticos do editor, code intelligence)** | `tests/test_agent_rules.py` | 68 | N/A | ✅ Completo |
-| **Links da documentação (todo caminho citado existe)** | `tests/test_doc_links.py` | 107 | N/A | ✅ Completo |
+| **Links da documentação (todo caminho citado existe)** | `tests/test_doc_links.py` | 109 | N/A | ✅ Completo |
 | **Hook de saída de testes do agente** | `tests/test_filter_test_output.py` | 21 | N/A | ✅ Completo |
 | **Proteções do agente (regras de deny)** | `tests/test_agent_guardrails.py` | 61 | N/A | ✅ Completo |
 | **Portão de lint (pre-commit + CI + ordem de imports no editor, ruff no lugar do flake8, nenhuma regra em dois linters)** | `tests/test_lint_gate.py` | 25 | N/A | ✅ Completo |
@@ -443,11 +444,11 @@ Este framework implementa a arquitetura completa da **Pirâmide de Testes**, com
 | **Portão de encoding (pre-commit, `.gitattributes`)** | `tests/test_check_text_encoding.py` | 12 | N/A | ✅ Completo |
 | **Chave do cache do venv (CI, versão exata do Python)** | `tests/test_venv_cache_key.py` | 4 | N/A | ✅ Completo |
 | **Fonte da versão do Python (CI, `.python-version`)** | `tests/test_python_version_source.py` | 9 | N/A | ✅ Completo |
-| **TOTAL** | | **721** | **100%** | **Completo** |
+| **TOTAL** | | **727** | **100%** | **Completo** |
 
 **Cobertura de Código:**
-- **Total de statements:** 468
-- **Cobertos:** 468 (100%)
+- **Total de statements:** 474
+- **Cobertos:** 474 (100%)
 - **Módulo Pages**: 100%
 - **Módulo Core**: 100%
 

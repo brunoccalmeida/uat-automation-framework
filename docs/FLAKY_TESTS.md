@@ -24,11 +24,19 @@ Do not guess at a cause the evidence cannot show. Failures already leave evidenc
 
 | Layer | Evidence on failure | Where |
 | --- | --- | --- |
-| Integration (pytest + real browser) | Screenshot, page source and the browser's performance timeline (ready state; each resource with its duration and HTTP status) | `reports/integration-failures/`, uploaded as a CI artifact |
+| Integration (pytest + real browser) | Screenshot, page source, the browser's performance timeline (ready state; each resource with its duration and HTTP status) and the page's console messages and JavaScript errors since the session started, heard over WebDriver BiDi (`[]` means none) | `reports/integration-failures/`, uploaded as a CI artifact |
 | E2E (Behave, `test` job) | Screenshot and current URL | Attached to the Allure result |
 | Smoke (Behave, `smoke-matrix` job) | Screenshot and current URL; Grid and browser logs | Allure results in the `smoke-failures-<browser>` CI artifact; logs in the job log |
 
 If that evidence cannot tell the hypotheses apart, add the evidence first, test-first, and let the next failure answer. That includes failure messages: one message for two different causes is a bug in the instrumentation.
+
+Waiting is not passive. Before it, work through the candidate causes, most likely first:
+
+1. **Rule out** each one the evidence you already have contradicts.
+2. **Reproduce** under the failing conditions (same layer, parallelism and Grid), keeping each run's full output, and state the odds of the green runs (section 4).
+3. **Inject** each remaining cause (block or slow a request, throw in the page, load the machine) to learn the signature it leaves in the evidence. An injection proves a cause is *sufficient*, never that it *happened*: many causes give the same symptom, so its value is checking that the evidence tells them apart.
+
+The investigation of #180 shows the method: a blank Sauce Demo page did not recur in 15 local runs; blocking the app bundle reproduced it and left a `responseStatus` of 0 in the timeline; a slow network did not, because `driver.get` waits for the load event; the saved page source referenced the bundle still deployed, ruling out a stale deploy. A script that throws before rendering left no trace, so the page's errors became evidence.
 
 ## 3. No automatic retries
 

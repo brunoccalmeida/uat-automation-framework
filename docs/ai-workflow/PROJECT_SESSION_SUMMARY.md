@@ -4,7 +4,7 @@
 > **Handoff entre chats.** O que vale agora e qual é a próxima missão; leia no início de cada chat (ver "Ciclo de Missão" em `AGENTS.md`).
 > Só estado (`tests/test_agent_rules.py` cobra). O histórico mora em issues, corpos de PR (`gh pr view <n>`) e Git. Os registros por missão até o #155 estão em `git show 266b09a:docs/ai-workflow/PROJECT_SESSION_SUMMARY.md`.
 
-**Última atualização:** 18/11/2026, #180 instrumentada (`LoginPage.open` e linha do tempo de carga nos artefatos); causa ainda não observada.
+**Última atualização:** 19/11/2026, #180 com reprodução ativa (não reproduziu em 15 execuções; bundle bloqueado reproduz o sintoma) e erros da página nos artefatos via WebDriver BiDi; causa ainda não observada.
 
 ---
 
@@ -15,8 +15,8 @@
 | CI (`master`) | Verde: unit, integração Chrome + Firefox, E2E Chrome, smoke, lint, report, `secret-scan`, `workflow-audit`; navegadores no Grid do `compose.yaml` |
 | Testes | Contagens no README (mantidas pelo hook `validate-readme-metrics`); cobertura mínima de 99% (`--cov-fail-under`), medida com unitários e integração juntos (só unitários: ~92% em `pages`, por desenho) |
 | Unitários de Page Object | Só lógica e contratos de espera; locator e delegação ao `BasePage` se provam na integração (#143, #170); nenhum unitário só de mock restante |
-| Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum em quarentena; aberto: #180 (local, 1 em 8; instrumentada, esperando a próxima falha para ver a causa) |
-| Evidência de falha | Screenshot e URL como artefato do CI em todas as camadas; integração também com `.timing.json` (Performance Timeline); cobrado por `tests/test_failure_artifacts.py` |
+| Testes flaky | Política em `docs/FLAKY_TESTS.md`; retry automático barrado por `tests/test_agent_rules.py`; nenhum em quarentena; aberto: #180 (local; 0 falhas em 15 execuções; investigação na issue) |
+| Evidência de falha | Screenshot e URL como artefato do CI em todas as camadas; integração também com `.timing.json` e `.console.json` (erros da página via BiDi); E2E sem eles (#183) |
 | Relatório público | Allure em <https://brunoccalmeida.github.io/uat-automation-framework/>, publicado só em push no `master` |
 | Proteção do `master` | Ruleset "Protect master": PR, check `ci-passed` (inclui o `pip-audit`), branch atualizada, histórico linear, sem bypass; squash grava título e corpo do PR |
 | Segurança | gitleaks e zizmor no `ci-passed`; actions e hooks fixados por SHA; Dependabot com `cooldown` de 7 dias; versões do gitleaks e do zizmor sobem à mão |
@@ -36,7 +36,7 @@
 
 **Antes de escolher, reconfira os bloqueios:** #95 (`curl -s https://pypi.org/pypi/PyYAML/json`, procurar arquivos `cp315`; com wheel, ela é a missão) e #153 (`gh api repos/betterleaks/betterleaks/releases`, procurar v2 estável).
 
-**Sem bloqueio resolvido:** a #180 já está instrumentada e só volta a ser missão quando falhar de novo (ler `.timing.json` e a mensagem `LoginPage did not render` antes de corrigir, `docs/FLAKY_TESTS.md`); até lá, as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #176 (mecanismo de falha esperada para bugs conhecidos, último item da ordem combinada em 06/11/2026; a regra já está no `AGENTS.md`).
+**Sem bloqueio resolvido:** a #180 tem as duas causas principais distinguíveis nos artefatos (bundle com `responseStatus: 0` no `.timing.json` ou erro com pilha no `.console.json`); falta testar sob carga a hipótese de recurso (mais sessões que núcleos, ver o comentário da issue). Se ela falhar de novo, leia os dois arquivos antes de corrigir (`docs/FLAKY_TESTS.md`); até lá, as demais P2 por `gh issue list`, na ordem das regras (segurança → visibilidade → dívida técnica); sem P2 de segurança ou visibilidade livre, a próxima é a #176 (mecanismo de falha esperada para bugs conhecidos, último item da ordem combinada em 06/11/2026; a regra já está no `AGENTS.md`).
 
 **#134 (automation-template) pausada** até o primeiro trabalho pago de automação (regra de três: duas fontes não bastam para extrair o núcleo). Até lá, as melhorias entram à mão neste repositório.
 
@@ -99,6 +99,7 @@ O que já virou regra está em `AGENTS.md` e nos arquivos com escopo de caminho;
 
 - Spike usa o `DriverManager`, nunca driver à mão: o diálogo de senha vazada do Chrome rouba o foco (#98).
 - O cookie `session-username` do Sauce Demo vale 10 min; script mais longo refaz o login (#129).
+- Sessão com BiDi (`enable_bidi`, ligado no `DriverManager`) fecha o alerta no instante em que ele abre se o `unhandledPromptBehavior` não for `ignore` (spec WebDriver BiDi, "user prompt opened steps"); o `DriverManager` fixa `ignore` (#180).
 - pytest interrompido deixa sessões presas no Grid: reinicie o contêiner. `docker update --cpus 0` não remove o limite: `docker compose down` + `up` (#129).
 
 ## Ambiente local (Windows)
